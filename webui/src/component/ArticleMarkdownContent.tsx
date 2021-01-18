@@ -1,6 +1,8 @@
 import React, { FC } from "react"
 import styled from "styled-components"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import remarkBreaks from "remark-breaks"
 
 
 interface Props {
@@ -9,9 +11,13 @@ interface Props {
 
 const ArticleMarkdownContent: FC<Props> = ({ content }) => (
   <MarkdownDiv>
-    <ReactMarkdown>
-      {content}
-    </ReactMarkdown>
+    <ReactMarkdown
+      plugins={[
+        remarkGfm,
+        remarkBreaks,
+      ]}
+      children={content}
+    />
   </MarkdownDiv>
 )
 
