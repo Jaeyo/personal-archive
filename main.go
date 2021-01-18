@@ -49,6 +49,8 @@ func routeForFrontend(e *echo.Echo) {
 	e.Static("", "/app/static")
 
 	pages := []string{
+		"/articles/search",
+		"/articles/:id/search",
 		"/articles/:id",
 		"/tags/:tag",
 	}
