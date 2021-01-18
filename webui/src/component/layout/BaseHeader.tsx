@@ -36,9 +36,6 @@ const BaseHeader: FC = () => {
             <Icon icon="search"/>
           </InputGroup.Button>
         </KeywordInputGroup>
-        <Link to="/settings">
-          <SettingIcon icon="cog" />
-        </Link>
       </RightAlignDiv>
     </Wrapper>
   )
@@ -70,13 +67,6 @@ const RightAlignDiv = styled.div`
   padding-right: 20px;
   display: flex;
   flex-direction: row;
-`
-
-const SettingIcon = styled(Icon)`
-  color: #777;
-  font-size: 20px;
-  margin-top: 18px;
-  margin-left: 20px;
 `
 
 const KeywordInputGroup = styled(InputGroup)`

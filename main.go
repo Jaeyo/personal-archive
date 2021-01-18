@@ -36,7 +36,6 @@ func routeForControllers(e *echo.Echo) {
 	for _, controller := range []Controller{
 		controllers.NewArticleController(),
 		controllers.NewArticleTagController(),
-		controllers.NewSettingController(),
 	} {
 		controller.Route(e)
 	}
