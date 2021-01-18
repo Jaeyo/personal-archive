@@ -88,6 +88,14 @@ const MarkdownDiv = styled.div`
     padding: 9px;
     white-space: pre-line;
   }
+  
+  em {
+    strong {
+      background-color: #ffeb3b;
+      padding: 2px 5px;
+      font-style: normal;
+    }
+  }
 `
 
 export default ArticleMarkdownContent
