@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"os"
 	"sync"
 	_ "github.com/mattn/go-sqlite3"
@@ -29,7 +30,7 @@ var GetDatabase = func() func() *DB {
 			ensureDirExist(dbDir)
 			dbPath := fmt.Sprintf("%s/personal-archive.db", dbDir)
 
-			db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+			db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{Logger: logger.Discard})
 			if err != nil {
 				panic(err)
 			}
@@ -41,7 +42,7 @@ var GetDatabase = func() func() *DB {
 }()
 
 func (d *DB) Init() error {
-	if err := d.AutoMigrate(&models.Article{}, &models.ArticleTag{}); err != nil {
+	if err := d.AutoMigrate(&models.Article{}, &models.ArticleTag{}, &models.Misc{}); err != nil {
 		return errors.Wrap(err, "failed to auto migrate")
 	}
 	return nil

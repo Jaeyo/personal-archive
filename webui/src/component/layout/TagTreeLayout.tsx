@@ -10,7 +10,7 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const BaseLayout: FC<Props> = ({loading, size = 'md', children}) => (
+const TagTreeLayout: FC<Props> = ({loading, size = 'md', children}) => (
   <Wrapper size={size}>
     <Header>
       <BaseHeader/>
@@ -41,4 +41,4 @@ const StyledContent = styled(Container)`
   margin-bottom: 200px;
 `
 
-export default BaseLayout
+export default TagTreeLayout

@@ -5,7 +5,7 @@ import { useHistory, useParams } from "react-router-dom"
 import { Alert, Button } from "rsuite"
 import { requestGetArticle } from "../../apis/ArticleApi"
 import Article, { Kind } from "../../models/Article"
-import BaseLayout from "../../component/layout/BaseLayout"
+import TagTreeLayout from "../../component/layout/TagTreeLayout"
 import ArticleTitle from "./ArticleTitle"
 import ArticleTags from "./ArticleTags"
 import ArticleLink from "./ArticleLink"
@@ -30,9 +30,9 @@ const ArticlePage: FC = () => {
   }, [id])
 
   return (
-    <BaseLayout loading={loadFetching}>
+    <TagTreeLayout loading={loadFetching}>
       {renderArticle(article, history)}
-    </BaseLayout>
+    </TagTreeLayout>
   )
 }
 

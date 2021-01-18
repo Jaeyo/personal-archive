@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from "react"
 import styled from "styled-components"
-import BaseLayout from "../../component/layout/BaseLayout"
+import TagTreeLayout from "../../component/layout/TagTreeLayout"
 import { usePage, useQuery } from "../../common/Hooks"
 import { requestSearchArticles } from "../../apis/ArticleApi"
 import { Alert } from "rsuite"
@@ -38,14 +38,14 @@ const SearchPage: FC = () => {
   }, [keyword, page])
 
   return (
-    <BaseLayout loading={fetching}>
+    <TagTreeLayout loading={fetching}>
       <Keyword>Keyword: {keyword}</Keyword>
       <ArticleList
         articles={articles}
         pagination={pagination}
         onSelectPage={page => history.push(`/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)}
       />
-    </BaseLayout>
+    </TagTreeLayout>
   )
 }
 

@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom"
 import { Alert } from "rsuite"
 import Article from "../../models/Article"
 import { requestGetArticle } from "../../apis/ArticleApi"
-import BaseLayout from "../../component/layout/BaseLayout"
+import TagTreeLayout from "../../component/layout/TagTreeLayout"
 import ArticleTitle from "../articlePage/ArticleTitle"
 import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
@@ -26,12 +26,12 @@ const EditArticlePage: FC = () => {
   }, [id])
 
   return (
-    <BaseLayout
+    <TagTreeLayout
       loading={loadFetching}
       size="lg"
     >
       {renderArticle(article)}
-    </BaseLayout>
+    </TagTreeLayout>
   )
 }
 
