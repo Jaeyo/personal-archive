@@ -4,12 +4,12 @@ import { Pagination } from "../common/Types"
 
 export const requestCreateArticleByURL = async (url: string, tags: string[]): Promise<Article> => {
   const resp = await requestPost(`/apis/articles`, {url, tags})
-  return resp.data.article
+  return new Article(resp.data.article)
 }
 
 export const requestGetArticle = async (id: number): Promise<Article> => {
   const resp = await requestGet(`/apis/articles/${id}`)
-  return resp.data.article
+  return new Article(resp.data.article)
 }
 
 export const requestUpdateTitle = async (id: number, title: string): Promise<void> => {
@@ -27,7 +27,7 @@ export const requestUpdateContent = async (id: number, content: string): Promise
 export const requestFindArticlesByTag = async (tag: string, page: number): Promise<[Article[], Pagination]> => {
   const resp = await requestGet(`/apis/articles/tags/${encodeURIComponent(tag)}?page=${page}`)
   return [
-    resp.data.articles,
+    resp.data.articles.map((article: any) => new Article(article)),
     resp.data.pagination,
   ]
 }
@@ -35,7 +35,7 @@ export const requestFindArticlesByTag = async (tag: string, page: number): Promi
 export const requestSearchArticles = async (keyword: string, page: number): Promise<[Article[], Pagination]> => {
   const resp = await requestGet(`/apis/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)
   return [
-    resp.data.articles,
+    resp.data.articles.map((article: any) => new Article(article)),
     resp.data.pagination,
   ]
 }

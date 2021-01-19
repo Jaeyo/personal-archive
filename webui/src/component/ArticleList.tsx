@@ -27,6 +27,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => (
                 ({tag}) => <ArticleTag tag={tag} key={tag}/>
               )
             }
+            <ReadingTimeSpan>{article.readingTime}</ReadingTimeSpan>
           </List.Item>
         ))
       }
@@ -50,6 +51,13 @@ const ArticleLink = styled(Link)`
 const PaginationDiv = styled.div`
   text-align: center;
   margin: 20px 0;
+`
+
+const ReadingTimeSpan = styled.span`
+  font-size: 11px;
+  color: #999;
+  margin-left: 10px;
+  border-bottom: 1px dashed #ddd;
 `
 
 export default ArticleList
