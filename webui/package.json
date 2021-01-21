@@ -16,6 +16,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-twitter-widgets": "^1.9.5",
+    "react-youtube": "^7.13.0",
     "reading-time": "^1.2.1",
     "recoil": "^0.1.2",
     "remark-breaks": "^2.0.1",

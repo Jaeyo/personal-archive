@@ -9,6 +9,7 @@ const (
 	KindMarkdown = "markdown"
 	KindTweet    = "tweet"
 	KindSlideShare = "slideshare"
+	KindYoutube = "youtube"
 )
 
 type Article struct {

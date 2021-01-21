@@ -5,6 +5,7 @@ export const Kind = {
   Markdown: 'markdown',
   Tweet: 'tweet',
   SlideShare: 'slideshare',
+  Youtube: 'youtube',
 }
 
 export default class Article {

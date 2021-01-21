@@ -15,6 +15,7 @@ type articleGenerator struct {
 	markdownGen       *articleMarkdownGenerator
 	tweetGen          *articleTweetGenerator
 	slideShareGen     *articleSlideShareGenerator
+	youtubeGen        *articleYoutubeGenerator
 	articleRepository repositories.ArticleRepository
 }
 
@@ -27,6 +28,7 @@ var GetArticleGenerator = func() func() ArticleGenerator {
 				markdownGen:       &articleMarkdownGenerator{},
 				tweetGen:          &articleTweetGenerator{},
 				slideShareGen:     &articleSlideShareGenerator{},
+				youtubeGen:        &articleYoutubeGenerator{},
 				articleRepository: repositories.GetArticleRepository(),
 			}
 		})
@@ -57,6 +59,9 @@ func (g *articleGenerator) getTitleAndContentAndKind(url string) (string, string
 	} else if g.slideShareGen.IsKindOfSlideShare(url) {
 		getTitleAndContentFn = g.slideShareGen.GetTitleAndContent
 		kind = models.KindSlideShare
+	} else if g.youtubeGen.IsKindOfYoutube(url) {
+		getTitleAndContentFn = g.youtubeGen.GetTitleAndContent
+		kind = models.KindYoutube
 	}
 
 	title, content, err := getTitleAndContentFn(url)

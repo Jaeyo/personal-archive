@@ -12,6 +12,7 @@ import ArticleLink from "./ArticleLink"
 import ArticleContentTweet from "./ArticleContentTweet"
 import ArticleMarkdownContent from "../../component/ArticleMarkdownContent"
 import ArticleContentSlideShare from "./ArticleContentSlideShare"
+import ArticleContentYoutube from "./ArticleContentYoutube"
 
 
 const ArticlePage: FC = () => {
@@ -33,7 +34,7 @@ const ArticlePage: FC = () => {
           setTimeout(() => history.push('/'), 1000)
         }
       })
-  }, [id])
+  }, [id, history])
 
   return (
     <TagTreeLayout loading={loadFetching}>
@@ -62,6 +63,8 @@ const renderContent = (article: Article, history: History) => {
     return <ArticleContentTweet article={article}/>
   } else if (article.kind === Kind.SlideShare) {
     return <ArticleContentSlideShare article={article}/>
+  } else if (article.kind === Kind.Youtube) {
+    return <ArticleContentYoutube article={article}/>
   }
 
   return (

@@ -54,7 +54,7 @@ func (g *articleMarkdownGenerator) getTitleAndContent2(url string) (string, stri
 	htmlByte, err := ioutil.ReadAll(resp.Body)
 	html := string(htmlByte)
 
-	title, err := g.getTitleFromHtml(html)
+	title, err := getTitleFromHtml(html)
 	if err != nil || title == "" {
 		title = url
 	}
@@ -78,7 +78,7 @@ func (g *articleMarkdownGenerator) getTitleAndContent2(url string) (string, stri
 	return title, content, nil
 }
 
-func (g *articleMarkdownGenerator) getTitleFromHtml(html string) (string, error) {
+func getTitleFromHtml(html string) (string, error) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return "", err
