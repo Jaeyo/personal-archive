@@ -9,8 +9,9 @@ import (
 )
 
 type MiscRepository interface {
-	CreateOrUpdate(tx *gorm.DB, key, value string) error
+	CreateOrUpdate(key, value string) error
 	GetValue(key string) (string, error)
+	DeleteByKeys(keys []string) error
 }
 
 type miscRepository struct {
@@ -31,9 +32,9 @@ var GetMiscRepository = func() func() MiscRepository {
 	}
 }()
 
-func (r *miscRepository) CreateOrUpdate(tx *gorm.DB, key, value string) error {
+func (r *miscRepository) CreateOrUpdate(key, value string) error {
 	var misc models.Misc
-	if err := tx.Where("key = ?", key).First(&misc).Error; err != nil {
+	if err := r.database.Where("key = ?", key).First(&misc).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			misc = models.Misc{}
 		} else {
@@ -44,7 +45,7 @@ func (r *miscRepository) CreateOrUpdate(tx *gorm.DB, key, value string) error {
 	misc.Key = key
 	misc.Value = value
 
-	return tx.Save(&misc).Error
+	return r.database.Save(&misc).Error
 }
 
 func (r *miscRepository) GetValue(key string) (string, error) {
@@ -53,6 +54,10 @@ func (r *miscRepository) GetValue(key string) (string, error) {
 		return "", err
 	}
 	return misc.Value, nil
+}
+
+func (r *miscRepository) DeleteByKeys(keys []string) error {
+	return r.database.Where("key IN ?", keys).Delete(&models.Misc{}).Error
 }
 
 func (r *miscRepository) getByKey(key string) (*models.Misc, error) {

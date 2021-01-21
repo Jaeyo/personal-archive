@@ -5,11 +5,15 @@ go 1.15
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
 	github.com/PuerkitoBio/goquery v1.6.1
+	github.com/gammazero/workerpool v1.1.1
 	github.com/go-shiori/go-readability v0.0.0-20201011032228-bdc871772408
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mattn/go-sqlite3 v1.14.6
+	github.com/pasztorpisti/qs v0.0.0-20171216220353-8d6c33ee906c
 	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.7.0
 	github.com/stretchr/testify v1.6.1
+	github.com/tidwall/gjson v1.6.7
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b // indirect
 	golang.org/x/sys v0.0.0-20210113181707-4bcb84eeeb78 // indirect
 	gorm.io/driver/sqlite v1.1.4

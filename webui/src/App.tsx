@@ -6,7 +6,9 @@ import ArticlePage from "./pages/articlePage/ArticlePage"
 import ArticlesByTagPage from "./pages/articlesByTagPage/ArticlesByTagPage"
 import EditArticlePage from "./pages/editArticlePage/EditArticlePage"
 import SearchPage from "./pages/searchPage/SearchPage"
+import SettingPage from "./pages/settingPage/SettingPage"
 import "rsuite/dist/styles/rsuite-default.css"
+import PocketAuthPage from "./pages/pocketAuthPage/PocketAuthPage"
 
 
 const App = () => (
@@ -25,6 +27,12 @@ const App = () => (
           </Route>
           <Route path="/tags/:tag">
             <ArticlesByTagPage />
+          </Route>
+          <Route path="/settings/pocket-auth">
+            <PocketAuthPage />
+          </Route>
+          <Route path="/settings">
+            <SettingPage />
           </Route>
           <Route path="/">
             <CreateArticlePage />

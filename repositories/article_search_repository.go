@@ -17,6 +17,7 @@ type ArticleSearchRepository interface {
 	Insert(article *models.Article) error
 	Update(article *models.Article) error
 	Delete(id int64) error
+	Deletes(ids []int64) error
 	Search(keyword string) ([]int64, error)
 }
 
@@ -78,6 +79,10 @@ func (r *articleSearchRepository) Update(article *models.Article) error {
 
 func (r *articleSearchRepository) Delete(id int64) error {
 	return r.database.Exec("DELETE FROM article_search WHERE id = ?", id).Error
+}
+
+func (r *articleSearchRepository) Deletes(ids []int64) error {
+	return r.database.Exec("DELETE FROM article_search WHERE id IN ?", ids).Error
 }
 
 func (r *articleSearchRepository) Search(keyword string) ([]int64, error) {

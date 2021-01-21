@@ -1,12 +1,30 @@
 package reqres
 
-type PocketAuthResponse struct {
-	OK          bool   `json:"ok"`
-	AppKey      string `json:"applicationKey"`
-	AccessToken string `json:"accessToken"`
+import "time"
+
+type GetPocketRequestTokenRequest struct {
+	ConsumerKey string `json:"consumerKey" validate:"required"`
+	RedirectURI string `json:"redirectURI" validate:"required"`
 }
 
-type SetPocketAuthRequest struct {
-	AppKey      string `json:"applicationKey" validate:"required"`
-	AccessToken string `json:"accessToken" validate:"required"`
+type PocketRequestTokenResponse struct {
+	OK           bool   `json:"ok"`
+	RequestToken string `json:"requestToken"`
+}
+
+type GetPocketAuthResponse struct {
+	OK              bool      `json:"ok"`
+	IsAuthenticated bool      `json:"isAuthenticated"`
+	Username        string    `json:"username"`
+	IsSyncOn        bool      `json:"isSyncOn"`
+	LastSyncTime    *time.Time `json:"lastSyncTime"`
+}
+
+type PocketSyncRequest struct {
+	IsSyncOn bool `json:"isSyncOn"`
+}
+
+type PocketAuthResponse struct {
+	OK        bool `json:"ok"`
+	IsAllowed bool `json:"isAllowed"`
 }

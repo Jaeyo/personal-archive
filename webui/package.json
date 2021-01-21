@@ -8,6 +8,7 @@
     "@types/react-dom": "^16.9.10",
     "ace-builds": "^1.4.12",
     "axios": "^0.21.1",
+    "javascript-time-ago": "^2.3.4",
     "react": "^17.0.1",
     "react-ace": "^9.2.1",
     "react-dom": "^17.0.1",
@@ -48,6 +49,7 @@
   },
   "devDependencies": {
     "@types/axios": "^0.14.0",
+    "@types/javascript-time-ago": "^2.0.1",
     "@types/react-router-dom": "^5.1.7",
     "@types/recoil": "^0.0.1",
     "@types/styled-components": "^5.1.7"

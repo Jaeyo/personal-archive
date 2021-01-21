@@ -32,6 +32,7 @@ func (c *ArticleController) Route(e *echo.Echo) {
 	e.GET("/apis/articles/tags/:tag", http.Provide(c.FindArticlesByTag))
 	e.GET("/apis/articles/search", http.Provide(c.SearchArticle))
 	e.DELETE("/apis/articles/:id", http.Provide(c.DeleteArticle))
+	e.DELETE("/apis/articles", http.Provide(c.DeleteArticles))
 }
 
 func (c *ArticleController) CreateArticleByURL(ctx http.ContextExtended) error {
@@ -188,6 +189,19 @@ func (c *ArticleController) DeleteArticle(ctx http.ContextExtended) error {
 
 	if err := c.articleService.Delete(id); err != nil {
 		return ctx.InternalServerError(err, "failed to delete article")
+	}
+
+	return ctx.Success(http.SuccessResponse{OK: true})
+}
+
+func (c *ArticleController) DeleteArticles(ctx http.ContextExtended) error {
+	ids, err := ctx.QueryParamInt64SliceWithComma("ids")
+	if err != nil {
+		return ctx.BadRequest("invalid ids")
+	}
+
+	if err := c.articleRepository.DeleteByIDs(ids); err != nil {
+		return ctx.InternalServerError(err,"failed to delete articles")
 	}
 
 	return ctx.Success(http.SuccessResponse{OK: true})

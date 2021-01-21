@@ -3,6 +3,7 @@ package http
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"strings"
@@ -26,6 +27,20 @@ func (c ContextExtended) QueryParamStr(name string) string {
 
 func (c ContextExtended) QueryParamInt(name string) (int, error) {
 	return strconv.Atoi(c.QueryParam(name))
+}
+
+func (c ContextExtended) QueryParamInt64SliceWithComma(name string) ([]int64, error) {
+	splited := strings.Split(c.QueryParam(name), ",")
+	logrus.Debugf("splited: %v", splited)
+	slice := []int64{}
+	for _, value := range splited {
+		intValue, err := strconv.ParseInt(value, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		slice = append(slice, intValue)
+	}
+	return slice, nil
 }
 
 func (c ContextExtended) Page() int {

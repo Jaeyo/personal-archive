@@ -43,3 +43,7 @@ export const requestSearchArticles = async (keyword: string, page: number): Prom
 export const requestDeleteArticle = async (id: number): Promise<void> => {
   await requestDelete(`/apis/articles/${id}`)
 }
+
+export const requestDeleteArticles = async (ids: number[]): Promise<void> => {
+  await requestDelete(`/apis/articles?ids=${ids.join(',')}`)
+}

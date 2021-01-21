@@ -1,10 +1,11 @@
-import React, { FC } from "react"
+import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
 import Article from "../models/Article"
-import { List, Pagination } from "rsuite"
+import { Alert, Button, Checkbox, List, Pagination } from "rsuite"
 import ArticleTag from "./ArticleTag"
 import { Pagination as IPagination } from "../common/Types"
+import { requestDeleteArticles } from "../apis/ArticleApi"
 
 
 interface Props {
@@ -13,36 +14,85 @@ interface Props {
   onSelectPage: (page: number) => void
 }
 
-const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => (
-  <>
-    <List>
+const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
+  const [ selectedIDs, setSelectedIDs ] = useState([] as number[])
+  const [ deleteFetching, setDeleteFetching ] = useState(false)
+
+  const onChecked = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIDs([ ...selectedIDs, id ])
+    } else {
+      setSelectedIDs(selectedIDs.filter(selectedID => selectedID !== id))
+    }
+  }
+
+  const onDelete = () => {
+    if (selectedIDs.length <= 0) {
+      return
+    }
+
+    setDeleteFetching(true)
+    requestDeleteArticles(selectedIDs)
+      .then(() => window.location.reload())
+      .catch(err => Alert.error(err.toString()))
+      .finally(() => setDeleteFetching(false))
+  }
+
+  return (
+    <>
       {
-        articles.map((article, i) => (
-          <List.Item key={article.id} index={i}>
-            <ArticleLink to={`/articles/${article.id}`}>
-              {article.title}
-            </ArticleLink>
-            {
-              article.tags.map(
-                ({tag}) => <ArticleTag tag={tag} key={tag}/>
-              )
-            }
-            <ReadingTimeSpan>{article.readingTime}</ReadingTimeSpan>
-          </List.Item>
-        ))
+        selectedIDs.length <= 0 ?
+          null :
+          <DeleteBtnDiv>
+            <DeleteBtn
+              color="red"
+              loading={deleteFetching}
+              onClick={onDelete}
+            >
+              Delete
+            </DeleteBtn>
+          </DeleteBtnDiv>
       }
-    </List>
-    <PaginationDiv>
-      <Pagination
-        activePage={pagination.page}
-        pages={pagination.totalPages}
-        prev
-        next
-        onSelect={onSelectPage}
-      />
-    </PaginationDiv>
-  </>
-)
+      <List>
+        {
+          articles.map((article, i) => (
+            <List.Item key={article.id} index={i}>
+              <Checkbox onChange={(_: any, checked: boolean) => onChecked(article.id, checked)}>
+                <ArticleLink to={`/articles/${article.id}`}>
+                  {article.title}
+                </ArticleLink>
+                {
+                  article.tags.map(
+                    ({tag}) => <ArticleTag tag={tag} key={tag}/>
+                  )
+                }
+                <ReadingTimeSpan>{article.readingTime}</ReadingTimeSpan>
+              </Checkbox>
+            </List.Item>
+          ))
+        }
+      </List>
+      <PaginationDiv>
+        <Pagination
+          activePage={pagination.page}
+          pages={pagination.totalPages}
+          prev
+          next
+          onSelect={onSelectPage}
+        />
+      </PaginationDiv>
+    </>
+  )
+}
+
+const DeleteBtnDiv = styled.div`
+  text-align: right;
+  margin-bottom: 15px;
+`
+
+const DeleteBtn = styled(Button)`
+  width: 100px;
+`
 
 const ArticleLink = styled(Link)`
   margin-right: 15px;

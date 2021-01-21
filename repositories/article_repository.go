@@ -18,6 +18,7 @@ type ArticleRepository interface {
 	GetAllCount() (int64, error)
 	ExistByTitle(title string) (bool, error)
 	DeleteByID(id int64) error
+	DeleteByIDs(ids []int64) error
 }
 
 type articleRepository struct {
@@ -196,6 +197,14 @@ func (r *articleRepository) DeleteByID(id int64) error {
 	}
 
 	return r.articleSearchRepository.Delete(id)
+}
+
+func (r *articleRepository) DeleteByIDs(ids []int64) error {
+	if err := r.database.Where("id IN ?", ids).Delete(&models.Article{}).Error; err != nil {
+		return err
+	}
+
+	return r.articleSearchRepository.Deletes(ids)
 }
 
 func ensureTagsNotNil(articles []*models.Article) {

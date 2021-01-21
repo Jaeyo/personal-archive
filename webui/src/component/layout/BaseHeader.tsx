@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { Link, useHistory } from "react-router-dom"
-import { Alert, Icon, Input, InputGroup } from "rsuite"
+import { Alert, Icon, IconButton, Input, InputGroup } from "rsuite"
 
 
 const BaseHeader: FC = () => {
@@ -36,6 +36,11 @@ const BaseHeader: FC = () => {
             <Icon icon="search"/>
           </InputGroup.Button>
         </KeywordInputGroup>
+        <IconButton
+          appearance="link"
+          icon={<Icon icon="cog" />}
+          onClick={() => history.push('/settings')}
+        />
       </RightAlignDiv>
     </Wrapper>
   )
