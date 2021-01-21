@@ -1,12 +1,12 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, ControlLabel, Input } from "rsuite"
+import { Alert, Button, ControlLabel, Form, FormGroup, Input, Tag } from "rsuite"
 import { requestObtainPocketRequestToken } from "../../apis/SettingApi"
 
 
 const PocketSettingUnauthenticated: FC = () => {
-  const [ fetching, setFetching ] = useState(false)
-  const [ consumerKey, setConsumerKey ] = useState('')
+  const [fetching, setFetching] = useState(false)
+  const [consumerKey, setConsumerKey] = useState('')
 
   const onActivate = () => {
     if (consumerKey.length <= 0) {
@@ -25,19 +25,42 @@ const PocketSettingUnauthenticated: FC = () => {
   }
 
   return (
-    <>
-      <h1>Pocket: not integrated</h1>
-      <ControlLabel>Consumer Key</ControlLabel>
-      <Input value={consumerKey} onChange={v => setConsumerKey(v)} />
-      <BtnDiv>
-        <Button onClick={onActivate} loading={fetching}>Activate</Button>
-      </BtnDiv>
-    </>
+    <Form layout="horizontal">
+      <FormRow>
+        <ControlLabel>Status</ControlLabel>
+        <StatusTag color="red">Disconnected</StatusTag>
+      </FormRow>
+      <FormRow>
+        <ControlLabel>Consumer Key</ControlLabel>
+        <Input
+          value={consumerKey}
+          onChange={v => setConsumerKey(v)}
+          style={{width: '400px'}}
+          size="sm"
+        />
+        <ConnectBtn
+          onClick={onActivate}
+          loading={fetching}
+          color="green"
+          size="sm"
+        >
+          Connect
+        </ConnectBtn>
+      </FormRow>
+    </Form>
   )
 }
 
-const BtnDiv = styled.div`
-  text-align: right;
+const FormRow = styled(FormGroup)`
+  margin-bottom: 0 !important;
+`
+
+const StatusTag = styled(Tag)`
+  margin: 8px 0;
+`
+
+const ConnectBtn = styled(Button)`
+  margin: 4px 0 4px 10px;
 `
 
 export default PocketSettingUnauthenticated

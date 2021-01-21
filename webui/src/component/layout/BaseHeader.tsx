@@ -36,7 +36,7 @@ const BaseHeader: FC = () => {
             <Icon icon="search"/>
           </InputGroup.Button>
         </KeywordInputGroup>
-        <IconButton
+        <SettingButton
           appearance="link"
           icon={<Icon icon="cog" />}
           onClick={() => history.push('/settings')}
@@ -77,7 +77,11 @@ const RightAlignDiv = styled.div`
 const KeywordInputGroup = styled(InputGroup)`
   display: inline-flex;
   width: 300px;
-  margin: 10px;
+  margin-right: 10px;
+`
+
+const SettingButton = styled(IconButton)`
+  color: gray;
 `
 
 export default BaseHeader

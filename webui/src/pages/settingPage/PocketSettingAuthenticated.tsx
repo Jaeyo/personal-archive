@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, ControlLabel, Input, Toggle } from "rsuite"
+import { Alert, Button, ControlLabel, Form, FormGroup, Input, Tag, Toggle } from "rsuite"
 import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
 import TimeAgo from "javascript-time-ago"
 import en from "javascript-time-ago/locale/en"
@@ -15,10 +15,10 @@ interface Props {
   lastSyncTime: Date | null
 }
 
-const PocketSettingAuthenticated: FC<Props> = ({ username, isSyncOn, lastSyncTime }) => {
-  const [ activateFetching, setActivateFetching ] = useState(false)
-  const [ syncToggleFetching, setSyncToggleFetching ] = useState(false)
-  const [ isSyncChecked, setSyncChecked ] = useState(isSyncOn)
+const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime}) => {
+  const [activateFetching, setActivateFetching] = useState(false)
+  const [syncToggleFetching, setSyncToggleFetching] = useState(false)
+  const [isSyncChecked, setSyncChecked] = useState(isSyncOn)
 
   const onUnactivate = () => {
     setActivateFetching(true)
@@ -39,28 +39,73 @@ const PocketSettingAuthenticated: FC<Props> = ({ username, isSyncOn, lastSyncTim
 
   return (
     <>
-      <h1>Pocket: integrated</h1>
-      <ControlLabel>Username</ControlLabel>
-      <Input value={username} disabled />
+      <Form layout="horizontal">
+        <FormRow>
+          <ControlLabel>Status</ControlLabel>
+          <StatusTag color="green">Connected</StatusTag>
+        </FormRow>
+        <FormRow>
+          <ControlLabel>Username</ControlLabel>
+          <UsernameInput
+            value={username}
+            disabled
+            style={{width: '400px'}}
+            size="sm"
+          />
+        </FormRow>
+        <FormRow>
+          <ControlLabel>Sync</ControlLabel>
+          <SyncToggle
+            checked={isSyncChecked}
+            checkedChildren="Sync"
+            unCheckedChildren="Not Sync"
+            disabled={syncToggleFetching}
+            onChange={onSyncToggle}
+          />
+          <LastSyncTime lastSyncTime={lastSyncTime}/>
+        </FormRow>
+      </Form>
       <BtnDiv>
-        <Button onClick={onUnactivate} loading={activateFetching} color="red">Unactivate</Button>
+        <Button
+          onClick={onUnactivate}
+          loading={activateFetching}
+          color="red"
+          appearance="ghost"
+          size="sm"
+        >
+          Disconnect
+        </Button>
       </BtnDiv>
-      <ControlLabel>Sync with Pocket</ControlLabel>
-      <Toggle
-        checked={isSyncChecked}
-        checkedChildren="Sync"
-        unCheckedChildren="Not Sync"
-        disabled={syncToggleFetching}
-        onChange={onSyncToggle}
-      />
-      {
-        lastSyncTime == null ?
-          null :
-          <ControlLabel>Last Sync: {new TimeAgo('en-US').format(new Date(lastSyncTime))}</ControlLabel>
-      }
     </>
   )
 }
+
+const LastSyncTime: FC<{ lastSyncTime: Date | null }> = ({lastSyncTime}) =>
+  lastSyncTime == null ?
+    null :
+    <Desc>Last Sync: {new TimeAgo('en-US').format(new Date(lastSyncTime))}</Desc>
+
+const FormRow = styled(FormGroup)`
+  margin-bottom: 0 !important;
+`
+
+const StatusTag = styled(Tag)`
+  margin: 8px 0;
+`
+
+const UsernameInput = styled(Input)`
+  margin: 4px 0;
+`
+
+const SyncToggle = styled(Toggle)`
+  margin: 8px 0;
+`
+
+const Desc = styled.span`
+  color: gray;
+  font-size: 9px;
+  margin-left: 10px;
+`
 
 const BtnDiv = styled.div`
   text-align: right;
