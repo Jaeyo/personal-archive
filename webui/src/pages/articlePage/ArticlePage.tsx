@@ -26,7 +26,12 @@ const ArticlePage: FC = () => {
         setArticle(article)
       })
       .finally(() => setLoadFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => {
+        Alert.error(err.toString())
+        if (err.response?.status === 404) {
+          setTimeout(() => history.push('/'), 1000)
+        }
+      })
   }, [id])
 
   return (
