@@ -8,6 +8,7 @@ import (
 const (
 	KindMarkdown = "markdown"
 	KindTweet    = "tweet"
+	KindSlideShare = "slideshare"
 )
 
 type Article struct {

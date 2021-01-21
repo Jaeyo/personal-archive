@@ -14,6 +14,7 @@ type ArticleGenerator interface {
 type articleGenerator struct {
 	markdownGen       *articleMarkdownGenerator
 	tweetGen          *articleTweetGenerator
+	slideShareGen     *articleSlideShareGenerator
 	articleRepository repositories.ArticleRepository
 }
 
@@ -25,6 +26,7 @@ var GetArticleGenerator = func() func() ArticleGenerator {
 			instance = &articleGenerator{
 				markdownGen:       &articleMarkdownGenerator{},
 				tweetGen:          &articleTweetGenerator{},
+				slideShareGen:     &articleSlideShareGenerator{},
 				articleRepository: repositories.GetArticleRepository(),
 			}
 		})
@@ -49,10 +51,12 @@ func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Articl
 func (g *articleGenerator) getTitleAndContentAndKind(url string) (string, string, string, error) {
 	getTitleAndContentFn := g.markdownGen.GetTitleAndContent
 	kind := models.KindMarkdown
-
 	if g.tweetGen.IsKindOfTweet(url) {
 		getTitleAndContentFn = g.tweetGen.GetTitleAndContent
 		kind = models.KindTweet
+	} else if g.slideShareGen.IsKindOfSlideShare(url) {
+		getTitleAndContentFn = g.slideShareGen.GetTitleAndContent
+		kind = models.KindSlideShare
 	}
 
 	title, content, err := getTitleAndContentFn(url)

@@ -11,6 +11,7 @@ import ArticleTags from "./ArticleTags"
 import ArticleLink from "./ArticleLink"
 import ArticleContentTweet from "./ArticleContentTweet"
 import ArticleMarkdownContent from "../../component/ArticleMarkdownContent"
+import ArticleContentSlideShare from "./ArticleContentSlideShare"
 
 
 const ArticlePage: FC = () => {
@@ -59,6 +60,8 @@ const renderArticle = (article: Article | null, history: History) => {
 const renderContent = (article: Article, history: History) => {
   if (article.kind === Kind.Tweet) {
     return <ArticleContentTweet article={article}/>
+  } else if (article.kind === Kind.SlideShare) {
+    return <ArticleContentSlideShare article={article}/>
   }
 
   return (

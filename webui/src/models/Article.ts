@@ -4,6 +4,7 @@ import readingTime from "reading-time"
 export const Kind = {
   Markdown: 'markdown',
   Tweet: 'tweet',
+  SlideShare: 'slideshare',
 }
 
 export default class Article {
