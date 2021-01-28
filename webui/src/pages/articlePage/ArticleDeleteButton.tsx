@@ -17,7 +17,13 @@ const ArticleDeleteButton: FC<Props> = ({articleID}) => {
   const onDelete = () => {
     setDeleteFetching(true)
     requestDeleteArticle(articleID)
-      .then(() => history.goBack())
+      .then(() => {
+        if (history.length === 1) {
+          history.push('/')
+        } else {
+          history.goBack()
+        }
+      })
       .finally(() => setDeleteFetching(false))
       .catch(err => Alert.error(err.toString()))
   }
