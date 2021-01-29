@@ -21,10 +21,13 @@ const BaseHeader: FC = () => {
     <Wrapper>
       <Link to="/">
         <Logo>
-          <LogoIcon icon="inbox" />
+          <LogoIcon icon="inbox"/>
           PERSONAL ARCHIVE
         </Logo>
       </Link>
+      <NavLink to="/tags/all">
+        <nav>Article</nav>
+      </NavLink>
       <RightAlignDiv>
         <KeywordInputGroup>
           <Input
@@ -38,7 +41,7 @@ const BaseHeader: FC = () => {
         </KeywordInputGroup>
         <SettingButton
           appearance="link"
-          icon={<Icon icon="cog" />}
+          icon={<Icon icon="cog"/>}
           onClick={() => history.push('/settings')}
         />
       </RightAlignDiv>
@@ -49,6 +52,8 @@ const BaseHeader: FC = () => {
 const Wrapper = styled.div`
   margin-top: 15px;
   margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
 `
 
 const Logo = styled.h1`
@@ -57,7 +62,24 @@ const Logo = styled.h1`
   font-size: 18px;
   border-bottom: 1px dashed #bbb;
   padding: 0 3px 9px 3px;
-  margin-left: 30px;
+  margin: 0 30px;
+`
+
+const NavLink = styled(Link)`
+  margin: 16px 0;
+  padding: 5px 20px;
+  font-weight: 600;
+  color: #777;
+  
+  :hover {
+    background-color: #eee;
+    color: #777;
+    text-decoration: none;
+  }
+  :focus {
+    color: #777;
+    text-decoration: none;
+  }
 `
 
 const LogoIcon = styled(Icon)`
@@ -67,6 +89,9 @@ const LogoIcon = styled(Icon)`
 `
 
 const RightAlignDiv = styled.div`
+  margin-left: auto;
+  margin-right: 0;
+  
   float: right;
   padding-top: 10px;
   padding-right: 20px;
@@ -77,6 +102,7 @@ const RightAlignDiv = styled.div`
 const KeywordInputGroup = styled(InputGroup)`
   display: inline-flex;
   width: 300px;
+  height: 36px;
   margin-right: 10px;
 `
 

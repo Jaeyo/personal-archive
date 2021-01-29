@@ -8,7 +8,7 @@ import { articleTagsState } from "../states/ArticleTags"
 import { ArticleTagCount } from "../models/ArticleTag"
 
 
-const TagTree: FC = () => {
+const ArticleTagTree: FC = () => {
   const [fetching, setFetching] = useState(false)
   const [articleTags, setArticleTags] = useRecoilState(articleTagsState)
   const [untaggedCount, setUntaggedCount] = useState(0)
@@ -86,4 +86,4 @@ const TagLabel = styled.span`
   padding-bottom: 2px;
 `
 
-export default TagTree
+export default ArticleTagTree

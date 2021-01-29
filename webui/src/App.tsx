@@ -7,8 +7,8 @@ import ArticlesByTagPage from "./pages/articlesByTagPage/ArticlesByTagPage"
 import EditArticlePage from "./pages/editArticlePage/EditArticlePage"
 import SearchPage from "./pages/searchPage/SearchPage"
 import SettingPage from "./pages/settingPage/SettingPage"
-import "rsuite/dist/styles/rsuite-default.css"
 import PocketAuthPage from "./pages/pocketAuthPage/PocketAuthPage"
+import "rsuite/dist/styles/rsuite-default.css"
 
 
 const App = () => (

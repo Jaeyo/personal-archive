@@ -1,7 +1,7 @@
 import React, { FC } from "react"
 import styled from "styled-components"
 import { Container, Header, Loader, Sidebar } from "rsuite"
-import TagTree from "../TagTree"
+import ArticleTagTree from "../ArticleTagTree"
 import BaseHeader from "./BaseHeader"
 
 
@@ -10,14 +10,14 @@ interface Props {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const TagTreeLayout: FC<Props> = ({loading, size = 'md', children}) => (
+const ArticleTagTreeLayout: FC<Props> = ({loading, size = 'md', children}) => (
   <Wrapper size={size}>
     <Header>
       <BaseHeader/>
     </Header>
     <Container>
       <Sidebar width={260}>
-        <TagTree/>
+        <ArticleTagTree/>
       </Sidebar>
       <StyledContent>
         {loading ? <Loader center/> : null}
@@ -41,4 +41,4 @@ const StyledContent = styled(Container)`
   margin-bottom: 200px;
 `
 
-export default TagTreeLayout
+export default ArticleTagTreeLayout

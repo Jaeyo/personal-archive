@@ -17,7 +17,7 @@ type Article struct {
 	Kind         string      `gorm:"column:kind;type:varchar(24);not null" json:"kind"`
 	URL          string      `gorm:"column:url;type:varchar(256);not null" json:"url"`
 	Content      string      `gorm:"column:content;type:text" json:"content"`
-	Title        string      `gorm:"column:title;type:varchar(256);not null" json:"title"`
+	Title        string      `gorm:"column:title;type:varchar(256);not null;uniqueIndex" json:"title"`
 	Tags         ArticleTags `gorm:"foreignKey:ArticleID" json:"tags"`
 	Created      time.Time   `gorm:"column:created;type:datetime;not null" json:"created"`
 	LastModified time.Time   `gorm:"column:last_modified;type:datetime;not null" json:"lastModified"`
@@ -48,4 +48,14 @@ func (a *Article) BeforeSave(db *gorm.DB) error {
 	}
 	a.LastModified = time.Now()
 	return nil
+}
+
+type Articles []*Article
+
+func (a Articles) ExtractTagIDs() []int64 {
+	ids := []int64{}
+	for _, article := range a {
+		ids = append(ids, article.Tags.ExtractIDs()...)
+	}
+	return ids
 }

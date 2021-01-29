@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
 import { Alert } from "rsuite"
 import { requestFindArticlesByTag } from "../../apis/ArticleApi"
-import TagTreeLayout from "../../component/layout/TagTreeLayout"
+import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import Article from "../../models/Article"
 import TagTitle from "./TagTitle"
 import { usePage } from "../../common/Hooks"
@@ -30,14 +30,14 @@ const ArticlesByTagPage: FC = () => {
   }, [tag, page])
 
   return (
-    <TagTreeLayout loading={fetching}>
+    <ArticleTagTreeLayout loading={fetching}>
       <TagTitle tag={tag}/>
       <ArticleList
         articles={articles}
         pagination={pagination}
         onSelectPage={page => history.push(`/tags/${tag}?page=${page}`)}
       />
-    </TagTreeLayout>
+    </ArticleTagTreeLayout>
   )
 }
 

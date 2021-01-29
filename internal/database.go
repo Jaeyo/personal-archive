@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/common"
 	"github.com/jaeyo/personal-archive/models"
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/pkg/errors"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type DB struct {
@@ -42,7 +44,15 @@ var GetDatabase = func() func() *DB {
 }()
 
 func (d *DB) Init() error {
-	if err := d.AutoMigrate(&models.Article{}, &models.ArticleTag{}, &models.Misc{}); err != nil {
+	if err := d.AutoMigrate(
+		&models.Article{},
+		&models.ArticleTag{},
+		&models.Misc{},
+		&models.Note{},
+		&models.Paragraph{},
+		&models.ReferenceArticle{},
+		&models.ReferenceWeb{},
+	); err != nil {
 		return errors.Wrap(err, "failed to auto migrate")
 	}
 	return nil
@@ -75,10 +85,42 @@ func (d *DB) Tables() ([]string, error) {
 	return tables, nil
 }
 
+func (d *DB) SearchIDs(table, keyword string) ([]int64, error) {
+	var results []*searchedID
+	query := fmt.Sprintf("SELECT id FROM %s WHERE %s MATCH ? ORDER BY rank", table, table)
+	if err := d.
+		Raw(query, refineSearchKeyword(keyword)).
+		Scan(&results).Error; err != nil {
+		return nil, err
+	}
+
+	ids := []int64{}
+	for _, result := range results {
+		id, err := strconv.ParseInt(result.ID, 10, 64)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
 func ensureDirExist(dirPath string) {
 	if _, err := os.Stat(dirPath); err != nil {
 		if err := os.MkdirAll(dirPath, 0755); err != nil {
 			panic(err)
 		}
 	}
+}
+
+func refineSearchKeyword(keyword string) string {
+	splited := strings.Split(keyword, " ")
+	for i, word := range splited {
+		splited[i] = fmt.Sprintf("%s*", word)
+	}
+	return strings.Join(splited, " + ")
+}
+
+type searchedID struct {
+	ID string
 }

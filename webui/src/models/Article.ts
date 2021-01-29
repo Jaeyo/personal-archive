@@ -26,8 +26,8 @@ export default class Article {
     this.content = obj.content
     this.title = obj.title
     this.tags = obj.tags
-    this.created = obj.created
-    this.lastModified = obj.lastModified
+    this.created = new Date(obj.created)
+    this.lastModified = new Date(obj.lastModified)
     this.readingTime = readingTime(obj.content).text
   }
 }

@@ -15,7 +15,7 @@ func (r *CreateArticleByURLRequest) Validate() error {
 	return validateTags(r.Tags)
 }
 
-type UpdateTitleRequest struct {
+type UpdateArticleTitleRequest struct {
 	Title string `json:"title" validate:"required,min=1,max=128"`
 }
 

@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useRef, useState } from "react"
 import { Alert, Button, Input, Loader, TagPicker } from "rsuite"
 import { useRecoilValue } from "recoil"
-import TagTreeLayout from "../../component/layout/TagTreeLayout"
+import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { articleTagsState } from "../../states/ArticleTags"
 import { requestCreateArticleByURL } from "../../apis/ArticleApi"
 import { toTagPickerItemTypes } from "../../common/Types"
@@ -29,7 +29,7 @@ const CreateArticlePage: FC = () => {
   }
 
   return (
-    <TagTreeLayout>
+    <ArticleTagTreeLayout>
       {fetching ? <Loader center /> : null}
       <Input
         inputRef={urlInputRef}
@@ -54,7 +54,7 @@ const CreateArticlePage: FC = () => {
         onClick={onSubmit}>
         Submit
       </Button>
-    </TagTreeLayout>
+    </ArticleTagTreeLayout>
   )
 }
 

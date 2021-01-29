@@ -11,6 +11,7 @@ type ArticleTagRepository interface {
 	UpdateTag(tag, newTag string) error
 	FindCounts() ([]*models.ArticleTagCountDTO, error)
 	Delete(articleTags models.ArticleTags) error
+	DeleteByIDs(ids []int64) error
 }
 
 type articleTagRepository struct {
@@ -55,4 +56,8 @@ func (r *articleTagRepository) FindCounts() ([]*models.ArticleTagCountDTO, error
 
 func (r *articleTagRepository) Delete(articleTags models.ArticleTags) error {
 	return r.database.Delete(&articleTags).Error
+}
+
+func (r *articleTagRepository) DeleteByIDs(ids []int64) error {
+	return r.database.Where("id IN ?", ids).Delete(&models.ArticleTag{}).Error
 }

@@ -37,6 +37,14 @@ func (t ArticleTags) ContainTag(tag string) bool {
 	return false
 }
 
+func (t ArticleTags) ExtractIDs() []int64 {
+	ids := []int64{}
+	for _, tag := range t {
+		ids = append(ids, tag.ID)
+	}
+	return ids
+}
+
 type Tags []string
 
 func (t Tags) FilterExcluded(articleTags ArticleTags) Tags {

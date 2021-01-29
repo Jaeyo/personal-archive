@@ -80,7 +80,7 @@ func (c *ArticleController) UpdateTitle(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	var req reqres.UpdateTitleRequest
+	var req reqres.UpdateArticleTitleRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.BadRequestf("invalid request body: %s", err.Error())
 	}
@@ -134,9 +134,11 @@ func (c *ArticleController) FindArticlesByTag(ctx http.ContextExtended) error {
 	tag := ctx.ParamStr("tag")
 	page, offset, limit := ctx.PageOffsetLimit()
 
-	var articles []*models.Article
-	var cnt int64
-	var err error
+	var (
+		articles []*models.Article
+		cnt int64
+		err error
+	)
 
 	if tag == "untagged" {
 		articles, cnt, err = c.articleRepository.FindUntaggedWithPage(offset, limit)
@@ -187,7 +189,7 @@ func (c *ArticleController) DeleteArticle(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	if err := c.articleService.Delete(id); err != nil {
+	if err := c.articleService.DeleteByIDs([]int64{id}); err != nil {
 		return ctx.InternalServerError(err, "failed to delete article")
 	}
 
@@ -200,7 +202,7 @@ func (c *ArticleController) DeleteArticles(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid ids")
 	}
 
-	if err := c.articleRepository.DeleteByIDs(ids); err != nil {
+	if err := c.articleService.DeleteByIDs(ids); err != nil {
 		return ctx.InternalServerError(err,"failed to delete articles")
 	}
 

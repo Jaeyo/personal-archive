@@ -15,7 +15,7 @@ type ArticleService interface {
 	UpdateTitle(id int64, newTitle string) error
 	UpdateTags(id int64, tags []string) error
 	UpdateContent(id int64, content string) error
-	Delete(id int64) error
+	DeleteByIDs(ids []int64) error
 }
 
 type articleService struct {
@@ -36,26 +36,14 @@ var GetArticleService = func() func() ArticleService {
 				articleTagRepository:    repositories.GetArticleTagRepository(),
 				articleSearchRepository: repositories.GetArticleSearchRepository(),
 			}
-			go instance.Initialize()
 		})
 		return instance
 	}
 }()
 
 func (s *articleService) Initialize() {
-	initialized, err := s.articleSearchRepository.Initialize()
-	if err != nil {
+	if err := s.articleSearchRepository.Initialize(); err != nil {
 		panic(err)
-	}
-
-	if initialized {
-		articles, err := s.articleRepository.FindAll()
-		if err != nil {
-			panic(err)
-		}
-		if err := s.articleSearchRepository.Index(articles); err != nil {
-			panic(err)
-		}
 	}
 }
 
@@ -96,7 +84,7 @@ func (s *articleService) UpdateTitle(id int64, newTitle string) error {
 
 	article, err := s.articleRepository.GetByID(id)
 	if err != nil {
-		return errors.Wrap(err, "failed to get article)")
+		return errors.Wrap(err, "failed to get article")
 	}
 
 	article.Title = newTitle
@@ -150,20 +138,20 @@ func (s *articleService) UpdateContent(id int64, content string) error {
 	return nil
 }
 
-func (s *articleService) Delete(id int64) error {
-	article, err := s.articleRepository.GetByID(id)
+func (s *articleService) DeleteByIDs(ids []int64) error {
+	articles, err := s.articleRepository.FindByIDs(ids)
 	if err != nil {
-		return errors.Wrap(err, "failed to get article)")
+		return errors.Wrap(err, "failed to find articles")
+	} else if len(ids) != len(articles) {
+		return fmt.Errorf("invalid ids: %v", ids)
 	}
 
-	if len(article.Tags) > 0 {
-		if err := s.articleTagRepository.Delete(article.Tags); err != nil {
-			return errors.Wrap(err, "failed to delete article tags")
-		}
+	if err := s.articleTagRepository.DeleteByIDs(articles.ExtractTagIDs()); err != nil {
+		return errors.Wrap(err, "failed to delete article tag by ids")
 	}
 
-	if err = s.articleRepository.DeleteByID(id); err != nil {
-		return errors.Wrap(err, "failed to delete article by id")
+	if err := s.articleRepository.DeleteByIDs(ids); err != nil {
+		return errors.Wrap(err, "failed to delete article by ids")
 	}
 	return nil
 }

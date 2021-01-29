@@ -199,6 +199,9 @@ func (s *pocketService) SetSyncable(isSyncable bool) error {
 
 func (s *pocketService) GetSyncable() (bool, error) {
 	if pocketSync, err := s.miscRepository.GetValue(PocketSync); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
 		return false, errors.Wrap(err, "failed to get pocket sync value")
 	} else {
 		return pocketSync == "1", nil

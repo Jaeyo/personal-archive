@@ -8,16 +8,16 @@ import (
 
 type ArticleRepository interface {
 	Save(article *models.Article) error
-	FindAll() ([]*models.Article, error)
-	FindAllWithPage(offset, limit int) ([]*models.Article, int64, error)
-	FindByIDsWithPage(ids []int64, offset, limit int) ([]*models.Article, int64, error)
+	FindAllWithPage(offset, limit int) (models.Articles, int64, error)
+	FindByIDsWithPage(ids []int64, offset, limit int) (models.Articles, int64, error)
+	FindByIDs(ids []int64) (models.Articles, error)
 	GetByID(id int64) (*models.Article, error)
-	FindByTagWithPage(tag string, offset, limit int) ([]*models.Article, int64, error)
-	FindUntaggedWithPage(offset, limit int) ([]*models.Article, int64, error)
+	FindByTagWithPage(tag string, offset, limit int) (models.Articles, int64, error)
+	FindUntaggedWithPage(offset, limit int) (models.Articles, int64, error)
 	GetUntaggedCount() (int64, error)
 	GetAllCount() (int64, error)
 	ExistByTitle(title string) (bool, error)
-	DeleteByID(id int64) error
+	ExistByIDs(ids []int64) (bool, error)
 	DeleteByIDs(ids []int64) error
 }
 
@@ -56,19 +56,7 @@ func (r *articleRepository) Save(article *models.Article) error {
 
 }
 
-func (r *articleRepository) FindAll() ([]*models.Article, error) {
-	var articles []*models.Article
-	if err := r.database.
-		Preload("Tags").
-		Order("created DESC").
-		Find(&articles).Error; err != nil {
-		return nil, err
-	}
-
-	return articles, nil
-}
-
-func (r *articleRepository) FindAllWithPage(offset, limit int) ([]*models.Article, int64, error) {
+func (r *articleRepository) FindAllWithPage(offset, limit int) (models.Articles, int64, error) {
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
@@ -90,7 +78,7 @@ func (r *articleRepository) FindAllWithPage(offset, limit int) ([]*models.Articl
 	return articles, cnt, nil
 }
 
-func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) ([]*models.Article, int64, error) {
+func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) (models.Articles, int64, error) {
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
@@ -104,6 +92,18 @@ func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) ([
 	return articles, int64(len(ids)), nil
 }
 
+func (r *articleRepository) FindByIDs(ids []int64) (models.Articles, error) {
+	var articles []*models.Article
+	if err := r.database.
+		Preload("Tags").
+		Where("id IN ?", ids).
+		Find(&articles).Error; err != nil {
+		return nil, err
+	}
+
+	return articles, nil
+}
+
 func (r *articleRepository) GetByID(id int64) (*models.Article, error) {
 	var article models.Article
 	err := r.database.
@@ -113,7 +113,7 @@ func (r *articleRepository) GetByID(id int64) (*models.Article, error) {
 	return &article, err
 }
 
-func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) ([]*models.Article, int64, error) {
+func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) (models.Articles, int64, error) {
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
@@ -139,7 +139,7 @@ func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) ([]
 	return articles, cnt, nil
 }
 
-func (r *articleRepository) FindUntaggedWithPage(offset, limit int) ([]*models.Article, int64, error) {
+func (r *articleRepository) FindUntaggedWithPage(offset, limit int) (models.Articles, int64, error) {
 	var articles []*models.Article
 	if err := r.database.
 		Joins("LEFT JOIN article_tag ON article_tag.article_id = article.id").
@@ -191,12 +191,13 @@ func (r *articleRepository) ExistByTitle(title string) (bool, error) {
 	return cnt > 0, err
 }
 
-func (r *articleRepository) DeleteByID(id int64) error {
-	if err := r.database.Delete(&models.Article{}, id).Error; err != nil {
-		return err
-	}
-
-	return r.articleSearchRepository.Delete(id)
+func (r *articleRepository) ExistByIDs(ids []int64) (bool, error) {
+	var cnt int64
+	err := r.database.
+		Model(&models.Article{}).
+		Where("id IN ?", ids).
+		Count(&cnt).Error
+	return cnt == int64(len(ids)), err
 }
 
 func (r *articleRepository) DeleteByIDs(ids []int64) error {

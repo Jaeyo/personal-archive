@@ -18,6 +18,9 @@ func main() {
 	if err := internal.GetDatabase().Init(); err != nil {
 		panic(err)
 	}
+	services.GetArticleService().Initialize()
+	services.GetNoteService().Initialize()
+
 	services.GetPocketSyncService().Start()
 
 	e := echo.New()
@@ -47,6 +50,7 @@ func routeForControllers(e *echo.Echo) {
 		controllers.NewArticleController(),
 		controllers.NewArticleTagController(),
 		controllers.NewSettingController(),
+		controllers.NewNoteController(),
 	} {
 		controller.Route(e)
 	}
@@ -67,6 +71,7 @@ func routeForFrontend(e *echo.Echo) {
 		"/tags/:tag",
 		"/settings",
 		"/settings/pocket-auth",
+		"/notes/edit",
 	}
 	for _, path := range pages {
 		e.File(path, "/app/static/index.html")
