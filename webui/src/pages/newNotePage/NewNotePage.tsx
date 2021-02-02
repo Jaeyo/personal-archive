@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react"
+import React, { FC, useEffect, useRef, useState } from "react"
 import { Alert } from "rsuite"
 import { useHistory } from "react-router-dom"
 import Article from "../../models/Article"
@@ -13,7 +13,13 @@ const NewNotePage: FC = () => {
   const [fetching, setFetching] = useState(false)
   const history = useHistory()
 
+  // ace editor 에서 command 로 submit 할 경우 title 의 state 가 제대로 읽히지 않음
+  useEffect(() => {
+    (window as any).title = title
+  }, [title])
+
   const onSubmit = (content: string, referenceArticles: Article[], referenceWebURLs: string[]) => {
+    const title = (window as any).title
     if (title.trim().length === 0) {
       Alert.error('title required')
       return

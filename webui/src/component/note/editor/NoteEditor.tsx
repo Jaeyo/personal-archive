@@ -25,7 +25,8 @@ const NoteEditor: FC<Props> = (
     content: initContent,
     referenceArticles: initRefArticles,
     referenceWebURLs: initRefWebURLs,
-    onSubmit: submit, fetching
+    onSubmit: submit,
+    fetching
   }
 ) => {
   const [content, setContent] = useState(initContent)
