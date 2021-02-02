@@ -28,6 +28,9 @@ const BaseHeader: FC = () => {
       <NavLink to="/tags/all">
         <nav>Article</nav>
       </NavLink>
+      <NavLink to="/notes">
+        <nav>Note</nav>
+      </NavLink>
       <RightAlignDiv>
         <KeywordInputGroup>
           <Input

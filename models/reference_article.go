@@ -34,3 +34,20 @@ func (a ReferenceArticles) ExtractIDs() []int64 {
 	}
 	return ids
 }
+
+func (a ReferenceArticles) ExtractArticleIDs() []int64 {
+	ids := []int64{}
+	for _, refArticle := range a {
+		ids = append(ids, refArticle.ArticleID)
+	}
+	return ids
+}
+
+func (a ReferenceArticles) ContainArticleID(articleID int64) bool {
+	for _, refArticle := range a {
+		if refArticle.ArticleID == articleID {
+			return true
+		}
+	}
+	return false
+}

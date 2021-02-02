@@ -74,11 +74,15 @@ func (r *articleRepository) FindAllWithPage(offset, limit int) (models.Articles,
 		return nil, -1, err
 	}
 
-	ensureTagsNotNil(articles)
+	ensureArticleAssociationNotNil(articles)
 	return articles, cnt, nil
 }
 
 func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) (models.Articles, int64, error) {
+	if len(ids) == 0 {
+		return []*models.Article{}, 0, nil
+	}
+
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
@@ -89,10 +93,15 @@ func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) (m
 		return nil, -1, err
 	}
 
+	ensureArticleAssociationNotNil(articles)
 	return articles, int64(len(ids)), nil
 }
 
 func (r *articleRepository) FindByIDs(ids []int64) (models.Articles, error) {
+	if len(ids) == 0 {
+		return []*models.Article{}, nil
+	}
+
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
@@ -101,6 +110,7 @@ func (r *articleRepository) FindByIDs(ids []int64) (models.Articles, error) {
 		return nil, err
 	}
 
+	ensureArticleAssociationNotNil(articles)
 	return articles, nil
 }
 
@@ -109,7 +119,7 @@ func (r *articleRepository) GetByID(id int64) (*models.Article, error) {
 	err := r.database.
 		Preload("Tags").
 		First(&article, id).Error
-	ensureTagsNotNil([]*models.Article{&article})
+	ensureArticleAssociationNotNil([]*models.Article{&article})
 	return &article, err
 }
 
@@ -135,7 +145,7 @@ func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) (mo
 		return nil, -1, err
 	}
 
-	ensureTagsNotNil(articles)
+	ensureArticleAssociationNotNil(articles)
 	return articles, cnt, nil
 }
 
@@ -160,7 +170,7 @@ func (r *articleRepository) FindUntaggedWithPage(offset, limit int) (models.Arti
 		return nil, -1, err
 	}
 
-	ensureTagsNotNil(articles)
+	ensureArticleAssociationNotNil(articles)
 	return articles, cnt, nil
 }
 
@@ -208,7 +218,7 @@ func (r *articleRepository) DeleteByIDs(ids []int64) error {
 	return r.articleSearchRepository.Deletes(ids)
 }
 
-func ensureTagsNotNil(articles []*models.Article) {
+func ensureArticleAssociationNotNil(articles []*models.Article) {
 	for _, article := range articles {
 		if article.Tags == nil {
 			article.Tags = models.ArticleTags{}

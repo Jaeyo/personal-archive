@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from "react"
-import { Alert, Button, Container, Loader, Tree } from "rsuite"
+import { Alert, Loader, Tree } from "rsuite"
 import styled from "styled-components"
 import { useRecoilState } from "recoil"
 import { useHistory } from "react-router-dom"
-import { requestFindArticleTags } from "../apis/ArticleTagApi"
-import { articleTagsState } from "../states/ArticleTags"
-import { ArticleTagCount } from "../models/ArticleTag"
+import { requestFindArticleTags } from "../../apis/ArticleTagApi"
+import { articleTagsState } from "../../states/ArticleTags"
+import { ArticleTagCount } from "../../models/ArticleTag"
 
 
 const ArticleTagTree: FC = () => {
@@ -32,21 +32,14 @@ const ArticleTagTree: FC = () => {
   }
 
   return (
-    <Container>
-      <NewButton onClick={() => history.push('/')}>New</NewButton>
-      <Tree
-        data={toArticleTagItems(articleTags, untaggedCount, allCount)}
-        onSelect={(_, tag) => history.push(`/tags/${encodeURIComponent(tag)}`)}
-        defaultExpandAll
-        style={{maxHeight: '100vh'}}
-      />
-    </Container>
+    <Tree
+      data={toArticleTagItems(articleTags, untaggedCount, allCount)}
+      onSelect={(_, tag) => history.push(`/tags/${encodeURIComponent(tag)}`)}
+      defaultExpandAll
+      style={{maxHeight: '100vh'}}
+    />
   )
 }
-
-const NewButton = styled(Button)`
-  margin-bottom: 15px;
-`
 
 interface DataItemType {
   value: string

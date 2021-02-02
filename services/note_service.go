@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/jaeyo/personal-archive/common"
 	"github.com/jaeyo/personal-archive/models"
 	"github.com/jaeyo/personal-archive/repositories"
 	"github.com/pkg/errors"
@@ -11,9 +12,12 @@ import (
 type NoteService interface {
 	Initialize()
 	Create(title, content string, referenceArticleIDs []int64, referenceWebURLs []string) (*models.Note, error)
+	CreateParagraph(id int64, content string, referenceArticleIDs []int64, referenceWebURLs []string) (*models.Note, error)
 	Search(keyword string, offset, limit int) ([]*models.Note, int64, error)
 	UpdateTitle(id int64, newTitle string) error
+	UpdateParagraph(id, paragraphID int64, content string, referenceArticleIDs common.Int64s, referenceWebURLs common.Strings) error
 	DeleteByIDs(ids []int64) error
+	SwapParagraphs(id, paragraphAID, paragraphBID int64) error
 }
 
 type noteService struct {
@@ -86,6 +90,43 @@ func (s *noteService) Create(title, content string, refArticleIDs []int64, refWe
 	return note, nil
 }
 
+func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []int64, refWebURLs []string) (*models.Note, error) {
+	exists, err := s.articleRepository.ExistByIDs(refArticleIDs)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to check reference article ids exist")
+	} else if !exists {
+		return nil, fmt.Errorf("invalid reference article ids: %v", refArticleIDs)
+	}
+
+	var refArticles []*models.ReferenceArticle
+	for _, refArticleID := range refArticleIDs {
+		refArticles = append(refArticles, &models.ReferenceArticle{ArticleID: refArticleID})
+	}
+
+	var refWebs []*models.ReferenceWeb
+	for _, refWebURL := range refWebURLs {
+		refWebs = append(refWebs, &models.ReferenceWeb{URL: refWebURL})
+	}
+
+	note, err := s.noteRepository.GetByID(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get note")
+	}
+
+	note.Paragraphs = append(note.Paragraphs, &models.Paragraph{
+		Seq:               note.Paragraphs.MaxSeq() + 1,
+		Content:           content,
+		ReferenceArticles: refArticles,
+		ReferenceWebs:     refWebs,
+	})
+
+	if err := s.noteRepository.Save(note); err != nil {
+		return nil, errors.Wrap(err, "failed to save note")
+	}
+
+	return note, nil
+}
+
 func (s *noteService) Search(keyword string, offset, limit int) ([]*models.Note, int64, error) {
 	ids, err := s.noteSearchRepository.Search(keyword)
 	if err != nil {
@@ -121,6 +162,66 @@ func (s *noteService) UpdateTitle(id int64, newTitle string) error {
 	return nil
 }
 
+func (s *noteService) UpdateParagraph(id, paragraphID int64, content string, refArticleIDs common.Int64s, refWebURLs common.Strings) error {
+	exists, err := s.articleRepository.ExistByIDs(refArticleIDs)
+	if err != nil {
+		return errors.Wrap(err, "failed to check reference article ids exist")
+	} else if !exists {
+		return fmt.Errorf("invalid reference article ids: %v", refArticleIDs)
+	}
+
+	paragraph, err := s.paragraphRepository.GetByIDAndNoteID(paragraphID, id)
+	if err != nil {
+		return errors.Wrap(err, "failed to get paragraph")
+	}
+
+	toBeRemovedRefArticles := models.ReferenceArticles{}
+	toBeAddedRefArticles := models.ReferenceArticles{}
+	for _, ra := range paragraph.ReferenceArticles {
+		if refArticleIDs.Contain(ra.ArticleID) {
+			toBeAddedRefArticles = append(toBeAddedRefArticles, ra)
+		} else {
+			toBeRemovedRefArticles = append(toBeRemovedRefArticles, ra)
+		}
+	}
+	for _, articleID := range refArticleIDs {
+		if !toBeAddedRefArticles.ContainArticleID(articleID) {
+			toBeAddedRefArticles = append(toBeAddedRefArticles, &models.ReferenceArticle{ArticleID: articleID})
+		}
+	}
+
+	toBeRemovedRefWebs := models.ReferenceWebs{}
+	toBeAddedRefWebs := models.ReferenceWebs{}
+	for _, rw := range paragraph.ReferenceWebs {
+		if refWebURLs.Contain(rw.URL) {
+			toBeAddedRefWebs = append(toBeAddedRefWebs, rw)
+		} else {
+			toBeRemovedRefWebs = append(toBeRemovedRefWebs, rw)
+		}
+	}
+	for _, url := range refWebURLs {
+		if !toBeAddedRefWebs.ContainURL(url) {
+			toBeAddedRefWebs = append(toBeAddedRefWebs, &models.ReferenceWeb{URL: url})
+		}
+	}
+
+	if err := s.referenceArticleRepository.DeleteByIDs(toBeRemovedRefArticles.ExtractIDs()); err != nil {
+		return errors.Wrap(err, "failed to delete reference articles by ids")
+	}
+	if err := s.referenceWebRepository.DeleteByIDs(toBeRemovedRefWebs.ExtractIDs()); err != nil {
+		return errors.Wrap(err, "failed to delete reference webs by ids")
+	}
+
+	paragraph.Content = content
+	paragraph.ReferenceArticles = toBeAddedRefArticles
+	paragraph.ReferenceWebs = toBeAddedRefWebs
+
+	if err := s.paragraphRepository.Save(paragraph); err != nil {
+		return errors.Wrap(err, "failed to save paragraph")
+	}
+	return nil
+}
+
 func (s *noteService) DeleteByIDs(ids []int64) error {
 	notes, err := s.noteRepository.FindByIDs(ids)
 	if err != nil {
@@ -146,6 +247,26 @@ func (s *noteService) DeleteByIDs(ids []int64) error {
 
 	if err := s.noteRepository.DeleteByIDs(ids); err != nil {
 		return errors.Wrap(err, "failed to delete note by ids")
+	}
+	return nil
+}
+
+func (s *noteService) SwapParagraphs(id, paragraphAID, paragraphBID int64) error {
+	paragraphs, err := s.paragraphRepository.FindByIDsAndNoteID([]int64{paragraphAID, paragraphBID}, id)
+	if err != nil {
+		return errors.Wrap(err, "failed to find paragraphs")
+	} else if len(paragraphs) != 2 {
+		return fmt.Errorf("failed to find 2 paragraphs (%d, %d)", paragraphAID, paragraphBID)
+	}
+
+	tmp := paragraphs[0].Seq
+	paragraphs[0].Seq = paragraphs[1].Seq
+	paragraphs[1].Seq = tmp
+
+	for _, p := range paragraphs {
+		if err := s.paragraphRepository.Save(p); err != nil {
+			return errors.Wrap(err, "failed to save paragraph")
+		}
 	}
 	return nil
 }

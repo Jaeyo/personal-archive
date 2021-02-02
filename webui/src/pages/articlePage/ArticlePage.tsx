@@ -10,24 +10,24 @@ import ArticleTitle from "./ArticleTitle"
 import ArticleTags from "./ArticleTags"
 import ArticleLink from "./ArticleLink"
 import ArticleContentTweet from "./ArticleContentTweet"
-import ArticleMarkdownContent from "../../component/ArticleMarkdownContent"
+import MarkdownContent from "../../component/common/MarkdownContent"
 import ArticleContentSlideShare from "./ArticleContentSlideShare"
 import ArticleContentYoutube from "./ArticleContentYoutube"
 
 
 const ArticlePage: FC = () => {
   const {id} = useParams() as any
-  const [loadFetching, setLoadFetching] = useState(false)
+  const [fetching, setFetching] = useState(false)
   const [article, setArticle] = useState(null as Article | null)
   const history = useHistory()
 
   useEffect(() => {
-    setLoadFetching(true)
+    setFetching(true)
     requestGetArticle(id)
       .then(article => {
         setArticle(article)
       })
-      .finally(() => setLoadFetching(false))
+      .finally(() => setFetching(false))
       .catch(err => {
         Alert.error(err.toString())
         if (err.response?.status === 404) {
@@ -37,7 +37,7 @@ const ArticlePage: FC = () => {
   }, [id, history])
 
   return (
-    <ArticleTagTreeLayout loading={loadFetching}>
+    <ArticleTagTreeLayout loading={fetching}>
       {renderArticle(article, history)}
     </ArticleTagTreeLayout>
   )
@@ -77,7 +77,7 @@ const renderContent = (article: Article, history: History) => {
           EDIT
         </Button>
       </EditBtnDiv>
-      <ArticleMarkdownContent content={article.content} />
+      <MarkdownContent content={article.content} />
     </>
   )
 }

@@ -9,7 +9,7 @@ interface Props {
   content: string
 }
 
-const ArticleMarkdownContent: FC<Props> = ({ content }) => (
+const MarkdownContent: FC<Props> = ({ content }) => (
   <MarkdownDiv>
     <ReactMarkdown
       plugins={[
@@ -98,4 +98,4 @@ const MarkdownDiv = styled.div`
   }
 `
 
-export default ArticleMarkdownContent
+export default MarkdownContent

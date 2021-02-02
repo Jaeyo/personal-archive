@@ -1,11 +1,11 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import Article from "../models/Article"
+import Article from "../../models/Article"
 import { Alert, Button, Checkbox, List, Pagination } from "rsuite"
 import ArticleTag from "./ArticleTag"
-import { Pagination as IPagination } from "../common/Types"
-import { requestDeleteArticles } from "../apis/ArticleApi"
+import { Pagination as IPagination } from "../../common/Types"
+import { requestDeleteArticles } from "../../apis/ArticleApi"
 
 
 interface Props {
@@ -34,8 +34,10 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
     setDeleteFetching(true)
     requestDeleteArticles(selectedIDs)
       .then(() => window.location.reload())
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setDeleteFetching(false))
+      .catch(err => {
+        Alert.error(err.toString())
+        setDeleteFetching(false)
+      })
   }
 
   return (
@@ -53,7 +55,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
             </DeleteBtn>
           </DeleteBtnDiv>
       }
-      <List>
+      <List hover>
         {
           articles.map((article, i) => (
             <List.Item key={article.id} index={i}>

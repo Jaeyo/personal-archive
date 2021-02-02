@@ -6,7 +6,7 @@ import { requestSearchArticles } from "../../apis/ArticleApi"
 import { Alert } from "rsuite"
 import Article from "../../models/Article"
 import { emptyPagination } from "../../common/Types"
-import ArticleList from "../../component/ArticleList"
+import ArticleList from "../../component/article/ArticleList"
 import { useHistory } from "react-router-dom"
 
 

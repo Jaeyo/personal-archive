@@ -22,8 +22,10 @@ const TagTitle: FC<Props> = ({tag: initialTag}) => {
     setFetching(true)
     requestUpdateTag(initialTag, tag)
       .then(() => window.location.href = `/tags/${tag}`)
-      .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
   }
 
   if (!isEditMode) {

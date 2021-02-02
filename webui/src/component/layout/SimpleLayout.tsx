@@ -1,6 +1,6 @@
 import React, { FC } from "react"
-import { Container, Header, Loader } from "rsuite"
-import BaseHeader from "./BaseHeader"
+import { Container, Loader } from "rsuite"
+import BaseLayout from "./BaseLayout"
 import styled from "styled-components"
 
 interface Props {
@@ -9,27 +9,14 @@ interface Props {
 }
 
 const SimpleLayout: FC<Props> = ({loading, size = 'md', children}) => (
-  <Wrapper size={size}>
-    <Header>
-      <BaseHeader/>
-    </Header>
-    <Container>
-      <StyledContent>
-        {loading ? <Loader center/> : null}
-        {children}
-      </StyledContent>
-    </Container>
-  </Wrapper>
+  <BaseLayout size={size}>
+    <StyledContent>
+      {loading ? <Loader center/> : null}
+      {children}
+    </StyledContent>
+  </BaseLayout>
+
 )
-
-interface WrapperProps {
-  size?: 'sm' | 'md' | 'lg'
-}
-
-const Wrapper = styled.div<WrapperProps>`
-  max-width: ${({size}) => size === 'lg' ? '1920px' : size === 'md' ? '1280px' : '1024px'};
-  margin: 0 auto;
-`
 
 const StyledContent = styled(Container)`
   padding: 20px;

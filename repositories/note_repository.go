@@ -11,6 +11,7 @@ type NoteRepository interface {
 	FindAllWithPage(offset, limit int) (models.Notes, int64, error)
 	FindByIDsWithPage(ids []int64, offset, limit int) (models.Notes, int64, error)
 	FindByIDs(ids []int64) (models.Notes, error)
+	FindTitles() (models.Notes, error)
 	GetByID(id int64) (*models.Note, error)
 	ExistByTitle(title string) (bool, error)
 	DeleteByIDs(ids []int64) error
@@ -54,6 +55,8 @@ func (r *noteRepository) FindAllWithPage(offset, limit int) (models.Notes, int64
 	var notes []*models.Note
 	if err := r.database.
 		Preload("Paragraphs").
+		Preload("Paragraphs.ReferenceArticles").
+		Preload("Paragraphs.ReferenceWebs").
 		Order("created DESC").
 		Offset(offset).
 		Limit(limit).
@@ -68,6 +71,7 @@ func (r *noteRepository) FindAllWithPage(offset, limit int) (models.Notes, int64
 		return nil, -1, err
 	}
 
+	ensureNoteAssociationNotNil(notes)
 	return notes, cnt, nil
 }
 
@@ -75,6 +79,8 @@ func (r *noteRepository) FindByIDsWithPage(ids []int64, offset, limit int) (mode
 	var notes []*models.Note
 	if err := r.database.
 		Preload("Paragraphs").
+		Preload("Paragraphs.ReferenceArticles").
+		Preload("Paragraphs.ReferenceWebs").
 		Where("id IN ?", ids).
 		Offset(offset).
 		Limit(limit).
@@ -82,6 +88,7 @@ func (r *noteRepository) FindByIDsWithPage(ids []int64, offset, limit int) (mode
 		return nil, -1, err
 	}
 
+	ensureNoteAssociationNotNil(notes)
 	return notes, int64(len(ids)), nil
 }
 
@@ -89,11 +96,26 @@ func (r *noteRepository) FindByIDs(ids []int64) (models.Notes, error) {
 	var notes []*models.Note
 	if err := r.database.
 		Preload("Paragraphs").
+		Preload("Paragraphs.ReferenceArticles").
+		Preload("Paragraphs.ReferenceWebs").
 		Where("id IN ?", ids).
 		Find(&notes).Error; err != nil {
 		return nil, err
 	}
 
+	ensureNoteAssociationNotNil(notes)
+	return notes, nil
+}
+
+func (r *noteRepository) FindTitles() (models.Notes, error) {
+	var notes []*models.Note
+	if err := r.database.
+		Select("id", "title").
+		Find(&notes).Error; err != nil {
+		return nil, err
+	}
+
+	ensureNoteAssociationNotNil(notes)
 	return notes, nil
 }
 
@@ -101,7 +123,11 @@ func (r *noteRepository) GetByID(id int64) (*models.Note, error) {
 	var note models.Note
 	err := r.database.
 		Preload("Paragraphs").
+		Preload("Paragraphs.ReferenceArticles").
+		Preload("Paragraphs.ReferenceWebs").
 		First(&note, id).Error
+
+	ensureNoteAssociationNotNil(models.Notes{&note})
 	return &note, err
 }
 
@@ -120,4 +146,20 @@ func (r *noteRepository) DeleteByIDs(ids []int64) error {
 	}
 
 	return r.noteSearchRepository.Deletes(ids)
+}
+
+func ensureNoteAssociationNotNil(notes models.Notes) {
+	for _, note := range notes {
+		if note.Paragraphs == nil {
+			note.Paragraphs = models.Paragraphs{}
+		}
+		for _, paragraph := range note.Paragraphs {
+			if paragraph.ReferenceArticles == nil {
+				paragraph.ReferenceArticles = models.ReferenceArticles{}
+			}
+			if paragraph.ReferenceWebs == nil {
+				paragraph.ReferenceWebs = models.ReferenceWebs{}
+			}
+		}
+	}
 }

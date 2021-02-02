@@ -6,7 +6,7 @@ import Article from "../../models/Article"
 import { toTagPickerItemTypes } from "../../common/Types"
 import { articleTagsState } from "../../states/ArticleTags"
 import { requestUpdateTags } from "../../apis/ArticleApi"
-import ArticleTag from "../../component/ArticleTag"
+import ArticleTag from "../../component/article/ArticleTag"
 
 
 interface Props {
@@ -29,8 +29,10 @@ const ArticleTags: FC<Props> = ({article}) => {
     setFetching(true)
     requestUpdateTags(article!.id, selectedTags)
       .then(() => window.location.reload())
-      .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
   }
 
   if (!isEditMode) {

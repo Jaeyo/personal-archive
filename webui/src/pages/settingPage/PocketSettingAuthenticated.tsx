@@ -24,8 +24,10 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
     setActivateFetching(true)
     requestPocketUnauth()
       .then(() => window.location.reload())
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setActivateFetching(false))
+      .catch(err => {
+        Alert.error(err.toString())
+        setActivateFetching(false)
+      })
   }
 
   const onSyncToggle = (checked: boolean) => {

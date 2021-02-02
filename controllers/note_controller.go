@@ -11,14 +11,18 @@ import (
 )
 
 type NoteController struct {
-	noteService    services.NoteService
-	noteRepository repositories.NoteRepository
+	noteService         services.NoteService
+	noteRepository      repositories.NoteRepository
+	articleRepository   repositories.ArticleRepository
+	paragraphRepository repositories.ParagraphRepository
 }
 
 func NewNoteController() *NoteController {
 	return &NoteController{
-		noteService:    services.GetNoteService(),
-		noteRepository: repositories.GetNoteRepository(),
+		noteService:         services.GetNoteService(),
+		noteRepository:      repositories.GetNoteRepository(),
+		articleRepository:   repositories.GetArticleRepository(),
+		paragraphRepository: repositories.GetParagraphRepository(),
 	}
 }
 
@@ -26,10 +30,15 @@ func (c *NoteController) Route(e *echo.Echo) {
 	e.GET("/apis/notes", http.Provide(c.FindNotes))
 	e.GET("/apis/notes/:id", http.Provide(c.GetNote))
 	e.PUT("/apis/notes/:id/title", http.Provide(c.UpdateTitle))
+	e.PUT("/apis/notes/:id/paragraphs/swap", http.Provide(c.SwapParagraphs))
+	e.PUT("/apis/notes/:id/paragraphs/:paragraphID", http.Provide(c.EditParagraph))
 	e.POST("/apis/notes", http.Provide(c.CreateNote))
+	e.POST("/apis/notes/:id/paragraphs", http.Provide(c.CreateParagraph))
+	e.GET("/apis/notes/title", http.Provide(c.FindNoteTitles))
 	e.GET("/apis/notes/search", http.Provide(c.SearchNote))
 	e.DELETE("/apis/notes/:id", http.Provide(c.DeleteNote))
 	e.DELETE("/apis/notes", http.Provide(c.DeleteNotes))
+	e.DELETE("/apis/notes/:id/paragraphs/:paragraphID", http.Provide(c.DeleteParagraph))
 }
 
 func (c *NoteController) FindNotes(ctx http.ContextExtended) error {
@@ -46,6 +55,7 @@ func (c *NoteController) FindNotes(ctx http.ContextExtended) error {
 		Pagination: http.NewPagination(page, cnt),
 	})
 }
+
 func (c *NoteController) GetNote(ctx http.ContextExtended) error {
 	id, err := ctx.ParamInt64("id")
 	if err != nil {
@@ -60,9 +70,15 @@ func (c *NoteController) GetNote(ctx http.ContextExtended) error {
 		return ctx.InternalServerError(err, "failed to get note")
 	}
 
-	return ctx.Success(reqres.NoteResponse{
-		OK:   true,
-		Note: note,
+	articles, err := c.articleRepository.FindByIDs(note.Paragraphs.ExtractReferenceArticleArticleIDs())
+	if err != nil {
+		return ctx.InternalServerError(err, "failed to find articles")
+	}
+
+	return ctx.Success(reqres.NoteAndReferenceArticlesResponse{
+		OK:                 true,
+		Note:               note,
+		ReferencedArticles: articles,
 	})
 }
 
@@ -84,10 +100,50 @@ func (c *NoteController) UpdateTitle(ctx http.ContextExtended) error {
 	return ctx.Success(http.SuccessResponse{OK: true})
 }
 
+func (c *NoteController) SwapParagraphs(ctx http.ContextExtended) error {
+	id, err := ctx.ParamInt64("id")
+	if err != nil {
+		return ctx.BadRequest("invalid id")
+	}
+
+	var req reqres.SwapParagraphSeqRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.BadRequestf("invalid request body: %s", err.Error())
+	}
+
+	if err := c.noteService.SwapParagraphs(id, req.AID, req.BID); err != nil {
+		return ctx.InternalServerError(err, "failed to swap paragraphs")
+	}
+
+	return ctx.Success(http.SuccessResponse{OK: true})
+}
+
+func (c *NoteController) EditParagraph(ctx http.ContextExtended) error {
+	id, err := ctx.ParamInt64("id")
+	if err != nil {
+		return ctx.BadRequest("invalid note id")
+	}
+	paragraphID, err := ctx.ParamInt64("paragraphID")
+	if err != nil {
+		return ctx.BadRequest("invalid paragraph id")
+	}
+
+	var req reqres.EditParagraphRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.BadRequestf("invalid request body: %s", err.Error())
+	}
+
+	if err := c.noteService.UpdateParagraph(id, paragraphID, req.Content, req.ReferenceArticleIDs, req.ReferenceWebURLs); err != nil {
+		return ctx.InternalServerError(err, "failed to update paragraph")
+	}
+
+	return ctx.Success(http.SuccessResponse{OK: true})
+}
+
 func (c *NoteController) CreateNote(ctx http.ContextExtended) error {
 	var req reqres.CreateNoteRequest
 	if err := ctx.Bind(&req); err != nil {
-		ctx.BadRequestf("invalid request body: %s", err.Error())
+		return ctx.BadRequestf("invalid request body: %s", err.Error())
 	}
 
 	note, err := c.noteService.Create(req.Title, req.Content, req.ReferenceArticleIDs, req.ReferenceWebURLs)
@@ -98,6 +154,41 @@ func (c *NoteController) CreateNote(ctx http.ContextExtended) error {
 	return ctx.Success(reqres.NoteResponse{
 		OK:   true,
 		Note: note,
+	})
+}
+
+func (c *NoteController) CreateParagraph(ctx http.ContextExtended) error {
+	id, err := ctx.ParamInt64("id")
+	if err != nil {
+		return ctx.BadRequest("invalid note id")
+	}
+
+	var req reqres.CreateParagraphRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.BadRequestf("invalid request body: %s", err.Error())
+	}
+
+	note, err := c.noteService.CreateParagraph(id, req.Content, req.ReferenceArticleIDs, req.ReferenceWebURLs)
+	if err != nil {
+		return ctx.InternalServerError(err, "failed to create note")
+	}
+
+	return ctx.Success(reqres.NoteResponse{
+		OK:   true,
+		Note: note,
+	})
+}
+
+func (c *NoteController) FindNoteTitles(ctx http.ContextExtended) error {
+	notes, err := c.noteRepository.FindTitles()
+	if err != nil {
+		return ctx.InternalServerError(err, "failed to find note titles")
+	}
+
+	return ctx.Success(reqres.NotesResponse{
+		OK:         true,
+		Notes:      notes,
+		Pagination: nil,
 	})
 }
 
@@ -141,6 +232,23 @@ func (c *NoteController) DeleteNotes(ctx http.ContextExtended) error {
 
 	if err := c.noteService.DeleteByIDs(ids); err != nil {
 		return ctx.InternalServerError(err, "failed to delete notes")
+	}
+
+	return ctx.Success(http.SuccessResponse{OK: true})
+}
+
+func (c *NoteController) DeleteParagraph(ctx http.ContextExtended) error {
+	id, err := ctx.ParamInt64("id")
+	if err != nil {
+		return ctx.BadRequest("invalid note id")
+	}
+	paragraphID, err := ctx.ParamInt64("paragraphID")
+	if err != nil {
+		return ctx.BadRequest("invalid paragraph id")
+	}
+
+	if err := c.paragraphRepository.DeleteByIDAndNoteID(id, paragraphID); err != nil {
+		return ctx.InternalServerError(err, "failed to delete paragraph")
 	}
 
 	return ctx.Success(http.SuccessResponse{OK: true})

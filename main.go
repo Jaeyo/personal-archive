@@ -71,7 +71,7 @@ func routeForFrontend(e *echo.Echo) {
 		"/tags/:tag",
 		"/settings",
 		"/settings/pocket-auth",
-		"/notes/edit",
+		"/notes",
 	}
 	for _, path := range pages {
 		e.File(path, "/app/static/index.html")

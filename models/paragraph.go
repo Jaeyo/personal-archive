@@ -46,6 +46,14 @@ func (p Paragraphs) ExtractReferenceArticleIDs() []int64 {
 	return ids
 }
 
+func (p Paragraphs) ExtractReferenceArticleArticleIDs() []int64 {
+	ids := []int64{}
+	for _, paragraph := range p {
+		ids = append(ids, paragraph.ReferenceArticles.ExtractArticleIDs()...)
+	}
+	return ids
+}
+
 func (p Paragraphs) ExtractReferenceWebIDs() []int64 {
 	ids := []int64{}
 	for _, paragraph := range p {
@@ -54,3 +62,12 @@ func (p Paragraphs) ExtractReferenceWebIDs() []int64 {
 	return ids
 }
 
+func (p Paragraphs) MaxSeq() int {
+	max := -1
+	for _, paragraph := range p {
+		if paragraph.Seq > max {
+			max = paragraph.Seq
+		}
+	}
+	return max
+}

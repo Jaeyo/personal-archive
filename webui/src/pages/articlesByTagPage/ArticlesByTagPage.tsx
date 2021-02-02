@@ -7,7 +7,7 @@ import Article from "../../models/Article"
 import TagTitle from "./TagTitle"
 import { usePage } from "../../common/Hooks"
 import { emptyPagination } from "../../common/Types"
-import ArticleList from "../../component/ArticleList"
+import ArticleList from "../../component/article/ArticleList"
 
 
 const ArticlesByTagPage: FC = () => {

@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom"
 import { Alert } from "rsuite"
 import Article from "../../models/Article"
 import { requestGetArticle } from "../../apis/ArticleApi"
-import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import ArticleTitle from "../articlePage/ArticleTitle"
 import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
 import EditArticleContentMarkdown from "./EditArticleContentMarkdown"
+import SimpleLayout from "../../component/layout/SimpleLayout"
 
 
 const EditArticlePage: FC = () => {
@@ -26,12 +26,12 @@ const EditArticlePage: FC = () => {
   }, [id])
 
   return (
-    <ArticleTagTreeLayout
+    <SimpleLayout
       loading={loadFetching}
       size="lg"
     >
       {renderArticle(article)}
-    </ArticleTagTreeLayout>
+    </SimpleLayout>
   )
 }
 

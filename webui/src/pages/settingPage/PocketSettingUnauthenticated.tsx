@@ -20,8 +20,10 @@ const PocketSettingUnauthenticated: FC = () => {
       .then(requestToken => {
         window.location.href = `https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectURI}`
       })
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setFetching(false))
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
   }
 
   return (

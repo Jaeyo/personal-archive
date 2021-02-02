@@ -1,24 +1,24 @@
 import React, { FC, useState } from "react"
 import { Alert } from "rsuite"
-import Article from "../../models/Article"
 import { useHistory } from "react-router-dom"
-import { requestDeleteArticle, requestUpdateTitle } from "../../apis/ArticleApi"
+import Note from "../../models/Note"
+import { requestDeleteNote, requestUpdateTitle } from "../../apis/NoteApi"
 import ManagedTitle from "../../component/common/ManagedTitle"
 import { reloadAfterTick } from "../../common/Utils"
 
 
 interface Props {
-  article: Article | null
+  note: Note | null
 }
 
-const ArticleTitle: FC<Props> = ({article}) => {
+const NoteTitle: FC<Props> = ({ note }) => {
   const [submitFetching, setSubmitFetching] = useState(false)
   const [deleteFetching, setDeleteFetching] = useState(false)
   const history = useHistory()
 
   const onSubmit = (title: string) => {
     setSubmitFetching(true)
-    requestUpdateTitle(article!.id, title)
+    requestUpdateTitle(note!.id, title)
       .then(() => window.location.reload())
       .catch(err => {
         Alert.error(err.toString())
@@ -28,10 +28,10 @@ const ArticleTitle: FC<Props> = ({article}) => {
 
   const onDelete = () => {
     setDeleteFetching(true)
-    requestDeleteArticle(article!.id)
+    requestDeleteNote(note!.id)
       .then(() => {
         if (history.length === 1) {
-          history.push('/')
+          history.push('/notes')
         } else {
           history.goBack()
           reloadAfterTick()
@@ -45,7 +45,7 @@ const ArticleTitle: FC<Props> = ({article}) => {
 
   return (
     <ManagedTitle
-      title={article ? article.title : '...'}
+      title={note ? note.title : '...'}
       onSubmit={onSubmit}
       onDelete={onDelete}
       submitFetching={submitFetching}
@@ -54,4 +54,4 @@ const ArticleTitle: FC<Props> = ({article}) => {
   )
 }
 
-export default ArticleTitle
+export default NoteTitle

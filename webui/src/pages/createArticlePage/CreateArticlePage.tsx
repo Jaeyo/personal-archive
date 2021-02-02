@@ -24,8 +24,10 @@ const CreateArticlePage: FC = () => {
       .then(article => {
         window.location.href = `/articles/${article.id}`
       })
-      .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
   }
 
   return (

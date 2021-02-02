@@ -5,7 +5,7 @@ import Article from "../../models/Article"
 import { Alert, Button } from "rsuite"
 import { requestUpdateContent } from "../../apis/ArticleApi"
 import { useHistory } from "react-router-dom"
-import ArticleMarkdownContent from "../../component/ArticleMarkdownContent"
+import MarkdownContent from "../../component/common/MarkdownContent"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
@@ -33,8 +33,10 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
     setSubmitFetching(true)
     requestUpdateContent(article!.id, content)
       .then(() => window.location.href = `/articles/${article!.id}`)
-      .finally(() => setSubmitFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => {
+        Alert.error(err.toString())
+        setSubmitFetching(false)
+      })
   }
 
   const previewDown = () => {
@@ -73,7 +75,7 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
           />
         </EditAreaDiv>
         <PreviewDiv ref={previewNode}>
-          <ArticleMarkdownContent content={content} />
+          <MarkdownContent content={content} />
         </PreviewDiv>
       </EditWrapperDiv>
       <SubmitDiv>

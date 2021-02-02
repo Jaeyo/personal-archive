@@ -34,3 +34,12 @@ func (a ReferenceWebs) ExtractIDs() []int64 {
 	}
 	return ids
 }
+
+func (a ReferenceWebs) ContainURL(url string) bool {
+	for _, refWeb := range a {
+		if refWeb.URL == url {
+			return true
+		}
+	}
+	return false
+}

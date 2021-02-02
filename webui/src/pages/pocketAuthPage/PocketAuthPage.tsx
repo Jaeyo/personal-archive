@@ -12,8 +12,10 @@ const PocketAuthPage: FC = () => {
       .then(isAllowed => {
         window.location.href = `/settings`
       })
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setFetching(false))
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
   }, [])
 
   return fetching ? <Loader center /> : null
