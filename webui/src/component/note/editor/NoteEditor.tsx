@@ -9,6 +9,7 @@ import MarkdownContent from "../../common/MarkdownContent"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
+import { usePrevious } from "../../../common/Hooks"
 
 
 interface Props {
@@ -32,18 +33,29 @@ const NoteEditor: FC<Props> = (
   const [refWebURLs, setRefWebURLs] = useState(initRefWebURLs)
   const [previewArticle, setPreviewArticle] = useState((initRefArticles.length > 0 ? initRefArticles[0] : null) as Article | null)
   const [showPreview, setShowPreview] = useState(true)
+
   const previewNode = useRef<HTMLDivElement>(null)
   const submitBtnNode = useRef<HTMLButtonElement>(null)
   const history = useHistory()
 
+  const prevInitContent = usePrevious(initContent)
+  const prevInitRefArticles = usePrevious(initRefArticles)
+  const prevInitRefWebURLs = usePrevious(initRefWebURLs)
+
   useEffect(() => {
-    setContent(initContent)
-    setRefArticles(initRefArticles)
-    setRefWebURLs(initRefWebURLs)
-    if (initRefArticles.length > 0) {
-      setPreviewArticle(initRefArticles[0])
+    if (initContent !== prevInitContent) {
+      setContent(initContent)
     }
-  }, [ initContent, initRefArticles, initRefWebURLs ])
+    if (initRefArticles !== prevInitRefArticles) {
+      setRefArticles(initRefArticles)
+      if (initRefArticles.length > 0) {
+        setPreviewArticle(initRefArticles[0])
+      }
+    }
+    if (initRefWebURLs !== prevInitRefWebURLs) {
+      setRefWebURLs(initRefWebURLs)
+    }
+  }, [ prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs ])
 
   const onSubmit = (content: string) => {
     submit(content, refArticles, refWebURLs)
