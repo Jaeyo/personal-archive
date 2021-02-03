@@ -3,6 +3,7 @@ import styled from "styled-components"
 import { Button, Toggle } from "rsuite"
 import { useHistory } from "react-router-dom"
 import AceEditor from "react-ace"
+import { Ace } from "ace-builds"
 import Article from "../../../models/Article"
 import References from "./References"
 import MarkdownContent from "../../common/MarkdownContent"
@@ -39,6 +40,7 @@ const NoteEditor: FC<Props> = (
 
   const previewNode = useRef<HTMLDivElement>(null)
   const submitBtnNode = useRef<HTMLButtonElement>(null)
+  const editor = useRef<Ace.Editor | null>(null)
   const history = useHistory()
 
   const prevInitContent = usePrevious(initContent)
@@ -49,16 +51,21 @@ const NoteEditor: FC<Props> = (
     if (initContent !== prevInitContent) {
       setContent(initContent)
     }
-    if (initRefArticles !== prevInitRefArticles) {
+
+    if (initRefArticles?.length !== prevInitRefArticles?.length) {
       setRefArticles(initRefArticles)
       if (initRefArticles.length > 0) {
         setPreviewArticle(initRefArticles[0])
       }
     }
-    if (initRefWebURLs !== prevInitRefWebURLs) {
+    if (initRefWebURLs?.length !== prevInitRefWebURLs?.length) {
       setRefWebURLs(initRefWebURLs)
     }
   }, [ prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs ])
+
+  useEffect(() => {
+    editor.current?.resize()
+  }, [showPreview, previewArticle])
 
   const onSubmit = () => {
     submit(content, refArticles, refWebURLs)
@@ -126,13 +133,14 @@ const NoteEditor: FC<Props> = (
             keyboardHandler="vim"
             tabSize={2}
             focus={true}
+            onLoad={instance => { editor.current = instance }}
             commands={[
               {name: 'down', bindKey: {mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
               {name: 'up', bindKey: {mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
               {name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => {
                 editor.blur()
                 setShowSubmitConfirm(true)
-              }},
+             }},
             ]}
             editorProps={{
               $blockScrolling: true,
