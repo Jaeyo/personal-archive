@@ -10,6 +10,7 @@ import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
 import { usePrevious } from "../../../common/Hooks"
+import Confirm from "../../common/Confirm"
 
 
 interface Props {
@@ -34,6 +35,7 @@ const NoteEditor: FC<Props> = (
   const [refWebURLs, setRefWebURLs] = useState(initRefWebURLs)
   const [previewArticle, setPreviewArticle] = useState((initRefArticles.length > 0 ? initRefArticles[0] : null) as Article | null)
   const [showPreview, setShowPreview] = useState(true)
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
 
   const previewNode = useRef<HTMLDivElement>(null)
   const submitBtnNode = useRef<HTMLButtonElement>(null)
@@ -58,7 +60,7 @@ const NoteEditor: FC<Props> = (
     }
   }, [ prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs ])
 
-  const onSubmit = (content: string) => {
+  const onSubmit = () => {
     submit(content, refArticles, refWebURLs)
   }
 
@@ -127,7 +129,10 @@ const NoteEditor: FC<Props> = (
             commands={[
               {name: 'down', bindKey: {mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
               {name: 'up', bindKey: {mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
-              {name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => onSubmit(editor.getValue())},
+              {name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => {
+                editor.blur()
+                setShowSubmitConfirm(true)
+              }},
             ]}
             editorProps={{
               $blockScrolling: true,
@@ -160,13 +165,20 @@ const NoteEditor: FC<Props> = (
         </Button>
         <Button
           appearance="primary"
-          onClick={() => onSubmit(content)}
+          onClick={() => setShowSubmitConfirm(true)}
           loading={fetching}
           ref={submitBtnNode}
         >
           Submit
         </Button>
       </SubmitBtnDiv>
+      <Confirm
+        show={showSubmitConfirm}
+        onOK={onSubmit}
+        onClose={() => setShowSubmitConfirm(false)}
+      >
+        Submit?
+      </Confirm>
     </>
   )
 }
