@@ -1,34 +1,37 @@
 import React, { FC } from "react"
 import styled from "styled-components"
-import { Button, Container, Loader, Sidebar } from "rsuite"
-import ArticleTagTree from "../article/ArticleTagTree"
-import BaseLayout from "./BaseLayout"
+import { Button, Container, Loader } from "rsuite"
 import { useHistory } from "react-router-dom"
+import ArticleTagTree from "../article/ArticleTagTree"
+import MainLayout from "./MainLayout"
 
 
 interface Props {
   loading?: boolean
-  size?: 'sm' | 'md' | 'lg'
 }
 
-const ArticleTagTreeLayout: FC<Props> = ({loading, size = 'md', children}) => {
+const ArticleTagTreeLayout: FC<Props> = ({loading, children}) => {
   const history = useHistory()
 
   return (
-    <BaseLayout size={size}>
-      <Sidebar width={260}>
-        <Container>
-          <NewButton onClick={() => history.push('/articles/new')}>
+    <MainLayout
+      side={
+        <>
+          <NewButton
+            appearance="primary"
+            onClick={() => history.push('/articles/new')}
+          >
             New Article
           </NewButton>
           <ArticleTagTree/>
-        </Container>
-      </Sidebar>
+        </>
+      }
+    >
       <StyledContent>
         {loading ? <Loader center/> : null}
         {children}
       </StyledContent>
-    </BaseLayout>
+    </MainLayout>
   )
 }
 
@@ -39,6 +42,8 @@ const StyledContent = styled(Container)`
 
 const NewButton = styled(Button)`
   margin-bottom: 15px;
+  margin-left: 40px;
+  width: 200px;
 `
 
 export default ArticleTagTreeLayout

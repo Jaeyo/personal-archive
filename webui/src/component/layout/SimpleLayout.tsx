@@ -1,20 +1,20 @@
 import React, { FC } from "react"
 import { Container, Loader } from "rsuite"
-import BaseLayout from "./BaseLayout"
 import styled from "styled-components"
+import MainLayout from "./MainLayout"
 
 interface Props {
   loading?: boolean
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'md' | 'lg'
 }
 
-const SimpleLayout: FC<Props> = ({loading, size = 'md', children}) => (
-  <BaseLayout size={size}>
+const SimpleLayout: FC<Props> = ({loading, children, size = 'md' }) => (
+  <MainLayout size={size}>
     <StyledContent>
       {loading ? <Loader center/> : null}
       {children}
     </StyledContent>
-  </BaseLayout>
+  </MainLayout>
 
 )
 

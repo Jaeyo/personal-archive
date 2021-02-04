@@ -60,7 +60,7 @@ const EditNoteParagraphPage: FC = () => {
   }
 
   return (
-    <SimpleLayout size="lg" loading={fetching}>
+    <SimpleLayout loading={fetching} size="lg">
       <TitleInput disabled value={title} />
       <NoteEditor
         content={content}

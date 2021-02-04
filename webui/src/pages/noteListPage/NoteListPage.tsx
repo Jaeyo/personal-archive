@@ -1,30 +1,31 @@
 import React, { FC } from "react"
 import styled from "styled-components"
-import { Icon, IconButton } from "rsuite"
+import { Button } from "rsuite"
 import { useHistory } from "react-router-dom"
-import SimpleLayout from "../../component/layout/SimpleLayout"
 import NoteNav from "../../component/note/NoteNav"
+import MainLayout from "../../component/layout/MainLayout"
 
 
 const NoteListPage: FC = () => {
   const history = useHistory()
 
   return (
-    <SimpleLayout>
-      <BtnDiv>
-        <IconButton
-          circle
-          icon={<Icon icon="plus" />}
-          onClick={() => history.push(`/notes/new`)}
-        />
-      </BtnDiv>
+    <MainLayout>
+      <NewButton
+        appearance="primary"
+        onClick={() => history.push('/notes/new')}
+      >
+        New Note
+      </NewButton>
       <NoteNav />
-    </SimpleLayout>
+    </MainLayout>
   )
 }
 
-const BtnDiv = styled.div`
-  text-align: right;
+const NewButton = styled(Button)`
+  margin-bottom: 15px;
+  margin-left: 45px;
+  width: 200px;
 `
 
 export default NoteListPage

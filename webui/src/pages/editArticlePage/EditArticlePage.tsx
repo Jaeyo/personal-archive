@@ -26,10 +26,7 @@ const EditArticlePage: FC = () => {
   }, [id])
 
   return (
-    <SimpleLayout
-      loading={loadFetching}
-      size="lg"
-    >
+    <SimpleLayout loading={loadFetching} size="lg">
       {renderArticle(article)}
     </SimpleLayout>
   )

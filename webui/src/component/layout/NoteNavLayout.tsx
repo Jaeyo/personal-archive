@@ -1,34 +1,37 @@
 import React, { FC } from "react"
-import { Button, Container, Loader, Sidebar } from "rsuite"
+import { Button, Container, Loader } from "rsuite"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
-import BaseLayout from "./BaseLayout"
 import NoteNav from "../note/NoteNav"
+import MainLayout from "./MainLayout"
 
 
 interface Props {
   loading?: boolean
-  size?: 'sm' | 'md' | 'lg'
 }
 
-const NoteNavLayout: FC<Props> = ({ loading, size = 'md', children }) => {
+const NoteNavLayout: FC<Props> = ({ loading, children }) => {
   const history = useHistory()
 
   return (
-    <BaseLayout size={size}>
-      <Sidebar width={260}>
-        <Container>
-          <NewButton onClick={() => history.push('/notes/new')}>
+    <MainLayout
+      side={
+        <>
+          <NewButton
+            appearance="primary"
+            onClick={() => history.push('/notes/new')}
+          >
             New Note
           </NewButton>
           <NoteNav />
-        </Container>
-      </Sidebar>
+        </>
+      }
+    >
       <StyledContent>
         {loading ? <Loader center/> : null}
         {children}
       </StyledContent>
-    </BaseLayout>
+    </MainLayout>
   )
 }
 
@@ -39,6 +42,8 @@ const StyledContent = styled(Container)`
 
 const NewButton = styled(Button)`
   margin-bottom: 15px;
+  margin-left: 45px;
+  width: 200px;
 `
 
 export default NoteNavLayout
