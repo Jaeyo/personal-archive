@@ -6,12 +6,12 @@ import AceEditor from "react-ace"
 import { Ace } from "ace-builds"
 import Article from "../../../models/Article"
 import References from "./References"
-import MarkdownContent from "../../common/MarkdownContent"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
 import { usePrevious } from "../../../common/Hooks"
 import Confirm from "../../common/Confirm"
+import ArticleContent from "../../../pages/articlePage/ArticleContent"
 
 
 interface Props {
@@ -151,7 +151,7 @@ const NoteEditor: FC<Props> = (
           !isPreviewable ?
             null :
             <PreviewDiv ref={previewNode}>
-              <MarkdownContent content={previewArticle?.content || ''}/>
+              <ArticleContent article={previewArticle!} />
             </PreviewDiv>
         }
       </div>
