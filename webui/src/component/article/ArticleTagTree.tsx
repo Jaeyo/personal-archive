@@ -32,14 +32,26 @@ const ArticleTagTree: FC = () => {
   }
 
   return (
-    <Tree
+    <StyledTree
       data={toArticleTagItems(articleTags, untaggedCount, allCount)}
-      onSelect={(_, tag) => history.push(`/tags/${encodeURIComponent(tag)}`)}
+      onSelect={(_: any, tag: any) => history.push(`/tags/${encodeURIComponent(tag)}`)}
       defaultExpandAll
-      style={{maxHeight: '100vh'}}
     />
   )
 }
+
+const StyledTree = styled(Tree)`
+  max-height: 100vh;
+  
+  // hide scroll bar for chrome, safari, opera
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  // hide scroll bar for IE and edge
+  -ms-overflow-style: none;
+  // hide scroll bar for firefix
+  scrollbar-width: none;
+`
 
 interface DataItemType {
   value: string

@@ -20,7 +20,7 @@ const NoteNav: FC = () => {
   }, [])
 
   return (
-    <>
+    <WrapperDiv>
       { fetching ? <Loader /> : null }
       {
         notes.map((note, i) => (
@@ -33,9 +33,23 @@ const NoteNav: FC = () => {
           </NoteDiv>
         ))
       }
-    </>
+    </WrapperDiv>
   )
 }
+
+const WrapperDiv = styled.div`
+  height: 100%;
+  overflow-y: auto;
+  
+  // hide scroll bar for chrome, safari, opera
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  // hide scroll bar for IE and edge
+  -ms-overflow-style: none;
+  // hide scroll bar for firefix
+  scrollbar-width: none;
+`
 
 const NoteDiv = styled.div`
   padding: 3px 12px;

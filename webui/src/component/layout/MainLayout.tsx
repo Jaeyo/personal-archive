@@ -33,7 +33,6 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
           </Menu>
           <Menu onClick={() => setShowSearchDrawer(true)}>
             <Icon icon="search" size="lg" />
-            {/*TODO IMME*/}
           </Menu>
           <Menu onClick={() => history.push(`/settings`)}>
             <Icon icon="cog" size="lg" />
@@ -41,7 +40,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
         </NavContainer>
         {
           side ?
-            <NavContainer $width={subNavWidth} $left={topNavWidth} $bg="white">
+            <NavContainer $width={subNavWidth} $left={topNavWidth} $bg="white" style={{ borderRight: '1px solid #eee'}}>
               {side}
             </NavContainer>
             : null
