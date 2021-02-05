@@ -10,13 +10,14 @@
 
 > Personal-Archive keeps track of things you learn / discover everyday!
 
-## 💡 Why Personal-Archive
+## 💡 Why
 
 I face tons of articles every day. Via googling or RSS or email newsletter or blog. Among them, some useful article go into Pocket or Instapaper, but I didn't bring them out again. I completely forgot.
 
 Oh, I thought I needed to organize these things. I had to sort out the important ones and sort them properly so that I could find them again later. I needed something like an article database, an article management tool, and second brain. I looked for a suitable tool for me, but nothing found. So I made it.
 
 ## 📋 Features
+
 - You just throw an URL for article. It will automatically **convert them into markdown** and save them.
   - You can read all of those articles in same UI which is optimized for reading. without **any distraction like ads.**
   - Of course, you can edit them. There's a **VI editor** for you.
@@ -28,10 +29,12 @@ Oh, I thought I needed to organize these things. I had to sort out the important
   - All of data is stored in embedded sqlite3 database. 
 
 ## 🖥 Demo
+
 // TODO
 ![screenshot](/docs/screenshot-01.png)
 
 ## 🕹 Quick Start
+
 ```
 $ docker run -td -v ~/.personal-archive:/data -p 1121:1121 --name personal-archive lastiverse/personal-archive:latest
 ```
