@@ -68,7 +68,11 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({ show, onClos
   const [ keyword, setKeyword ] = useState('')
   const history = useHistory()
 
-  const onSubmit = () => history.push(`/articles/search?q=${encodeURIComponent(keyword)}`)
+  const onSubmit = () => {
+    setKeyword('')
+    onClose()
+    history.push(`/articles/search?q=${encodeURIComponent(keyword)}`)
+  }
 
   return (
     <Drawer
