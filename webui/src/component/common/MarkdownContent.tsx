@@ -77,6 +77,7 @@ const MarkdownDiv = styled.div`
   
   p {
     margin: 0.5em 0;
+    line-height: 1.7;
   }
   
   img {
@@ -91,7 +92,7 @@ const MarkdownDiv = styled.div`
   
   em {
     strong {
-      background-color: #ffeb3b;
+      background-color: #F2E39B;
       padding: 2px 5px;
       font-style: normal;
     }
