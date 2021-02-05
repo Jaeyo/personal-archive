@@ -23,6 +23,6 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 - You can add multiple tags on article.
 - Did you get an insight from article? You can create some note that has a reference to that article.
 - Full text search also supported.
-- Tired of entering an URL manually? It can integrates with Pocket. All the article in your Pocket will be synced.
+- Tired of entering an URL manually? It can integrates with [Pocket](https://getpocket.com/). All the article in your Pocket will be synced.
 - No external database, specific language runtime or dependency. All you need is an machine which can launch docker image. 
   - All of data is stored in embedded sqlite3 database. 
