@@ -31,7 +31,6 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 
 ## 🖥 Demo
 
-// TODO
 ![screenshot](/docs/screenshot-01.png)
 
 ## 🕹 Quick Start
