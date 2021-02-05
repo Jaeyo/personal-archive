@@ -28,9 +28,8 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 - **No external database, specific language runtime or dependency.** All you need is an machine which can launch docker image. 
   - All of data is stored in embedded sqlite3 database. 
 
-## 🖥 Demo
+## 🖥 Screenshot
 
-// TODO
 ![screenshot](/docs/screenshot-01.png)
 
 ## 🕹 Quick Start
