@@ -10,8 +10,19 @@
 
 > Personal-Archive keeps track of things you learn / discover everyday!
 
-## Why?
+## 💡 Why Personal-Archive
 
 I face tons of articles every day. Via googling or RSS or email newsletter or blog. Among them, some useful article go into Pocket or Instapaper, but I didn't bring them out again. I completely forgot.
 
 Oh, I thought I needed to organize these things. I had to sort out the important ones and sort them properly so that I could find them again later. I needed something like an article database, an article management tool, and second brain. I looked for a suitable tool for me, but nothing found. So I made it.
+
+## 📋 Features
+- You just throw an URL for article. It will automatically convert them into markdown and save them.
+  - You can read all of those articles in same UI which is optimized for reading. without any distraction like ads.
+  - Of course, you can edit them. There's a VI editor for you.
+- You can add multiple tags on article.
+- Did you get an insight from article? You can create some note that has a reference to that article.
+- Full text search also supported.
+- Tired of entering an URL manually? It can integrates with Pocket. All the article in your Pocket will be synced.
+- No external database, specific language runtime or dependency. All you need is an machine which can launch docker image. 
+  - All of data is stored in embedded sqlite3 database. 
