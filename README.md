@@ -31,7 +31,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 // TODO
 ![screenshot](/docs/screenshot-01.png)
 
-## Quick Start
+## 🕹 Quick Start
 ```
 $ docker run -td -v ~/.personal-archive:/data -p 1121:1121 --name personal-archive lastiverse/personal-archive:latest
 ```
