@@ -1,6 +1,6 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, ControlLabel, Form, FormGroup, Input, Tag } from "rsuite"
+import { Alert, Button, ControlLabel, Form, FormGroup, Icon, Input, Tag, Tooltip, Whisper } from "rsuite"
 import { requestObtainPocketRequestToken } from "../../apis/SettingApi"
 
 
@@ -33,7 +33,20 @@ const PocketSettingUnauthenticated: FC = () => {
         <StatusTag color="red">Disconnected</StatusTag>
       </FormRow>
       <FormRow>
-        <ControlLabel>Consumer Key</ControlLabel>
+        <ControlLabel>
+          Consumer Key
+          &nbsp;
+          <Whisper placement="right" trigger="click" speaker={
+            <Tooltip>
+              <a href="https://getpocket.com/developer/docs/authentication" target="_blank" rel="noreferrer">
+                https://getpocket.com/developer/docs/authentication
+              </a>
+            </Tooltip>
+          }>
+            <Icon icon="question" style={{ cursor: 'pointer' }}/>
+          </Whisper>
+        </ControlLabel>
+
         <Input
           value={consumerKey}
           onChange={v => setConsumerKey(v)}
