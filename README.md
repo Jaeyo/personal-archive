@@ -39,7 +39,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 $ docker run -td -v ~/.personal-archive:/data -p 1121:1121 --name personal-archive lastiverse/personal-archive:latest
 ```
 
-## Development
+## 🔨 Development
 
 Run backend:
 ```
