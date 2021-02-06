@@ -18,15 +18,15 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 
 ## 📋 Features
 
-- You just throw an URL for article. It will automatically **convert them into markdown** and save them.
+- You just throw a URL for an article. It will automatically **convert them into markdown** and save them.
   - You can read all of those articles in same UI which is optimized for reading. without **any distraction like ads.**
   - Of course, you can edit them. There's a **VI editor** for you.
-- You can add **multiple tags** on article.
+- You can add **multiple tags** on an article.
 - Did you get an insight from article? You can create some note that has a reference to that article.
 - **Full text search** also supported.
-- Tired of entering an URL manually? It can **integrates with [Pocket](https://getpocket.com/)**. All the article in your Pocket will be synced automatically.
-- **No external database, specific language runtime or dependency.** All you need is an machine which can launch docker image. 
-  - All of data is stored in embedded sqlite3 database. 
+- Tired of entering a URL manually? It can **integrates with [Pocket](https://getpocket.com/)**. All the article in your Pocket will be synced automatically.
+- **No external database, specific language runtime or dependency required.** All you need is just a machine with docker.
+  - All data is stored in embedded sqlite3 database. 
 - **Lightweight**. Thanks for golang.
 
 ## 🖥 Screenshot
@@ -38,3 +38,19 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 ```
 $ docker run -td -v ~/.personal-archive:/data -p 1121:1121 --name personal-archive lastiverse/personal-archive:latest
 ```
+
+## Development
+
+Run backend:
+```
+$ make run-local
+```
+
+Run frontend:
+```
+$ make run-webui
+```
+
+## 🔭 Future work
+- Support mobile environment.
+- Authentication.
