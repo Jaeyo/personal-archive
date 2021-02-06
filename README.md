@@ -29,7 +29,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
   - All of data is stored in embedded sqlite3 database. 
 - **Lightweight**. Thanks for golang.
 
-## 🖥 Demo
+## 🖥 Screenshot
 
 ![screenshot](/docs/screenshot-01.png)
 
