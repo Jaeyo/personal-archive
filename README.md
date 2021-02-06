@@ -14,7 +14,7 @@
 
 I face tons of articles every day. Via googling or RSS or email newsletter or blog. Among them, some useful article go into Pocket or Instapaper, but I didn't bring them out again. I completely forgot.
 
-Oh, I thought I needed to organize these things. I had to sort out the important ones and sort them properly so that I could find them again later. I needed something like an article database, an article management tool, and second brain. I looked for a suitable tool for me, but nothing found. So I made it.
+Oh, I thought I needed to organize these things. I had to sort out the important ones and sort them properly so that I could find them again later. I needed something like an article database, an article management tool, and second brain. I looked for a suitable tool for me, but nothing found. So I made it myself.
 
 ## 📋 Features
 
@@ -32,6 +32,9 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 ## 🖥 Screenshot
 
 ![screenshot](/docs/screenshot-01.png)
+
+## ✒️ How do I use it?
+[How do I use it](/docs/how-do-i-use-it.md)
 
 ## 🕹 Quick Start
 
@@ -52,5 +55,6 @@ $ make run-webui
 ```
 
 ## 🔭 Future work
+- Dark mode.
 - Support mobile environment.
 - Authentication.
