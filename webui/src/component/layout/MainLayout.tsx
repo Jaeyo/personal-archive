@@ -4,6 +4,16 @@ import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 
 
+const desktop = {
+  topNavWidth: 70,
+  subNavWidth: 300,
+}
+
+const mobile = {
+  topNavHeight: 54,
+  subNavHeight: 70,
+}
+
 interface Props {
   side?: ReactNode
   size?: 'md' | 'lg'
@@ -23,7 +33,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
   return (
     <OuterContainer $bgColor={bgColor}>
       <InnerContainer $width={width}>
-        <TopNavContainer $width={topNavWidth} $left={0} $vertical $center $bg={bgColor} $zIndex={10}>
+        <TopNavContainer $left={0} $vertical $center $bg={bgColor} $zIndex={10}>
           <Logo>PA</Logo>
           <Menu onClick={() => history.push(`/tags/all`)}>
             <Icon icon="book2" size="lg" />
@@ -40,9 +50,9 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
         </TopNavContainer>
         {
           side ?
-            <NavContainer $width={subNavWidth} $left={topNavWidth} $bg="white" style={{ borderRight: '1px solid #eee'}}>
+            <SubNavContainer $bg="white">
               {side}
-            </NavContainer>
+            </SubNavContainer>
             : null
         }
         <ContentContainer $left={contentLeft}>
@@ -117,10 +127,7 @@ const InnerContainer = styled(Container)<{ $width: number }>`
   }
 `
 
-const TopNavContainer = styled(Container)<{
-  $width: number,
-  $bg?: string,
-}>`
+const TopNavContainer = styled(Container)<{ $bg?: string }>`
   position: fixed;
  
   // mobile
@@ -129,6 +136,7 @@ const TopNavContainer = styled(Container)<{
     left: 0;
     right: 0;
     padding: 15px 20px 15px 30px;
+    height: ${mobile.topNavHeight}px;
     // header align
     display: grid;
     grid-auto-flow: column;
@@ -140,7 +148,7 @@ const TopNavContainer = styled(Container)<{
     top: 0;
     bottom: 0;
     padding: 10px;
-    width: ${({ $width }) => `${$width}px`};
+    width: ${desktop.topNavWidth}px;
     // vertical
     display: flex;
     flex-direction: column;
@@ -148,7 +156,6 @@ const TopNavContainer = styled(Container)<{
     text-align: center;
   }
   
-    
   ${({ $bg }) => $bg && `
     background-color: ${$bg};
   `}
@@ -156,19 +163,27 @@ const TopNavContainer = styled(Container)<{
   z-index: 10;
 `
 
-const NavContainer = styled(Container)<{
-  $width: number,
-  $left: number,
-  $bg?: string,
-}>`
+const SubNavContainer = styled(Container)<{ $bg?: string }>`
   position: fixed;
-  top: 0;
-  bottom: 0;
-  padding: ${({ $left }) => `10px 10px 10px ${$left + 10}px`};
-  width: ${({ $left, $width }) => `${$left + $width}px`};
-  ${({ $bg }) => $bg && `
-    background-color: ${$bg};
-  `}
+ 
+  // mobile
+  @media (max-width: 768px) {
+    top: ${mobile.topNavHeight}px;
+    // TODO IMME
+  }
+  
+  // desktop
+  @media (min-width: 769px) {
+    top: 0;
+    bottom: 0;
+    padding: ${`10px 10px 10px ${desktop.topNavWidth}px`};
+    width: ${desktop.topNavWidth + desktop.subNavWidth};
+    border-right: 1px solid #eee;
+    
+    ${({ $bg }) => $bg && `
+      background-color: ${$bg};
+    `}
+  }
 `
 
 const ContentContainer = styled(Container)<{ $left: number }>`
