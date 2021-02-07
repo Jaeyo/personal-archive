@@ -58,3 +58,5 @@ $ make run-webui
 - Dark mode.
 - Support mobile environment.
 - Authentication.
+- Nested tag tree.
+- Personalized reader configuration (e.g. font family / size ...)
