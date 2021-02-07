@@ -23,7 +23,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
   return (
     <OuterContainer $bgColor={bgColor}>
       <InnerContainer $width={width}>
-        <NavContainer $width={topNavWidth} $left={0} $vertical $center $bg={bgColor} $zIndex={10}>
+        <TopNavContainer $width={topNavWidth} $left={0} $vertical $center $bg={bgColor} $zIndex={10}>
           <Logo>PA</Logo>
           <Menu onClick={() => history.push(`/tags/all`)}>
             <Icon icon="book2" size="lg" />
@@ -37,7 +37,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
           <Menu onClick={() => history.push(`/settings`)}>
             <Icon icon="cog" size="lg" />
           </Menu>
-        </NavContainer>
+        </TopNavContainer>
         {
           side ?
             <NavContainer $width={subNavWidth} $left={topNavWidth} $bg="white" style={{ borderRight: '1px solid #eee'}}>
@@ -55,13 +55,9 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
 }
 
 const Menu: FC<{onClick?: () => void}> = ({ children, onClick }) => (
-  <span
-    role="button"
-    style={{ padding: '11px 0', margin: '6px 0', cursor: 'pointer', color: 'white' }}
-    onClick={() => onClick ? onClick() : null}
-  >
+  <MenuSpan role="button" onClick={() => onClick ? onClick() : null}>
     {children}
-  </span>
+  </MenuSpan>
 )
 
 const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({ show, onClose }) => {
@@ -108,46 +104,105 @@ const OuterContainer = styled(Container)<{ $bgColor: string }>`
 
 const InnerContainer = styled(Container)<{ $width: number }>`
   position: relative;
-  width: ${({ $width }) => $width}px;
   margin: 0 auto;
+  
+  // mobile
+  @media (max-width: 768px) {
+    width: 100%
+  }
+  
+  // desktop 
+  @media (min-width: 769px) {
+    width: ${({ $width }) => $width}px;
+  }
 `
 
-const Logo = styled.h1`
-  font-size: 22px;
-  margin-bottom: 20px
+const TopNavContainer = styled(Container)<{
+  $width: number,
+  $bg?: string,
+}>`
+  position: fixed;
+ 
+  // mobile
+  @media (max-width: 768px) {
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 15px 20px 15px 30px;
+    // header align
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: 1fr;
+  }
+ 
+  // desktop 
+  @media (min-width: 769px) {
+    top: 0;
+    bottom: 0;
+    padding: 10px;
+    width: ${({ $width }) => `${$width}px`};
+    // vertical
+    display: flex;
+    flex-direction: column;
+    // center
+    text-align: center;
+  }
+  
+    
+  ${({ $bg }) => $bg && `
+    background-color: ${$bg};
+  `}
+  
+  z-index: 10;
 `
 
 const NavContainer = styled(Container)<{
   $width: number,
   $left: number,
-  $vertical?: boolean,
   $bg?: string,
-  $center?: boolean,
-  $zIndex?: number,
 }>`
   position: fixed;
   top: 0;
   bottom: 0;
   padding: ${({ $left }) => `10px 10px 10px ${$left + 10}px`};
   width: ${({ $left, $width }) => `${$left + $width}px`};
-  ${({ $vertical }) => $vertical && `
-    display: flex;
-    flex-direction: column;
-  `}
   ${({ $bg }) => $bg && `
     background-color: ${$bg};
-  `}
-  ${({ $center }) => $center && `
-    text-align: center;
-  `}
-  ${({ $zIndex }) => $zIndex && `
-    z-index: ${$zIndex};
   `}
 `
 
 const ContentContainer = styled(Container)<{ $left: number }>`
   padding: ${({ $left }) => `10px 10px 10px ${$left + 10}px`};
   background-color: white;
+`
+
+const Logo = styled.h1`
+  display: inline;
+  font-size: 22px;
+  line-height: 1;
+  
+  // desktop
+  @media (min-width: 769px) {
+    margin: 30px 0;
+  }
+`
+
+const MenuSpan = styled.span`
+  // mobile
+  @media (max-width: 768px) {
+    padding: 2px 4px;
+    margin: 0 4px;
+    cursor: pointer;
+    color: white;
+  }
+
+  // desktop 
+  @media (min-width: 769px) {
+    padding: 11px 0;
+    margin: 6px 0;
+    cursor: pointer;
+    color: white;
+  }
 `
 
 export default MainLayout
