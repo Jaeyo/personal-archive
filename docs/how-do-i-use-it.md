@@ -1,6 +1,6 @@
 # How do I use it
 
-I found a fantastic article while surfing the Internet. I really want to learn this and leave it for a long time. What do you do when that happens?
+I found a fantastic article while surfing the Internet. I want to learn this and leave it for a long time. What do you do when that happens?
 Is it enough just to read it once? It wasn't to me. I don't have a good memory. I will remember what I read today properly tomorrow maybe, but there is no guarantee that it will be like that after a month.
 So this is how I use it.
 
@@ -34,7 +34,7 @@ Now I'll show you how to use this Personal-Archive to get it right.
 ![](./how-do-i-use-it-03.gif)
 
 4. We can use these tags to find useful articles later, right? 
-   Oh, of course, you can search.
+   Oh, of course, you can just search.
 
 ![](./how-do-i-use-it-04.gif)
 
@@ -50,7 +50,8 @@ Now I'll show you how to use this Personal-Archive to get it right.
 ![](./how-do-i-use-it-06.gif)
 
 7. Now, the paragraph I just wrote have been added to my existing note.
-   You can change the order of the paragraph according to their importance. 
+   
+   change the order of the paragraph according to their importance. 
 
 ![](./how-do-i-use-it-07.gif)
 
@@ -59,5 +60,7 @@ Now I'll show you how to use this Personal-Archive to get it right.
 > Not only general writing, you can scrap contents such as tweet, youtube, and slideshare.
 > 
 > ![](./how-do-i-use-it-01-tweet.png)
+> ---
 > ![](./how-do-i-use-it-01-youtube.png)
+> ---
 > ![](./how-do-i-use-it-01-slideshare.png)
