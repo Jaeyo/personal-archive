@@ -28,6 +28,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 - **No external database, specific language runtime or dependency required.** All you need is just a machine with docker.
   - All data is stored in embedded sqlite3 database. 
 - **Lightweight**. Thanks for golang.
+- Support **mobile** with responsive design.
 
 ## 🖥 Screenshot
 
@@ -56,7 +57,6 @@ $ make run-webui
 
 ## 🔭 Future work
 - Dark mode.
-- Support mobile environment.
 - Authentication.
 - Nested tag tree.
 - Personalized reader configuration (e.g. font family / size ...)
