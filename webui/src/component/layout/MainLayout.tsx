@@ -169,15 +169,15 @@ const TopNavContainer = styled(Container)<{ $bg: string }>`
 const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
   position: fixed;
   z-index: 10;
-  ${({ $showNav }) => $showNav && `
-    background-color: white;
-  `}
  
   // mobile
   @media (max-width: 768px) {
     top: ${mobile.topNavHeight}px;
     left: 0;
     right: 0;
+    ${({ $showNav }) => $showNav && `
+      background-color: white;
+    `}
     
     // burger
     & > :nth-child(1) {
@@ -202,7 +202,7 @@ const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
     padding: ${`10px 10px 10px ${desktop.topNavWidth}px`};
     width: ${desktop.topNavWidth + desktop.subNavWidth}px;
     border-right: 1px solid #eee;
-    
+    background-color: white;
   }
 `
 
@@ -217,8 +217,7 @@ const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
   
   // mobile
   @media (max-width: 768px) {
-    // padding: ${mobile.topNavHeight + mobile.subNavHeight}px 10px 10px 10px;
-    padding: ${mobile.topNavHeight}px 10px 10px 10px;
+    padding: ${10 + mobile.topNavHeight}px 10px 10px 10px;
   }
   
   // desktop
