@@ -80,10 +80,6 @@ const MarkdownDiv = styled.div`
     line-height: 1.7;
   }
   
-  img {
-    max-width: 60%;
-  }
-  
   pre {
     background-color: #f2f2f2;
     padding: 9px;
@@ -95,6 +91,20 @@ const MarkdownDiv = styled.div`
       background-color: #F2E39B;
       padding: 2px 5px;
       font-style: normal;
+    }
+  }
+  
+  // mobile
+  @media (max-width: 768px) {
+    img {
+      max-width: 100%;
+    }
+  }
+  
+  // desktop 
+  @media (min-width: 769px) {
+    img {
+      max-width: 60%;
     }
   }
 `

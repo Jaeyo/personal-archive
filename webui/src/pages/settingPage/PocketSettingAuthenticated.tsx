@@ -1,9 +1,10 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, ControlLabel, Form, FormGroup, Input, Tag, Toggle } from "rsuite"
-import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
+import { Alert, Button, Form, Tag, Toggle } from "rsuite"
 import TimeAgo from "javascript-time-ago"
+import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
 import en from "javascript-time-ago/locale/en"
+import { FormLabel, FormRow, FormValue } from "../../component/common/Form"
 
 TimeAgo.addLocale(en)
 TimeAgo.setDefaultLocale('en-US')
@@ -43,20 +44,15 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
     <>
       <Form layout="horizontal">
         <FormRow>
-          <ControlLabel>Status</ControlLabel>
+          <FormLabel>Status</FormLabel>
           <StatusTag color="green">Connected</StatusTag>
         </FormRow>
         <FormRow>
-          <ControlLabel>Username</ControlLabel>
-          <UsernameInput
-            value={username}
-            disabled
-            style={{width: '400px'}}
-            size="sm"
-          />
+          <FormLabel>Username</FormLabel>
+          <FormValue>{username}</FormValue>
         </FormRow>
         <FormRow>
-          <ControlLabel>Sync</ControlLabel>
+          <FormLabel>Sync</FormLabel>
           <SyncToggle
             checked={isSyncChecked}
             checkedChildren="Sync"
@@ -87,16 +83,9 @@ const LastSyncTime: FC<{ lastSyncTime: Date | null }> = ({lastSyncTime}) =>
     null :
     <Desc>Last Sync: {new TimeAgo('en-US').format(new Date(lastSyncTime))}</Desc>
 
-const FormRow = styled(FormGroup)`
-  margin-bottom: 0 !important;
-`
 
 const StatusTag = styled(Tag)`
   margin: 8px 0;
-`
-
-const UsernameInput = styled(Input)`
-  margin: 4px 0;
 `
 
 const SyncToggle = styled(Toggle)`

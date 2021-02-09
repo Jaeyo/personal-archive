@@ -1,7 +1,8 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, ControlLabel, Form, FormGroup, Icon, Input, Tag, Tooltip, Whisper } from "rsuite"
+import { Alert, Button, Form, Icon, Input, Tag, Tooltip, Whisper } from "rsuite"
 import { requestObtainPocketRequestToken } from "../../apis/SettingApi"
+import { FormLabel, FormRow } from "../../component/common/Form"
 
 
 const PocketSettingUnauthenticated: FC = () => {
@@ -29,11 +30,11 @@ const PocketSettingUnauthenticated: FC = () => {
   return (
     <Form layout="horizontal">
       <FormRow>
-        <ControlLabel>Status</ControlLabel>
+        <FormLabel>Status</FormLabel>
         <StatusTag color="red">Disconnected</StatusTag>
       </FormRow>
       <FormRow>
-        <ControlLabel>
+        <FormLabel>
           Consumer Key
           &nbsp;
           <Whisper placement="right" trigger="click" speaker={
@@ -45,12 +46,12 @@ const PocketSettingUnauthenticated: FC = () => {
           }>
             <Icon icon="question" style={{ cursor: 'pointer' }}/>
           </Whisper>
-        </ControlLabel>
+        </FormLabel>
 
         <Input
           value={consumerKey}
           onChange={v => setConsumerKey(v)}
-          style={{width: '400px'}}
+          style={{maxWidth: '400px'}}
           size="sm"
         />
         <ConnectBtn
@@ -65,10 +66,6 @@ const PocketSettingUnauthenticated: FC = () => {
     </Form>
   )
 }
-
-const FormRow = styled(FormGroup)`
-  margin-bottom: 0 !important;
-`
 
 const StatusTag = styled(Tag)`
   margin: 8px 0;

@@ -20,6 +20,8 @@ const ArticlesByTagPage: FC = () => {
 
   useEffect(() => {
     setFetching(true)
+    setArticles([])
+    setPagination(emptyPagination)
     requestFindArticlesByTag(tag, page)
       .then(([articles, pagination]) => {
         setArticles(articles)

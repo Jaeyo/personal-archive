@@ -3,6 +3,7 @@ import { requestGetPocketAuth } from "../../apis/SettingApi"
 import { Alert, Loader } from "rsuite"
 import PocketSettingUnauthenticated from "./PocketSettingUnauthenticated"
 import PocketSettingAuthenticated from "./PocketSettingAuthenticated"
+import { Else, If, Then } from "react-if"
 
 
 const PocketSetting: FC = () => {
@@ -29,13 +30,20 @@ const PocketSetting: FC = () => {
     return <Loader/>
   }
 
-  return isAuthenticated ?
-    <PocketSettingAuthenticated
-      username={username || ''}
-      isSyncOn={isSyncOn}
-      lastSyncTime={lastSyncTime}
-    /> :
-    <PocketSettingUnauthenticated/>
+  return (
+    <If condition={isAuthenticated}>
+      <Then>
+        <PocketSettingAuthenticated
+          username={username || ''}
+          isSyncOn={isSyncOn}
+          lastSyncTime={lastSyncTime}
+        />
+      </Then>
+      <Else>
+        <PocketSettingUnauthenticated/>
+      </Else>
+    </If>
+  )
 }
 
 export default PocketSetting
