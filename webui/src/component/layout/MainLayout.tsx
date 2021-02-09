@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from "react"
+import React, { FC, ReactNode, useEffect, useState } from "react"
 import { Container, Drawer, Icon, Input, InputGroup } from "rsuite"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
@@ -23,8 +23,12 @@ interface Props {
 const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
   const [ showSearchDrawer, setShowSearchDrawer ] = useState(false)
   const [ showSubNav, setShowSubNav ] = useState(false)  // only works in mobile
-
   const history = useHistory()
+
+  useEffect(() => {
+    // 페이지 이동시 초기화
+    history.listen(() => setShowSubNav(false))
+  }, [ history ])
 
   const width = size === 'md' ? 1280 : 1680
   const bgColor = '#272c36'
@@ -50,7 +54,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
         <When condition={side != null}>
           <SubNavContainer $showNav={showSubNav}>
             <SubNavBurger>
-              <Icon icon="bug" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg"/>
+              <Icon icon="bars" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg"/>
             </SubNavBurger>
             <Container>
               {side}
