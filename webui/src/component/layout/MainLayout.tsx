@@ -2,6 +2,7 @@ import React, { FC, ReactNode, useState } from "react"
 import { Container, Drawer, Icon, Input, InputGroup } from "rsuite"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
+import { When } from "react-if"
 
 
 const desktop = {
@@ -11,7 +12,7 @@ const desktop = {
 
 const mobile = {
   topNavHeight: 54,
-  subNavHeight: 70,
+  subNavHeight: 38,
 }
 
 interface Props {
@@ -21,14 +22,12 @@ interface Props {
 
 const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
   const [ showSearchDrawer, setShowSearchDrawer ] = useState(false)
+  const [ showSubNav, setShowSubNav ] = useState(false)  // only works in mobile
 
   const history = useHistory()
 
   const width = size === 'md' ? 1280 : 1680
   const bgColor = '#272c36'
-  const topNavWidth = 70
-  const subNavWidth = 300
-  const contentLeft = topNavWidth + (side ? subNavWidth : 0)
 
   return (
     <OuterContainer $bgColor={bgColor}>
@@ -48,14 +47,17 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
             <Icon icon="cog" size="lg" />
           </Menu>
         </TopNavContainer>
-        {
-          side ?
-            <SubNavContainer $bg="white">
+        <When condition={side != null}>
+          <SubNavContainer $showNav={showSubNav}>
+            <SubNavBurger>
+              <Icon icon="bug" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg"/>
+            </SubNavBurger>
+            <Container>
               {side}
-            </SubNavContainer>
-            : null
-        }
-        <ContentContainer $left={contentLeft}>
+            </Container>
+          </SubNavContainer>
+        </When>
+        <ContentContainer $sideExist={side != null}>
           {children}
         </ContentContainer>
         <SearchDrawer show={showSearchDrawer} onClose={() => setShowSearchDrawer(false)} />
@@ -127,8 +129,10 @@ const InnerContainer = styled(Container)<{ $width: number }>`
   }
 `
 
-const TopNavContainer = styled(Container)<{ $bg?: string }>`
+const TopNavContainer = styled(Container)<{ $bg: string }>`
   position: fixed;
+  z-index: 20;
+  background-color: ${({ $bg }) => $bg};
  
   // mobile
   @media (max-width: 768px) {
@@ -155,40 +159,64 @@ const TopNavContainer = styled(Container)<{ $bg?: string }>`
     // center
     text-align: center;
   }
-  
-  ${({ $bg }) => $bg && `
-    background-color: ${$bg};
-  `}
-  
-  z-index: 10;
 `
 
-const SubNavContainer = styled(Container)<{ $bg?: string }>`
+const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
   position: fixed;
+  z-index: 10;
+  background-color: white;
  
   // mobile
   @media (max-width: 768px) {
     top: ${mobile.topNavHeight}px;
+    left: 0;
+    right: 0;
+    
+    // burger
+    & > :nth-child(1) {
+      height: ${mobile.subNavHeight}px;
+    }
+    
+    // display by $showNav
+    & > :nth-child(2) {
+      display: ${({ $showNav }) => $showNav ? 'block' : 'none'};
+    }
     // TODO IMME
   }
   
   // desktop
   @media (min-width: 769px) {
+    // remove burger
+    & > :nth-child(1) {
+      display: none;
+    }
+    
     top: 0;
     bottom: 0;
     padding: ${`10px 10px 10px ${desktop.topNavWidth}px`};
-    width: ${desktop.topNavWidth + desktop.subNavWidth};
+    width: ${desktop.topNavWidth + desktop.subNavWidth}px;
     border-right: 1px solid #eee;
     
-    ${({ $bg }) => $bg && `
-      background-color: ${$bg};
-    `}
   }
 `
 
-const ContentContainer = styled(Container)<{ $left: number }>`
-  padding: ${({ $left }) => `10px 10px 10px ${$left + 10}px`};
+const SubNavBurger = styled(Container)`
+  text-align: right;
+  padding: 10px;
+`
+
+const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
   background-color: white;
+  
+  // mobile
+  @media (max-width: 768px) {
+    padding: ${mobile.topNavHeight + mobile.subNavHeight}px 10px 10px 10px;
+  }
+  
+  // desktop
+  @media (min-width: 769px) {
+    padding: 10px 10px 10px ${({ $sideExist }) => 10 + desktop.topNavWidth + ($sideExist ? desktop.subNavWidth : 0)}px;
+  }
 `
 
 const Logo = styled.h1`
