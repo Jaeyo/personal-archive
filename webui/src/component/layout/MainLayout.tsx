@@ -54,7 +54,7 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
         <When condition={side != null}>
           <SubNavContainer $showNav={showSubNav}>
             <SubNavBurger>
-              <Icon icon="bars" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg"/>
+              <Icon icon="bars" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg" />
             </SubNavBurger>
             <Container>
               {side}
@@ -94,6 +94,7 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({ show, onClos
         setKeyword('')
         onClose()
       }}
+      style={{ maxWidth: '80%' }}
       size="xs"
     >
       <Drawer.Body>
@@ -168,7 +169,9 @@ const TopNavContainer = styled(Container)<{ $bg: string }>`
 const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
   position: fixed;
   z-index: 10;
-  background-color: white;
+  ${({ $showNav }) => $showNav && `
+    background-color: white;
+  `}
  
   // mobile
   @media (max-width: 768px) {
@@ -185,7 +188,6 @@ const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
     & > :nth-child(2) {
       display: ${({ $showNav }) => $showNav ? 'block' : 'none'};
     }
-    // TODO IMME
   }
   
   // desktop
@@ -207,6 +209,7 @@ const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
 const SubNavBurger = styled(Container)`
   text-align: right;
   padding: 10px;
+  display: inline;
 `
 
 const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
@@ -214,7 +217,8 @@ const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
   
   // mobile
   @media (max-width: 768px) {
-    padding: ${mobile.topNavHeight + mobile.subNavHeight}px 10px 10px 10px;
+    // padding: ${mobile.topNavHeight + mobile.subNavHeight}px 10px 10px 10px;
+    padding: ${mobile.topNavHeight}px 10px 10px 10px;
   }
   
   // desktop
