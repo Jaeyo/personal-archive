@@ -41,7 +41,7 @@ const NewNoteParagraphPage: FC = () => {
   }
 
   return (
-    <SimpleLayout loading={fetching}>
+    <SimpleLayout loading={fetching} size="lg">
       <TitleInput disabled value={title} />
       <NoteEditor
         content=""
