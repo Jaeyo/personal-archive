@@ -16,6 +16,7 @@ RUN apk add python2
 
 RUN mkdir -p /app/static
 RUN mkdir -p /app/bin
+COPY --from=builder /build/VERSION.txt /app/
 COPY --from=builder /build/out/personal-archive /app/
 COPY --from=builder /build/webui/build /app/static/
 COPY --from=builder /build/bin/html2text.py /app/bin/

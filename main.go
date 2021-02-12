@@ -14,15 +14,30 @@ import (
 )
 
 func main() {
-	initLogging()
-	if err := internal.GetDatabase().Init(); err != nil {
-		panic(err)
-	}
-	services.GetArticleService().Initialize()
-	services.GetNoteService().Initialize()
+	initialize()
 
 	services.GetPocketSyncService().Start()
 
+	startHttpServer()
+}
+
+func initialize() {
+	logrus.SetOutput(os.Stdout)
+	logrus.SetLevel(logrus.DebugLevel)
+
+	if err := internal.GetDatabase().Init(); err != nil {
+		panic(err)
+	}
+
+	if err := services.GetAppService().PreserveVerInfo(); err != nil {
+		panic(err)
+	}
+
+	services.GetArticleService().Initialize()
+	services.GetNoteService().Initialize()
+}
+
+func startHttpServer() {
 	e := echo.New()
 	e.HTTPErrorHandler = errorHandler
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -38,11 +53,6 @@ func main() {
 			panic(err)
 		}
 	}
-}
-
-func initLogging() {
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.DebugLevel)
 }
 
 func routeForControllers(e *echo.Echo) {
