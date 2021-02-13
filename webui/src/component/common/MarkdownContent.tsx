@@ -3,10 +3,7 @@ import styled from "styled-components"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
-
-//@ts-ignore
 import {Prism as SyntaxHighlighter} from "react-syntax-highlighter"
-//@ts-ignore
 import {dark} from "react-syntax-highlighter/dist/esm/styles/prism"
 import {render} from "react-dom"
 

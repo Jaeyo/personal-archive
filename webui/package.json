@@ -54,6 +54,7 @@
     "@types/axios": "^0.14.0",
     "@types/javascript-time-ago": "^2.0.1",
     "@types/react-router-dom": "^5.1.7",
+    "@types/react-syntax-highlighter": "^13.5.0",
     "@types/recoil": "^0.0.1",
     "@types/styled-components": "^5.1.7"
   }
