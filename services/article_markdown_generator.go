@@ -26,22 +26,32 @@ func (g *articleMarkdownGenerator) GetTitleAndContent(url string) (string, strin
 }
 
 func (g *articleMarkdownGenerator) getTitleAndContent1(url string) (string, string, error) {
-	result, err := readability.FromURL(url, 5*time.Second)
+	title, content, err := g.extractReadable(url)
 	if err != nil {
-		return "", "", errors.Wrap(err, "failed to execute readability module")
+		return "", "", errors.Wrap(err, "failed to extract readable")
 	}
 
-	content, err := md.
+	// TODO preserve language-*
+
+	content, err = md.
 		NewConverter("", true, &md.Options{
 			HorizontalRule: "---",
 		}).
-		ConvertString(result.Content)
+		ConvertString(content)
 
 	if err != nil {
 		return "", "", errors.Wrap(err, "failed to convert html to markdown")
 	}
 
-	return result.Title, content, nil
+	return title, content, nil
+}
+
+func (g *articleMarkdownGenerator) extractReadable(url string) (string, string, error) {
+	result, err := readability.FromURL(url, 5*time.Second)
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed to execute readability module")
+	}
+	return result.Title, result.Content, nil
 }
 
 func (g *articleMarkdownGenerator) getTitleAndContent2(url string) (string, string, error) {
