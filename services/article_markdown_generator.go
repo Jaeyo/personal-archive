@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-shiori/go-readability"
@@ -47,6 +48,34 @@ func (g *articleMarkdownGenerator) getTitleAndContent1(url string) (string, stri
 }
 
 func (g *articleMarkdownGenerator) extractReadable(url string) (string, string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed to request url")
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		return "", "", fmt.Errorf("response code is not success: %d", resp.StatusCode)
+	}
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed to parse response body")
+	}
+
+	prefix := "language-"
+	doc.Find("pre code").Each(func(i int, selection *goquery.Selection) {
+		classes := strings.Split(selection.AttrOr("class", ""), " ")
+		for _, class := range classes {
+			if strings.HasPrefix(class, prefix) {
+				lang := class[len(prefix):]
+				selection.SetAttr("data-lang", lang)
+				return
+			}
+		}
+
+		selection.Parent().Attr() // TODO IMME
+	})
+
 	result, err := readability.FromURL(url, 5*time.Second)
 	if err != nil {
 		return "", "", errors.Wrap(err, "failed to execute readability module")
