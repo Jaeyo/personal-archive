@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/jaeyo/personal-archive/common"
 	"github.com/jaeyo/personal-archive/repositories"
 	"github.com/pkg/errors"
 	"io/ioutil"
@@ -34,7 +35,12 @@ var GetAppService = func() func() AppService {
 }()
 
 func (s *appService) PreserveVerInfo() error {
-	verB, err := ioutil.ReadFile("/app/VERSION.txt")
+	verFile := "/app/VERSION.txt"
+	if common.IsLocal() {
+		verFile = "./VERSION.txt"
+	}
+
+	verB, err := ioutil.ReadFile(verFile)
 	if err != nil {
 		return errors.Wrap(err, "failed to read version.txt file")
 	}
