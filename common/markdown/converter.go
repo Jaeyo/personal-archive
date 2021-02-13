@@ -15,27 +15,39 @@ func getConverter() *md.Converter {
 	converter := md.NewConverter("", true, &md.Options{
 		HorizontalRule: "---",
 	})
-	converter.AddRules(md.Rule{
-		Filter: []string{"pre"},
-		Replacement: func(content string, selec *goquery.Selection, options *md.Options) *string {
-			codeElement := selec.Find("code")
-			language := codeElement.AttrOr("data-lang", "")
 
-			code := codeElement.Text()
-			if codeElement.Length() == 0 {
-				code = selec.Text()
-			}
+	converter.AddRules(
+		// 코드 블록, 이전 단계에서 `data-lang` attr 에 박아놓은 랭기지 타입을 살린다.
+		md.Rule{
+			Filter: []string{"pre"},
+			Replacement: func(_ string, selec *goquery.Selection, options *md.Options) *string {
+				codeElement := selec.Find("code")
+				language := codeElement.AttrOr("data-lang", "")
 
-			fenceChar, _ := utf8.DecodeRuneInString(options.Fence)
-			fence := calculateCodeFence(fenceChar, code)
+				code := codeElement.Text()
+				if codeElement.Length() == 0 {
+					code = selec.Text()
+				}
 
-			text := "\n\n" + fence + language + "\n" +
-				code +
-				"\n" + fence + "\n\n"
-			return &text
+				fenceChar, _ := utf8.DecodeRuneInString(options.Fence)
+				fence := calculateCodeFence(fenceChar, code)
 
+				text := "\n\n" + fence + language + "\n" +
+					code +
+					"\n" + fence + "\n\n"
+				return &text
+			},
 		},
-	})
+		// 라이브러리의 기본 "p", "div" 룰을 사용하면 코드 블럭에서 indent 가 사라지는 경우가 있음
+		md.Rule{
+			//
+			Filter: []string{"p", "div"},
+			Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
+				content = "\n\n" + content + "\n\n"
+				return &content
+			},
+		})
+
 	return converter
 }
 
