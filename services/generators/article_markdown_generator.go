@@ -1,10 +1,10 @@
-package services
+package generators
 
 import (
 	"fmt"
-	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-shiori/go-readability"
+	"github.com/jaeyo/personal-archive/common/markdown"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
@@ -31,7 +31,7 @@ func (g *articleMarkdownGenerator) getTitleAndContent1(url string) (string, stri
 		return "", "", errors.Wrap(err, "failed to extract readable")
 	}
 
-	markdownContent, err := g.getMarkdownConverter().ConvertString(htmlContent)
+	markdownContent, err := markdown.ConvertFromHtml(htmlContent)
 	if err != nil {
 		return "", "", errors.Wrap(err, "failed to convert html to markdown")
 	}
@@ -82,14 +82,6 @@ func (g *articleMarkdownGenerator) extractReadable(url string) (string, string, 
 		return "", "", errors.Wrap(err, "failed to execute readability module")
 	}
 	return result.Title, result.Content, nil
-}
-
-func (g *articleMarkdownGenerator) getMarkdownConverter() *md.Converter {
-	converter := md.NewConverter("", true, &md.Options{
-		HorizontalRule: "---",
-	})
-	// TODO
-	return converter
 }
 
 func (g *articleMarkdownGenerator) getTitleAndContent2(url string) (string, string, error) {

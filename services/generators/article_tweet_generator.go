@@ -1,4 +1,4 @@
-package services
+package generators
 
 import (
 	"github.com/pkg/errors"

@@ -1,4 +1,4 @@
-package services
+package generators
 
 import (
 	"fmt"

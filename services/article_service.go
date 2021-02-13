@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/models"
 	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/services/generators"
 	"github.com/pkg/errors"
 	"sync"
 )
@@ -19,7 +20,7 @@ type ArticleService interface {
 }
 
 type articleService struct {
-	articleGenerator        ArticleGenerator
+	articleGenerator        generators.ArticleGenerator
 	articleRepository       repositories.ArticleRepository
 	articleTagRepository    repositories.ArticleTagRepository
 	articleSearchRepository repositories.ArticleSearchRepository
@@ -31,7 +32,7 @@ var GetArticleService = func() func() ArticleService {
 	return func() ArticleService {
 		once.Do(func() {
 			instance = &articleService{
-				articleGenerator:        GetArticleGenerator(),
+				articleGenerator:        generators.GetArticleGenerator(),
 				articleRepository:       repositories.GetArticleRepository(),
 				articleTagRepository:    repositories.GetArticleTagRepository(),
 				articleSearchRepository: repositories.GetArticleSearchRepository(),
