@@ -29,7 +29,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
   - All data is stored in embedded sqlite3 database. 
 - **Lightweight**. Thanks for golang.
 - Support **mobile** with responsive design.
-- Support Syntax-highlighting from **[react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter)**.
+- Support **Syntax-highlighting** from [react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter). (thanks for [@illusionist-osmin](https://github.com/illusionist-osmin))
 
 ## 🖥 Screenshot
 
