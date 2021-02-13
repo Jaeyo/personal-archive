@@ -5,3 +5,6 @@ dist/
 test_data/
 webui/.eslintcache
 
+.vscode/
+.vscode/settings.json
+
