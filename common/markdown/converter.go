@@ -40,7 +40,6 @@ func getConverter() *md.Converter {
 		},
 		// 라이브러리의 기본 "p", "div" 룰을 사용하면 코드 블럭에서 indent 가 사라지는 경우가 있음
 		md.Rule{
-			//
 			Filter: []string{"p", "div"},
 			Replacement: func(content string, selec *goquery.Selection, opt *md.Options) *string {
 				content = "\n\n" + content + "\n\n"
