@@ -7,21 +7,12 @@ import Note from "../../models/Note"
 
 
 const NoteNav: FC = () => {
-  const [fetching, setFetching] = useState(false)
-  const [notes, setNotes] = useState([] as Note[])
+  const [fetching, notes] = useRequestFindNoteTitles()
   const history = useHistory()
-
-  useEffect(() => {
-    setFetching(true)
-    requestFindNoteTitles()
-      .then(notes => setNotes(notes))
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setFetching(false))
-  }, [])
 
   return (
     <WrapperDiv>
-      { fetching ? <Loader /> : null }
+      {fetching && <Loader/>}
       {
         notes.map((note, i) => (
           <NoteDiv key={note.id}>
@@ -35,6 +26,21 @@ const NoteNav: FC = () => {
       }
     </WrapperDiv>
   )
+}
+
+const useRequestFindNoteTitles = (): [boolean, Note[]] => {
+  const [fetching, setFetching] = useState(false)
+  const [notes, setNotes] = useState([] as Note[])
+
+  useEffect(() => {
+    setFetching(true)
+    requestFindNoteTitles()
+      .then(notes => setNotes(notes))
+      .catch(err => Alert.error(err.toString()))
+      .finally(() => setFetching(false))
+  }, [])
+
+  return [fetching, notes]
 }
 
 const WrapperDiv = styled.div`
