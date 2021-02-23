@@ -14,26 +14,16 @@ interface Props {
 }
 
 const ArticleTags: FC<Props> = ({article}) => {
-  const [fetching, setFetching] = useState(false)
   const [isEditMode, setEditMode] = useState(false)
   const [selectedTags, setSelectedTags] = useState([] as string[])
   const articleTags = useRecoilValue(articleTagsState)
+  const [fetching, submit] = useSubmit(article)
 
   useEffect(() => {
     if (article) {
-      setSelectedTags(article.tags.map(({ tag }) => tag))
+      setSelectedTags(article.tags.map(({tag}) => tag))
     }
   }, [article])
-
-  const onSubmit = () => {
-    setFetching(true)
-    requestUpdateTags(article!.id, selectedTags)
-      .then(() => window.location.reload())
-      .catch(err => {
-        Alert.error(err.toString())
-        setFetching(false)
-      })
-  }
 
   if (!isEditMode) {
     return (
@@ -42,7 +32,7 @@ const ArticleTags: FC<Props> = ({article}) => {
         <TagsSpan>tags: </TagsSpan>
         {
           article.tags.map(
-            ({ tag }) => <ArticleTag tag={tag} key={tag}/>
+            ({tag}) => <ArticleTag tag={tag} key={tag}/>
           )
         }
         <EditButton
@@ -67,10 +57,26 @@ const ArticleTags: FC<Props> = ({article}) => {
         onChange={(tags: string[]) => setSelectedTags(tags)}
         value={selectedTags}
       />
-      <Button loading={fetching} onClick={onSubmit}>Submit</Button>
+      <Button loading={fetching} onClick={() => submit(selectedTags)}>Submit</Button>
       <Button onClick={() => setEditMode(false)}>Cancel</Button>
     </InputDiv>
   )
+}
+
+const useSubmit = (article: Article): [boolean, (selectedTags: string[]) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const submit = (selectedTags: string[]) => {
+    setFetching(true)
+    requestUpdateTags(article!.id, selectedTags)
+      .then(() => window.location.reload())
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, submit]
 }
 
 const ShowDiv = styled.div`

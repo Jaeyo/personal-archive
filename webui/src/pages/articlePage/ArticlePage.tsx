@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from "react"
-import { History } from "history"
 import { useHistory, useParams } from "react-router-dom"
 import { Alert } from "rsuite"
 import { requestGetArticle } from "../../apis/ArticleApi"
@@ -13,6 +12,25 @@ import ArticleContent from "./ArticleContent"
 
 const ArticlePage: FC = () => {
   const {id} = useParams() as any
+  const [fetching, article] = useRequestGetArticle(id)
+
+  return (
+    <ArticleTagTreeLayout loading={fetching}>
+      {
+        article && (
+          <>
+            <ArticleTitle article={article}/>
+            <ArticleTags article={article}/>
+            <ArticleLink article={article}/>
+            <ArticleContent article={article}/>
+          </>
+        )
+      }
+    </ArticleTagTreeLayout>
+  )
+}
+
+const useRequestGetArticle = (id: number): [boolean, Article | null] => {
   const [fetching, setFetching] = useState(false)
   const [article, setArticle] = useState(null as Article | null)
   const history = useHistory()
@@ -32,26 +50,7 @@ const ArticlePage: FC = () => {
       })
   }, [id, history])
 
-  return (
-    <ArticleTagTreeLayout loading={fetching}>
-      {renderArticle(article, history)}
-    </ArticleTagTreeLayout>
-  )
-}
-
-const renderArticle = (article: Article | null, history: History) => {
-  if (!article) {
-    return null
-  }
-
-  return (
-    <>
-      <ArticleTitle article={article}/>
-      <ArticleTags article={article}/>
-      <ArticleLink article={article}/>
-      <ArticleContent article={article} />
-    </>
-  )
+  return [fetching, article]
 }
 
 export default ArticlePage

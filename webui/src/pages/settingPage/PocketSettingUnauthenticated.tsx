@@ -6,26 +6,8 @@ import { FormLabel, FormRow } from "../../component/common/Form"
 
 
 const PocketSettingUnauthenticated: FC = () => {
-  const [fetching, setFetching] = useState(false)
   const [consumerKey, setConsumerKey] = useState('')
-
-  const onActivate = () => {
-    if (consumerKey.length <= 0) {
-      Alert.error('consumer key required')
-      return
-    }
-
-    const redirectURI = `${window.location.protocol}//${window.location.host}/settings/pocket-auth`
-    setFetching(true)
-    requestObtainPocketRequestToken(consumerKey, redirectURI)
-      .then(requestToken => {
-        window.location.href = `https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectURI}`
-      })
-      .catch(err => {
-        Alert.error(err.toString())
-        setFetching(false)
-      })
-  }
+  const [fetching, activate] = useActivate()
 
   return (
     <Form layout="horizontal">
@@ -44,7 +26,7 @@ const PocketSettingUnauthenticated: FC = () => {
               </a>
             </Tooltip>
           }>
-            <Icon icon="question" style={{ cursor: 'pointer' }}/>
+            <Icon icon="question" style={{cursor: 'pointer'}}/>
           </Whisper>
         </FormLabel>
 
@@ -55,7 +37,7 @@ const PocketSettingUnauthenticated: FC = () => {
           size="sm"
         />
         <ConnectBtn
-          onClick={onActivate}
+          onClick={activate}
           loading={fetching}
           color="green"
           size="sm"
@@ -65,6 +47,30 @@ const PocketSettingUnauthenticated: FC = () => {
       </FormRow>
     </Form>
   )
+}
+
+const useActivate = (): [boolean, (consumerKey: string) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const activate = (consumerKey: string) => {
+    if (consumerKey.length <= 0) {
+      Alert.error('consumer key required')
+      return
+    }
+
+    const redirectURI = `${window.location.protocol}//${window.location.host}/settings/pocket-auth`
+    setFetching(true)
+    requestObtainPocketRequestToken(consumerKey, redirectURI)
+      .then(requestToken => {
+        window.location.href = `https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectURI}`
+      })
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, activate]
 }
 
 const StatusTag = styled(Tag)`

@@ -1,17 +1,54 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
+import styled from "styled-components"
 import { Alert, Icon, IconButton, Panel } from "rsuite"
-import NoteNavLayout from "../../component/layout/NoteNavLayout"
 import NoteTitle from "./NoteTitle"
+import NoteNavLayout from "../../component/layout/NoteNavLayout"
 import Note from "../../models/Note"
 import { requestGetNote, requestSwapParagraphs } from "../../apis/NoteApi"
 import NoteParagraph from "./NoteParagraph"
 import Article from "../../models/Article"
-import styled from "styled-components"
 
 
 const NotePage: FC = () => {
   const {id} = useParams() as any
+  const history = useHistory()
+  const [fetching, note, referencedArticles, swapParagraphSeq] = useRequestGetNote(id)
+
+  return (
+    <NoteNavLayout loading={fetching}>
+      {note && <NoteTitle note={note}/>}
+      {
+        note?.paragraphs
+          .sort((a, b) => a.seq - b.seq)
+          .map(paragraph =>
+            <NoteParagraph
+              key={paragraph.id}
+              paragraph={paragraph}
+              referencedArticles={referencedArticles}
+              onMoveUp={seq => swapParagraphSeq(seq, seq - 1)}
+              onMoveDown={seq => swapParagraphSeq(seq, seq + 1)}
+            />
+          )
+      }
+      <ParagraphPanel bordered>
+        <div style={{textAlign: 'center'}}>
+          <IconButton
+            icon={<Icon icon="plus"/>}
+            onClick={() => history.push(`/notes/${id}/paragraphs`)}
+          />
+        </div>
+      </ParagraphPanel>
+    </NoteNavLayout>
+  )
+}
+
+const useRequestGetNote = (id: number): [
+  boolean,
+    Note | null,
+  Article[],
+  (seqA: number, seqB: number) => void,
+] => {
   const [fetching, setFetching] = useState(false)
   const [note, setNote] = useState(null as Note | null)
   const [referencedArticles, setReferencedArticles] = useState([] as Article[])
@@ -20,7 +57,7 @@ const NotePage: FC = () => {
   useEffect(() => {
     setFetching(true)
     requestGetNote(id)
-      .then(([ note, referencedArticles ]) => {
+      .then(([note, referencedArticles]) => {
         setNote(note)
         setReferencedArticles(referencedArticles)
       })
@@ -48,32 +85,7 @@ const NotePage: FC = () => {
     setNote(Object.assign({}, note)) // refresh
   }
 
-  return (
-    <NoteNavLayout loading={fetching}>
-      <NoteTitle note={note}/>
-      {
-        note?.paragraphs
-          .sort((a, b) => a.seq - b.seq)
-          .map(paragraph =>
-            <NoteParagraph
-              key={paragraph.id}
-              paragraph={paragraph}
-              referencedArticles={referencedArticles}
-              onMoveUp={seq => swapParagraphSeq(seq, seq - 1)}
-              onMoveDown={seq => swapParagraphSeq(seq, seq + 1)}
-            />
-          )
-      }
-      <ParagraphPanel bordered>
-        <div style={{ textAlign: 'center' }}>
-          <IconButton
-            icon={<Icon icon="plus" />}
-            onClick={() => history.push(`/notes/${id}/paragraphs`)}
-          />
-        </div>
-      </ParagraphPanel>
-    </NoteNavLayout>
-  )
+  return [fetching, note, referencedArticles, swapParagraphSeq]
 }
 
 const ParagraphPanel = styled(Panel)`

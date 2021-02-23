@@ -10,10 +10,33 @@ import TitleInput from "../../component/note/TitleInput"
 
 const NewNotePage: FC = () => {
   const [title, setTitle] = useState('')
+  const [ fetching, submit ] = useSubmit()
+
+  const onSubmit = (content: string, referenceArticles: Article[], referenceWebURLs: string[]) =>
+    submit(title, content, referenceArticles, referenceWebURLs)
+
+  return (
+    <SimpleLayout size="lg">
+      <TitleInput value={title} onChange={setTitle} placeholder="Title"/>
+      <NoteEditor
+        content=""
+        referenceArticles={[]}
+        referenceWebURLs={[]}
+        onSubmit={onSubmit}
+        fetching={fetching}
+      />
+    </SimpleLayout>
+  )
+}
+
+const useSubmit = (): [
+  boolean,
+  (title: string, content: string, referenceArticles: Article[], referenceWebURLs: string[]) => void,
+] => {
   const [fetching, setFetching] = useState(false)
   const history = useHistory()
 
-  const onSubmit = (content: string, referenceArticles: Article[], referenceWebURLs: string[]) => {
+  const submit = (title: string, content: string, referenceArticles: Article[], referenceWebURLs: string[]) => {
     if (title.trim().length === 0) {
       Alert.error('title required')
       return
@@ -34,18 +57,7 @@ const NewNotePage: FC = () => {
       })
   }
 
-  return (
-    <SimpleLayout size="lg">
-      <TitleInput value={title} onChange={setTitle} placeholder="Title"/>
-      <NoteEditor
-        content=""
-        referenceArticles={[]}
-        referenceWebURLs={[]}
-        onSubmit={onSubmit}
-        fetching={fetching}
-      />
-    </SimpleLayout>
-  )
+  return [ fetching, submit ]
 }
 
 export default NewNotePage

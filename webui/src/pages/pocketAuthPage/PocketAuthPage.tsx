@@ -4,8 +4,12 @@ import { requestPocketAuth } from "../../apis/SettingApi"
 
 
 const PocketAuthPage: FC = () => {
-  const [ fetching, setFetching ] = useState(false)
+  const [fetching] = useRequestPocketAuth()
+  return fetching ? <Loader center/> : null
+}
 
+const useRequestPocketAuth = (): [boolean] => {
+  const [fetching, setFetching] = useState(false)
   useEffect(() => {
     setFetching(true)
     requestPocketAuth()
@@ -18,7 +22,7 @@ const PocketAuthPage: FC = () => {
       })
   }, [])
 
-  return fetching ? <Loader center /> : null
+  return [fetching]
 }
 
 export default PocketAuthPage

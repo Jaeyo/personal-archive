@@ -9,22 +9,50 @@ import Article from "../../models/Article"
 
 
 const NewNoteParagraphPage: FC = () => {
-  const { id: noteID } = useParams() as any
-  const [ fetching, setFetching ] = useState(false)
-  const [ title, setTitle ] = useState('...')
+  const {id: noteID} = useParams() as any
+  const [loadFetching, title] = useRequestGetNote(noteID)
+  const [submitFetching, submit] = useSubmit(noteID)
+
+  return (
+    <SimpleLayout loading={loadFetching} size="lg">
+      <TitleInput disabled value={title}/>
+      <NoteEditor
+        content=""
+        referenceArticles={[]}
+        referenceWebURLs={[]}
+        onSubmit={submit}
+        fetching={submitFetching}
+      />
+    </SimpleLayout>
+  )
+}
+
+const useRequestGetNote = (noteID: number): [boolean, string] => {
+  const [fetching, setFetching] = useState(false)
+  const [title, setTitle] = useState('...')
   const history = useHistory()
 
   useEffect(() => {
     setFetching(true)
     requestGetNote(noteID)
-      .then(([ note, articles ]) => {
+      .then(([note, articles]) => {
         setTitle(note.title)
       })
       .catch(err => Alert.error(err.toString()))
       .finally(() => setFetching(false))
-  }, [ noteID ])
+  }, [noteID])
 
-  const onSubmit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
+  return [fetching, title]
+}
+
+const useSubmit = (noteID: number): [
+  boolean,
+  (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => void,
+] => {
+  const [fetching, setFetching] = useState(false)
+  const history = useHistory()
+
+  const submit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
     if (content.trim().length === 0) {
       Alert.error('content required')
       return
@@ -40,18 +68,7 @@ const NewNoteParagraphPage: FC = () => {
       })
   }
 
-  return (
-    <SimpleLayout loading={fetching} size="lg">
-      <TitleInput disabled value={title} />
-      <NoteEditor
-        content=""
-        referenceArticles={[]}
-        referenceWebURLs={[]}
-        onSubmit={onSubmit}
-        fetching={fetching}
-      />
-    </SimpleLayout>
-  )
+  return [fetching, submit]
 }
 
 export default NewNoteParagraphPage

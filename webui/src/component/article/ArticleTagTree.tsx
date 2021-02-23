@@ -9,11 +9,27 @@ import { ArticleTagCount } from "../../models/ArticleTag"
 
 
 const ArticleTagTree: FC = () => {
+  const [fetching, articleTags, untaggedCount, allCount] = useRequestFindArticleTags()
+  const history = useHistory()
+
+  if (fetching) {
+    return <Loader/>
+  }
+
+  return (
+    <StyledTree
+      data={toArticleTagItems(articleTags, untaggedCount, allCount)}
+      onSelect={(_: any, tag: any) => history.push(`/tags/${encodeURIComponent(tag)}`)}
+      defaultExpandAll
+    />
+  )
+}
+
+const useRequestFindArticleTags = (): [boolean, ArticleTagCount[], number, number] => {
   const [fetching, setFetching] = useState(false)
   const [articleTags, setArticleTags] = useRecoilState(articleTagsState)
   const [untaggedCount, setUntaggedCount] = useState(0)
   const [allCount, setAllCount] = useState(0)
-  const history = useHistory()
 
   useEffect(() => {
     setFetching(true)
@@ -27,17 +43,7 @@ const ArticleTagTree: FC = () => {
       .catch(err => Alert.error(err.toString()))
   }, [setArticleTags, setUntaggedCount])
 
-  if (fetching) {
-    return <Loader/>
-  }
-
-  return (
-    <StyledTree
-      data={toArticleTagItems(articleTags, untaggedCount, allCount)}
-      onSelect={(_: any, tag: any) => history.push(`/tags/${encodeURIComponent(tag)}`)}
-      defaultExpandAll
-    />
-  )
+  return [fetching, articleTags, untaggedCount, allCount]
 }
 
 const StyledTree = styled(Tree)`

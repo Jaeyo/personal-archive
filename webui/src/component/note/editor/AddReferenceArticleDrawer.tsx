@@ -2,7 +2,7 @@ import React, { FC, useState } from "react"
 import { Alert, Button, Drawer, Icon, Input, InputGroup, List, Loader, Pagination } from "rsuite"
 import { requestSearchArticles } from "../../../apis/ArticleApi"
 import Article from "../../../models/Article"
-import { emptyPagination } from "../../../common/Types"
+import { emptyPagination, Pagination as PaginationType } from "../../../common/Types"
 
 
 interface Props {
@@ -13,24 +13,19 @@ interface Props {
 
 const AddReferenceArticleDrawer: FC<Props> = ({show, onConfirm, onCancel}) => {
   const [keyword, setKeyword] = useState('')
-  const [fetching, setFetching] = useState(false)
-  const [articles, setArticle] = useState([] as Article[])
+  const [articles, setArticles] = useState([] as Article[])
   const [pagination, setPagination] = useState(emptyPagination)
+  const [fetching, search] = useSearch()
 
-  const onSearch = (page: number) => {
-    setFetching(true)
-    requestSearchArticles(keyword, page)
-      .then(([articles, pagination]) => {
-        setArticle(articles)
-        setPagination(pagination)
-      })
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setFetching(false))
-  }
+  const onSearch = (page: number) =>
+    search(keyword, page).then(({articles, pagination}) => {
+      setArticles(articles)
+      setPagination(pagination)
+    })
 
   const clear = () => {
     setKeyword('')
-    setArticle([])
+    setArticles([])
     setPagination(emptyPagination)
   }
 
@@ -81,6 +76,25 @@ const AddReferenceArticleDrawer: FC<Props> = ({show, onConfirm, onCancel}) => {
       </Drawer.Footer>
     </Drawer>
   )
+}
+
+type SearchResult = { articles: Article[], pagination: PaginationType }
+type SearchFn = (keyword: string, page: number) => Promise<SearchResult>
+
+const useSearch = (): [boolean, SearchFn] => {
+  const [fetching, setFetching] = useState(false)
+
+  const search = (keyword: string, page: number) => new Promise<SearchResult>((resolve, reject) => {
+    setFetching(true)
+    requestSearchArticles(keyword, page)
+      .then(([articles, pagination]) => {
+        resolve({articles, pagination})
+      })
+      .catch(err => Alert.error(err.toString()))
+      .finally(() => setFetching(false))
+  })
+
+  return [fetching, search]
 }
 
 export default AddReferenceArticleDrawer

@@ -12,9 +12,7 @@ interface Props {
 }
 
 const renderers = {
-  code: ({language, value}: any) => {
-return <SyntaxHighlighter style={nord} language={language} children={value} />
-  }
+  code: ({language, value}: any) => <SyntaxHighlighter style={nord} language={language} children={value} />
 }
 
 const MarkdownContent: FC<Props> = ({ content }) => (

@@ -1,10 +1,10 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { Alert, Button, Form, Tag, Toggle } from "rsuite"
-import TimeAgo from "javascript-time-ago"
 import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
-import en from "javascript-time-ago/locale/en"
 import { FormLabel, FormRow, FormValue } from "../../component/common/Form"
+import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en"
 
 TimeAgo.addLocale(en)
 TimeAgo.setDefaultLocale('en-US')
@@ -17,28 +17,8 @@ interface Props {
 }
 
 const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime}) => {
-  const [activateFetching, setActivateFetching] = useState(false)
-  const [syncToggleFetching, setSyncToggleFetching] = useState(false)
-  const [isSyncChecked, setSyncChecked] = useState(isSyncOn)
-
-  const onUnactivate = () => {
-    setActivateFetching(true)
-    requestPocketUnauth()
-      .then(() => window.location.reload())
-      .catch(err => {
-        Alert.error(err.toString())
-        setActivateFetching(false)
-      })
-  }
-
-  const onSyncToggle = (checked: boolean) => {
-    setSyncToggleFetching(true)
-    setSyncChecked(checked)
-    requestPocketSync(checked)
-      .then(() => Alert.info(`Pocket sync ${checked ? 'ON' : 'OFF'}`))
-      .catch(err => Alert.error(err.toString()))
-      .finally(() => setSyncToggleFetching(false))
-  }
+  const [activateFetching, deactivate] = useDeactivate()
+  const [syncToggleFetching, isSyncChecked, syncToggle] = useSyncToggle(isSyncOn)
 
   return (
     <>
@@ -58,14 +38,14 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
             checkedChildren="Sync"
             unCheckedChildren="Not Sync"
             disabled={syncToggleFetching}
-            onChange={onSyncToggle}
+            onChange={syncToggle}
           />
           <LastSyncTime lastSyncTime={lastSyncTime}/>
         </FormRow>
       </Form>
       <BtnDiv>
         <Button
-          onClick={onUnactivate}
+          onClick={deactivate}
           loading={activateFetching}
           color="red"
           appearance="ghost"
@@ -76,6 +56,38 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
       </BtnDiv>
     </>
   )
+}
+
+const useDeactivate = (): [boolean, () => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const deactivate = () => {
+    setFetching(true)
+    requestPocketUnauth()
+      .then(() => window.location.reload())
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, deactivate]
+}
+
+const useSyncToggle = (isSyncOn: boolean): [boolean, boolean, (checked: boolean) => void] => {
+  const [fetching, setFetching] = useState(false)
+  const [isSyncChecked, setSyncChecked] = useState(isSyncOn)
+
+  const syncToggle = (checked: boolean) => {
+    setFetching(true)
+    setSyncChecked(checked)
+    requestPocketSync(checked)
+      .then(() => Alert.info(`Pocket sync ${checked ? 'ON' : 'OFF'}`))
+      .catch(err => Alert.error(err.toString()))
+      .finally(() => setFetching(false))
+  }
+
+  return [fetching, isSyncChecked, syncToggle]
 }
 
 const LastSyncTime: FC<{ lastSyncTime: Date | null }> = ({lastSyncTime}) =>

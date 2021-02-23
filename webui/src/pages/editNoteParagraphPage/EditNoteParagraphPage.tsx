@@ -10,18 +10,36 @@ import Article from "../../models/Article"
 
 const EditNoteParagraphPage: FC = () => {
   const params = useParams() as any
-  const [ noteID, paragraphID ] = [ parseInt(params.id, 10), parseInt(params.paragraphID, 10) ]
-  const [ fetching, setFetching ] = useState(false)
-  const [ title, setTitle ] = useState('...')
-  const [ content, setContent ] = useState('')
-  const [ referencedArticles, setReferencedArticles ] = useState([] as Article[])
-  const [ referencedWebURLs, setReferencedWebURLs ] = useState([] as string[])
+  const [noteID, paragraphID] = [parseInt(params.id, 10), parseInt(params.paragraphID, 10)]
+  const [loadFetching, title, content, referencedArticles, referencedWebURLs] = useRequestGetNote(noteID, paragraphID)
+  const [submitFetching, submit] = useSubmit(noteID, paragraphID)
+
+  return (
+    <SimpleLayout loading={loadFetching} size="lg">
+      <TitleInput disabled value={title}/>
+      <NoteEditor
+        content={content}
+        referenceArticles={referencedArticles}
+        referenceWebURLs={referencedWebURLs}
+        onSubmit={submit}
+        fetching={submitFetching}
+      />
+    </SimpleLayout>
+  )
+}
+
+const useRequestGetNote = (noteID: number, paragraphID: number): [boolean, string, string, Article[], string[]] => {
+  const [fetching, setFetching] = useState(false)
+  const [title, setTitle] = useState('...')
+  const [content, setContent] = useState('')
+  const [referencedArticles, setReferencedArticles] = useState([] as Article[])
+  const [referencedWebURLs, setReferencedWebURLs] = useState([] as string[])
   const history = useHistory()
 
   useEffect(() => {
     setFetching(true)
     requestGetNote(noteID)
-      .then(([ note, articles ]) => {
+      .then(([note, articles]) => {
         setTitle(note.title)
 
         const paragraph = note.paragraphs.find(p => p.id === paragraphID)
@@ -41,9 +59,19 @@ const EditNoteParagraphPage: FC = () => {
       })
       .catch(err => Alert.error(err.toString()))
       .finally(() => setFetching(false))
-  }, [ noteID, paragraphID, history ])
+  }, [noteID, paragraphID, history])
 
-  const onSubmit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
+  return [fetching, title, content, referencedArticles, referencedWebURLs]
+}
+
+const useSubmit = (noteID: number, paragraphID: number): [
+  boolean,
+  (content: string, referencedArticles: Article[], referencedWebURLs: string[]) => void,
+] => {
+  const [fetching, setFetching] = useState(false)
+  const history = useHistory()
+
+  const submit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
     if (content.trim().length === 0) {
       Alert.error('content required')
       return
@@ -58,19 +86,7 @@ const EditNoteParagraphPage: FC = () => {
         setFetching(false)
       })
   }
-
-  return (
-    <SimpleLayout loading={fetching} size="lg">
-      <TitleInput disabled value={title} />
-      <NoteEditor
-        content={content}
-        referenceArticles={referencedArticles}
-        referenceWebURLs={referencedWebURLs}
-        onSubmit={onSubmit}
-        fetching={fetching}
-      />
-    </SimpleLayout>
-  )
+  return [fetching, submit]
 }
 
 export default EditNoteParagraphPage

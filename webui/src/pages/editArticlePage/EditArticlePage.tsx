@@ -12,39 +12,39 @@ import SimpleLayout from "../../component/layout/SimpleLayout"
 
 const EditArticlePage: FC = () => {
   const {id} = useParams() as any
-  const [loadFetching, setLoadFetching] = useState(false)
-  const [article, setArticle] = useState(null as Article | null)
-
-  useEffect(() => {
-    setLoadFetching(true)
-    requestGetArticle(id)
-      .then(article => {
-        setArticle(article)
-      })
-      .finally(() => setLoadFetching(false))
-      .catch(err => Alert.error(err.toString()))
-  }, [id])
+  const [fetching, article] = useRequestGetArticle(id)
 
   return (
-    <SimpleLayout loading={loadFetching} size="lg">
-      {renderArticle(article)}
+    <SimpleLayout loading={fetching} size="lg">
+      {
+        article && (
+          <>
+            <ArticleTitle article={article}/>
+            <ArticleTags article={article}/>
+            <ArticleLink article={article}/>
+            <EditArticleContentMarkdown article={article}/>
+          </>
+        )
+      }
     </SimpleLayout>
   )
 }
 
-const renderArticle = (article: Article | null) => {
-  if (!article) {
-    return null
-  }
+const useRequestGetArticle = (id: number): [boolean, Article | null] => {
+  const [fetching, setFetching] = useState(false)
+  const [article, setArticle] = useState(null as Article | null)
 
-  return (
-    <>
-      <ArticleTitle article={article}/>
-      <ArticleTags article={article}/>
-      <ArticleLink article={article}/>
-      <EditArticleContentMarkdown article={article}/>
-    </>
-  )
+  useEffect(() => {
+    setFetching(true)
+    requestGetArticle(id)
+      .then(article => {
+        setArticle(article)
+      })
+      .finally(() => setFetching(false))
+      .catch(err => Alert.error(err.toString()))
+  }, [id])
+
+  return [fetching, article]
 }
 
 export default EditArticlePage

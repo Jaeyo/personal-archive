@@ -12,22 +12,42 @@ interface Props {
 }
 
 const ArticleTitle: FC<Props> = ({article}) => {
-  const [submitFetching, setSubmitFetching] = useState(false)
-  const [deleteFetching, setDeleteFetching] = useState(false)
-  const history = useHistory()
+  const [submitFetching, submitArticle] = useSubmit(article)
+  const [deleteFetching, deleteArticle] = useDelete(article)
 
-  const onSubmit = (title: string) => {
-    setSubmitFetching(true)
+  return (
+    <ManagedTitle
+      title={article ? article.title : '...'}
+      onSubmit={submitArticle}
+      onDelete={deleteArticle}
+      submitFetching={submitFetching}
+      deleteFetching={deleteFetching}
+    />
+  )
+}
+
+const useSubmit = (article: Article | null): [boolean, (title: string) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const submit = (title: string) => {
+    setFetching(true)
     requestUpdateTitle(article!.id, title)
       .then(() => window.location.reload())
       .catch(err => {
         Alert.error(err.toString())
-        setSubmitFetching(false)
+        setFetching(false)
       })
   }
 
-  const onDelete = () => {
-    setDeleteFetching(true)
+  return [fetching, submit]
+}
+
+const useDelete = (article: Article | null): [boolean, () => void] => {
+  const [fetching, setFetching] = useState(false)
+  const history = useHistory()
+
+  const deleteArticle = () => {
+    setFetching(true)
     requestDeleteArticle(article!.id)
       .then(() => {
         if (history.length === 1) {
@@ -39,19 +59,11 @@ const ArticleTitle: FC<Props> = ({article}) => {
       })
       .catch(err => {
         Alert.error(err.toString())
-        setDeleteFetching(false)
+        setFetching(false)
       })
   }
 
-  return (
-    <ManagedTitle
-      title={article ? article.title : '...'}
-      onSubmit={onSubmit}
-      onDelete={onDelete}
-      submitFetching={submitFetching}
-      deleteFetching={deleteFetching}
-    />
-  )
+  return [fetching, deleteArticle]
 }
 
 export default ArticleTitle

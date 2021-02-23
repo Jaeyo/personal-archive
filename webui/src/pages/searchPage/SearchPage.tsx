@@ -1,26 +1,41 @@
 import React, { FC, useEffect, useState } from "react"
 import styled from "styled-components"
+import { useHistory } from "react-router-dom"
+import { Alert } from "rsuite"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { usePage, useQuery } from "../../common/Hooks"
 import { requestSearchArticles } from "../../apis/ArticleApi"
-import { Alert } from "rsuite"
 import Article from "../../models/Article"
-import { emptyPagination } from "../../common/Types"
+import { emptyPagination, Pagination } from "../../common/Types"
 import ArticleList from "../../component/article/ArticleList"
-import { useHistory } from "react-router-dom"
 
 
 const SearchPage: FC = () => {
-  const [fetching, setFetching] = useState(false)
-  const [articles, setArticles] = useState([] as Article[])
-  const [pagination, setPagination] = useState(emptyPagination)
   const keyword = useQuery().get('q') || ''
   const page = usePage()
+  const [ fetching, articles, pagination ] = useRequestSearchArticles(keyword, page)
   const history = useHistory()
 
   if (keyword.length <= 1) {
-    Alert.error('keyword should be more than 2 characterS')
+    Alert.error('keyword should be more than 2 characters')
   }
+
+  return (
+    <ArticleTagTreeLayout loading={fetching}>
+      <Keyword>Keyword: {keyword}</Keyword>
+      <ArticleList
+        articles={articles}
+        pagination={pagination}
+        onSelectPage={page => history.push(`/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)}
+      />
+    </ArticleTagTreeLayout>
+  )
+}
+
+const useRequestSearchArticles = (keyword: string, page: number): [ boolean, Article[], Pagination ] => {
+  const [fetching, setFetching] = useState(false)
+  const [articles, setArticles] = useState([] as Article[])
+  const [pagination, setPagination] = useState(emptyPagination)
 
   useEffect(() => {
     if (keyword.length <= 1) {
@@ -37,16 +52,7 @@ const SearchPage: FC = () => {
       .finally(() => setFetching(false))
   }, [keyword, page])
 
-  return (
-    <ArticleTagTreeLayout loading={fetching}>
-      <Keyword>Keyword: {keyword}</Keyword>
-      <ArticleList
-        articles={articles}
-        pagination={pagination}
-        onSelectPage={page => history.push(`/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)}
-      />
-    </ArticleTagTreeLayout>
-  )
+  return [ fetching, articles, pagination ]
 }
 
 const Keyword = styled.h1`

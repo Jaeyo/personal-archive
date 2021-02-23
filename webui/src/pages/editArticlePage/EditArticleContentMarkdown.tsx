@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react"
+import React, { FC, RefObject, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import AceEditor from "react-ace"
 import Article from "../../models/Article"
@@ -16,10 +16,10 @@ interface Props {
 }
 
 const EditArticleContentMarkdown: FC<Props> = ({article}) => {
-  const [submitFetching, setSubmitFetching] = useState(false)
   const [content, setContent] = useState('')
-  const previewNode = useRef<HTMLDivElement>(null)
   const history = useHistory()
+  const [previewNode, previewDown, previewUp] = usePreviewNode()
+  const [fetching, submit] = useSubmit()
 
   useEffect(() => {
     if (article) {
@@ -27,27 +27,7 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
     }
   }, [article])
 
-  const onSubmit = () => submit(content)
-
-  const submit = (content: string) => {
-    setSubmitFetching(true)
-    requestUpdateContent(article!.id, content)
-      .then(() => window.location.href = `/articles/${article!.id}`)
-      .catch(err => {
-        Alert.error(err.toString())
-        setSubmitFetching(false)
-      })
-  }
-
-  const previewDown = () => {
-    const top = (previewNode.current?.scrollTop || 0) + 150
-    previewNode.current?.scrollTo({ top })
-  }
-
-  const previewUp = () => {
-    const top = (previewNode.current?.scrollTop || 0) - 150
-    previewNode.current?.scrollTo({ top })
-  }
+  const onSubmit = () => submit(article!.id, content)
 
   return (
     <WrapperDiv>
@@ -65,9 +45,13 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
             tabSize={2}
             focus={true}
             commands={[
-              { name: 'down', bindKey: { mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
-              { name: 'up', bindKey: { mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
-              { name: 'submit', bindKey: { mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => submit(editor.getValue())},
+              {name: 'down', bindKey: {mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
+              {name: 'up', bindKey: {mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
+              {
+                name: 'submit',
+                bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'},
+                exec: editor => submit(article!.id, editor.getValue())
+              },
             ]}
             editorProps={{
               $blockScrolling: true,
@@ -75,15 +59,47 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
           />
         </EditAreaDiv>
         <PreviewDiv ref={previewNode}>
-          <MarkdownContent content={content} />
+          <MarkdownContent content={content}/>
         </PreviewDiv>
       </EditWrapperDiv>
       <SubmitDiv>
         <Button onClick={() => history.goBack()}>Cancel</Button>
-        <Button loading={submitFetching} onClick={onSubmit}>Submit</Button>
+        <Button loading={fetching} onClick={onSubmit}>Submit</Button>
       </SubmitDiv>
     </WrapperDiv>
   )
+}
+
+const usePreviewNode = (): [RefObject<HTMLDivElement>, () => void, () => void] => {
+  const previewNode = useRef<HTMLDivElement>(null)
+
+  const previewDown = () => {
+    const top = (previewNode.current?.scrollTop || 0) + 150
+    previewNode.current?.scrollTo({top})
+  }
+
+  const previewUp = () => {
+    const top = (previewNode.current?.scrollTop || 0) - 150
+    previewNode.current?.scrollTo({top})
+  }
+
+  return [previewNode, previewDown, previewUp]
+}
+
+const useSubmit = (): [boolean, (articleID: number, content: string) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const submit = (articleID: number, content: string) => {
+    setFetching(true)
+    requestUpdateContent(articleID, content)
+      .then(() => window.location.href = `/articles/${articleID}`)
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, submit]
 }
 
 const WrapperDiv = styled.div`

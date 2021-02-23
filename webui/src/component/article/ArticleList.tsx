@@ -1,8 +1,8 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import Article from "../../models/Article"
 import { Alert, Button, Checkbox, List, Pagination } from "rsuite"
+import Article from "../../models/Article"
 import ArticleTag from "./ArticleTag"
 import { Pagination as IPagination } from "../../common/Types"
 import { requestDeleteArticles } from "../../apis/ArticleApi"
@@ -15,30 +15,8 @@ interface Props {
 }
 
 const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
-  const [ selectedIDs, setSelectedIDs ] = useState([] as number[])
-  const [ deleteFetching, setDeleteFetching ] = useState(false)
-
-  const onChecked = (id: number, checked: boolean) => {
-    if (checked) {
-      setSelectedIDs([ ...selectedIDs, id ])
-    } else {
-      setSelectedIDs(selectedIDs.filter(selectedID => selectedID !== id))
-    }
-  }
-
-  const onDelete = () => {
-    if (selectedIDs.length <= 0) {
-      return
-    }
-
-    setDeleteFetching(true)
-    requestDeleteArticles(selectedIDs)
-      .then(() => window.location.reload())
-      .catch(err => {
-        Alert.error(err.toString())
-        setDeleteFetching(false)
-      })
-  }
+  const [selectedIDs, select] = useSelectedIDs()
+  const [fetching, deleteArticles] = useDeleteArticles()
 
   return (
     <>
@@ -48,8 +26,8 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
           <DeleteBtnDiv>
             <DeleteBtn
               color="red"
-              loading={deleteFetching}
-              onClick={onDelete}
+              loading={fetching}
+              onClick={deleteArticles(selectedIDs)}
             >
               Delete
             </DeleteBtn>
@@ -59,7 +37,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
         {
           articles.map((article, i) => (
             <List.Item key={article.id} index={i}>
-              <Checkbox onChange={(_: any, checked: boolean) => onChecked(article.id, checked)}>
+              <Checkbox onChange={(_: any, checked: boolean) => select(article.id, checked)}>
                 <ArticleLink to={`/articles/${article.id}`}>
                   {article.title}
                 </ArticleLink>
@@ -85,6 +63,40 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
       </PaginationDiv>
     </>
   )
+}
+
+const useSelectedIDs = (): [number[], (id: number, checked: boolean) => void] => {
+  const [selectedIDs, setSelectedIDs] = useState([] as number[])
+
+  const select = (id: number, checked: boolean) => {
+    if (checked) {
+      setSelectedIDs([...selectedIDs, id])
+    } else {
+      setSelectedIDs(selectedIDs.filter(selectedID => selectedID !== id))
+    }
+  }
+
+  return [selectedIDs, select]
+}
+
+const useDeleteArticles = (): [boolean, (ids: number[]) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const deleteArticles = (ids: number[]) => {
+    if (ids.length <= 0) {
+      return
+    }
+
+    setFetching(true)
+    requestDeleteArticles(ids)
+      .then(() => window.location.reload())
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, deleteArticles]
 }
 
 const DeleteBtnDiv = styled.div`

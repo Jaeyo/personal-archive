@@ -10,23 +10,15 @@ interface Props {
 }
 
 const TagTitle: FC<Props> = ({tag: initialTag}) => {
-  const [fetching, setFetching] = useState(false)
   const [isEditMode, setEditMode] = useState(false)
   const [tag, setTag] = useState('')
+  const [fetching, submit] = useSubmit()
 
   useEffect(() => {
     setTag(initialTag)
   }, [initialTag])
 
-  const onSubmit = () => {
-    setFetching(true)
-    requestUpdateTag(initialTag, tag)
-      .then(() => window.location.href = `/tags/${tag}`)
-      .catch(err => {
-        Alert.error(err.toString())
-        setFetching(false)
-      })
-  }
+  const onSubmit = () => submit(initialTag, tag)
 
   if (!isEditMode) {
     return (
@@ -51,6 +43,22 @@ const TagTitle: FC<Props> = ({tag: initialTag}) => {
   )
 }
 
+const useSubmit = (): [boolean, (initialTag: string, tag: string) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const submit = (initialTag: string, tag: string) => {
+    setFetching(true)
+    requestUpdateTag(initialTag, tag)
+      .then(() => window.location.href = `/tags/${tag}`)
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [fetching, submit]
+}
+
 const ShowDiv = styled.div`
   margin-bottom: 11px;
 `
@@ -69,7 +77,7 @@ const InputDiv = styled.div`
 `
 
 const EditButton = styled(IconButton)<VisibleProps>`
-  display: ${({ $visible }) => $visible ? 'inline' : 'none'}
+  display: ${({$visible}) => $visible ? 'inline' : 'none'}
 `
 
 export default TagTitle

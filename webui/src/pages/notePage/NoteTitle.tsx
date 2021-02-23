@@ -8,27 +8,47 @@ import { reloadAfterTick } from "../../common/Utils"
 
 
 interface Props {
-  note: Note | null
+  note: Note
 }
 
-const NoteTitle: FC<Props> = ({ note }) => {
-  const [submitFetching, setSubmitFetching] = useState(false)
-  const [deleteFetching, setDeleteFetching] = useState(false)
-  const history = useHistory()
+const NoteTitle: FC<Props> = ({note}) => {
+  const [submitFetching, submit] = useSubmit(note.id)
+  const [deleteFetching, deleteArticle] = useDelete(note.id)
 
-  const onSubmit = (title: string) => {
-    setSubmitFetching(true)
-    requestUpdateTitle(note!.id, title)
+  return (
+    <ManagedTitle
+      title={note ? note.title : '...'}
+      onSubmit={submit}
+      onDelete={deleteArticle}
+      submitFetching={submitFetching}
+      deleteFetching={deleteFetching}
+    />
+  )
+}
+
+const useSubmit = (noteID: number): [boolean, (title: string) => void] => {
+  const [fetching, setFetching] = useState(false)
+
+  const submit = (title: string) => {
+    setFetching(true)
+    requestUpdateTitle(noteID, title)
       .then(() => window.location.reload())
       .catch(err => {
         Alert.error(err.toString())
-        setSubmitFetching(false)
+        setFetching(false)
       })
   }
 
-  const onDelete = () => {
-    setDeleteFetching(true)
-    requestDeleteNote(note!.id)
+  return [fetching, submit]
+}
+
+const useDelete = (noteID: number): [boolean, () => void] => {
+  const [fetching, setFetching] = useState(false)
+  const history = useHistory()
+
+  const deleteArticle = () => {
+    setFetching(true)
+    requestDeleteNote(noteID)
       .then(() => {
         if (history.length === 1) {
           history.push('/notes')
@@ -39,19 +59,11 @@ const NoteTitle: FC<Props> = ({ note }) => {
       })
       .catch(err => {
         Alert.error(err.toString())
-        setDeleteFetching(false)
+        setFetching(false)
       })
   }
 
-  return (
-    <ManagedTitle
-      title={note ? note.title : '...'}
-      onSubmit={onSubmit}
-      onDelete={onDelete}
-      submitFetching={submitFetching}
-      deleteFetching={deleteFetching}
-    />
-  )
+  return [fetching, deleteArticle]
 }
 
 export default NoteTitle

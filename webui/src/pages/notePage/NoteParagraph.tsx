@@ -17,19 +17,9 @@ interface Props {
 }
 
 const NoteParagraph: FC<Props> = ({ paragraph, referencedArticles, onMoveUp, onMoveDown }) => {
-  const [deleteFetching, setDeleteFetching] = useState(false)
   const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
+  const [ fetching, deleteParagraph ] = useDelete(paragraph)
   const history = useHistory()
-
-  const onDelete = () => {
-    setDeleteFetching(true)
-    requestDeleteParagraph(paragraph.noteID, paragraph.id)
-      .then(() => window.location.reload())
-      .catch(err => {
-        Alert.error(err.toString())
-        setDeleteFetching(false)
-      })
-  }
 
   const currentReferencedArticleIDs = paragraph.referenceArticles.map(a => a.articleID)
   const currentReferencedArticles = referencedArticles
@@ -57,14 +47,14 @@ const NoteParagraph: FC<Props> = ({ paragraph, referencedArticles, onMoveUp, onM
         />
         &nbsp;
         <IconButton
-          loading={deleteFetching}
+          loading={fetching}
           icon={<Icon icon={"trash"}/>}
           onClick={() => setDeleteConfirmShow(true)}
           size="xs"
         />
         <Confirm
           show={deleteConfirmShow}
-          onOK={onDelete}
+          onOK={deleteParagraph}
           onClose={() => setDeleteConfirmShow(false)}
         >
           DELETE?
@@ -95,6 +85,22 @@ const NoteParagraph: FC<Props> = ({ paragraph, referencedArticles, onMoveUp, onM
       </div>
     </WrapperPanel>
   )
+}
+
+const useDelete = (paragraph: Paragraph): [ boolean, () => void ] => {
+  const [fetching, setFetching] = useState(false)
+
+  const deleteParagraph = () => {
+    setFetching(true)
+    requestDeleteParagraph(paragraph.noteID, paragraph.id)
+      .then(() => window.location.reload())
+      .catch(err => {
+        Alert.error(err.toString())
+        setFetching(false)
+      })
+  }
+
+  return [ fetching, deleteParagraph ]
 }
 
 const WrapperPanel = styled(Panel)`
