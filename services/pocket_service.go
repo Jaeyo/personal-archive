@@ -63,7 +63,7 @@ func (s *pocketService) ObtainRequestToken(consumerKey, redirectURI string) (str
 		return "", errors.Wrap(err, "failed to create/update pocket consumer key")
 	}
 	if err := s.miscRepository.CreateOrUpdate(PocketRequestToken, requestToken); err != nil {
-		return "", errors.Wrap(err, "failed to create/update pocket consumer key")
+		return "", errors.Wrap(err, "failed to create/update pocket request token")
 	}
 
 	return requestToken, nil
