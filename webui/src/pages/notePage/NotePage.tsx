@@ -31,21 +31,19 @@ const NotePage: FC = () => {
             />
           )
       }
-      <ParagraphPanel bordered>
-        <div style={{textAlign: 'center'}}>
-          <IconButton
-            icon={<Icon icon="plus"/>}
-            onClick={() => history.push(`/notes/${id}/paragraphs`)}
-          />
-        </div>
-      </ParagraphPanel>
+      <AddButtonWrapper>
+        <IconButton
+          icon={<Icon icon="plus"/>}
+          onClick={() => history.push(`/notes/${id}/paragraphs`)}
+        />
+      </AddButtonWrapper>
     </NoteNavLayout>
   )
 }
 
 const useRequestGetNote = (id: number): [
   boolean,
-    Note | null,
+  Note | null,
   Article[],
   (seqA: number, seqB: number) => void,
 ] => {
@@ -88,8 +86,9 @@ const useRequestGetNote = (id: number): [
   return [fetching, note, referencedArticles, swapParagraphSeq]
 }
 
-const ParagraphPanel = styled(Panel)`
-  margin: 10px 0;
+const AddButtonWrapper = styled.div`
+  text-align: center;
+  padding: 10px 0;
 `
 
 export default NotePage
