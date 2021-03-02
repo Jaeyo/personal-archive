@@ -62,6 +62,7 @@ const ManagedTitle: FC<Props> = ({title, onSubmit, onDelete, submitFetching, del
 }
 
 const Title = styled.h1`
+  word-break: break-all;
   display: inline;
   font-size: 24px;
   margin-right: 20px;

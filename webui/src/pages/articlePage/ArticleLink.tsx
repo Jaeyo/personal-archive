@@ -12,13 +12,17 @@ const ArticleLink: FC<Props> = ({article}) => (
   <div>
     <Icon icon="link"/>
     <LinkSpan>link: </LinkSpan>
-    <a href={article.url} target="_blank" rel="noreferrer">{article.url}</a>
+    <UrlLink href={article.url} target="_blank" rel="noreferrer">{article.url}</UrlLink>
   </div>
 )
 
 const LinkSpan = styled.span`
   margin-left: 8px;
   margin-right: 4px;
+`
+
+const UrlLink = styled.a`
+  word-break: break-all;
 `
 
 export default ArticleLink
