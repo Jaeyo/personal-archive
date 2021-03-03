@@ -4,7 +4,6 @@ import (
 	"github.com/jaeyo/personal-archive/common"
 	"github.com/jaeyo/personal-archive/repositories"
 	"github.com/pkg/errors"
-	"io/ioutil"
 	"sync"
 )
 
@@ -18,6 +17,7 @@ type AppService interface {
 
 type appService struct {
 	miscRepository repositories.MiscRepository
+	versionReader  common.VersionReader
 }
 
 var GetAppService = func() func() AppService {
@@ -28,6 +28,7 @@ var GetAppService = func() func() AppService {
 		once.Do(func() {
 			instance = &appService{
 				miscRepository: repositories.GetMiscRepository(),
+				versionReader:  common.NewVersionReader(),
 			}
 		})
 		return instance
@@ -35,16 +36,10 @@ var GetAppService = func() func() AppService {
 }()
 
 func (s *appService) PreserveVerInfo() error {
-	verFile := "/app/VERSION.txt"
-	if common.IsLocal() {
-		verFile = "./VERSION.txt"
-	}
-
-	verB, err := ioutil.ReadFile(verFile)
+	ver, err := s.versionReader.Read()
 	if err != nil {
-		return errors.Wrap(err, "failed to read version.txt file")
+		return errors.Wrap(err, "failed to read version")
 	}
-	ver := string(verB)
 
 	if err := s.miscRepository.CreateOrUpdate(AppVer, ver); err != nil {
 		return errors.Wrap(err, "failed to create / update")
