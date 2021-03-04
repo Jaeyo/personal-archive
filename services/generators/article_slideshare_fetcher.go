@@ -11,14 +11,10 @@ import (
 
 const SlideShareUrlRegex = "https://www.slideshare.net/.*/.*"
 
-type articleSlideShareGenerator struct {
+type articleSlideShareFetcher struct {
 }
 
-func (g *articleSlideShareGenerator) IsKindOfSlideShare(url string) bool {
-	return regexp.MustCompile(SlideShareUrlRegex).MatchString(url)
-}
-
-func (g *articleSlideShareGenerator) GetTitleAndContent(url string) (string, string, error) {
+func (g *articleSlideShareFetcher) Fetch(url string) (string, string, error) {
 	oEmbedURL := fmt.Sprintf("http://www.slideshare.net/api/oembed/2?url=%s&format=json&maxwidth=800&maxheight=800", url)
 	resp, err := http.Get(oEmbedURL)
 	if err != nil {
@@ -43,7 +39,11 @@ func (g *articleSlideShareGenerator) GetTitleAndContent(url string) (string, str
 	return title, embedHtml, nil
 }
 
-func (g *articleSlideShareGenerator) resize(embedHtml string) string {
+func (g *articleSlideShareFetcher) IsFetchable(url string) bool {
+	return regexp.MustCompile(SlideShareUrlRegex).MatchString(url)
+}
+
+func (g *articleSlideShareFetcher) resize(embedHtml string) string {
 	reg := regexp.MustCompile("width=\"[0-9]+\" height=\"[0-9]+\"")
 	return reg.ReplaceAllString(embedHtml, "width=\"800\" height=\"638\"")
 }

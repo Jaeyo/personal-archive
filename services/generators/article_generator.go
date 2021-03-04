@@ -12,10 +12,10 @@ type ArticleGenerator interface {
 }
 
 type articleGenerator struct {
-	markdownGen       *articleMarkdownGenerator
-	tweetGen          *articleTweetGenerator
-	slideShareGen     *articleSlideShareGenerator
-	youtubeGen        *articleYoutubeGenerator
+	markdownFetcher   ArticleFetcher
+	tweetFetcher      ArticleFetcher
+	slideShareFetcher ArticleFetcher
+	youtubeFetcher    ArticleFetcher
 	articleRepository repositories.ArticleRepository
 }
 
@@ -25,10 +25,10 @@ var GetArticleGenerator = func() func() ArticleGenerator {
 	return func() ArticleGenerator {
 		once.Do(func() {
 			instance = &articleGenerator{
-				markdownGen:       &articleMarkdownGenerator{},
-				tweetGen:          &articleTweetGenerator{},
-				slideShareGen:     &articleSlideShareGenerator{},
-				youtubeGen:        &articleYoutubeGenerator{},
+				markdownFetcher:   &articleMarkdownFetcher{},
+				tweetFetcher:      &articleTweetFetcher{},
+				slideShareFetcher: &articleSlideShareFetcher{},
+				youtubeFetcher:    &articleYoutubeFetcher{},
 				articleRepository: repositories.GetArticleRepository(),
 			}
 		})
@@ -37,7 +37,7 @@ var GetArticleGenerator = func() func() ArticleGenerator {
 }()
 
 func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Article, error) {
-	title, content, kind, err := g.getTitleAndContentAndKind(url)
+	title, content, kind, err := g.fetch(url)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get title/content/kind from url")
 	}
@@ -50,21 +50,21 @@ func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Articl
 	return models.NewArticle(kind, url, content, title, tags), nil
 }
 
-func (g *articleGenerator) getTitleAndContentAndKind(url string) (string, string, string, error) {
-	getTitleAndContentFn := g.markdownGen.GetTitleAndContent
+func (g *articleGenerator) fetch(url string) (string, string, string, error) {
+	fetch := g.markdownFetcher.Fetch
 	kind := models.KindMarkdown
-	if g.tweetGen.IsKindOfTweet(url) {
-		getTitleAndContentFn = g.tweetGen.GetTitleAndContent
+	if g.tweetFetcher.IsFetchable(url) {
+		fetch = g.tweetFetcher.Fetch
 		kind = models.KindTweet
-	} else if g.slideShareGen.IsKindOfSlideShare(url) {
-		getTitleAndContentFn = g.slideShareGen.GetTitleAndContent
+	} else if g.slideShareFetcher.IsFetchable(url) {
+		fetch = g.slideShareFetcher.Fetch
 		kind = models.KindSlideShare
-	} else if g.youtubeGen.IsKindOfYoutube(url) {
-		getTitleAndContentFn = g.youtubeGen.GetTitleAndContent
+	} else if g.youtubeFetcher.IsFetchable(url) {
+		fetch = g.youtubeFetcher.Fetch
 		kind = models.KindYoutube
 	}
 
-	title, content, err := getTitleAndContentFn(url)
+	title, content, err := fetch(url)
 	if err != nil {
 		return "", "", "", err
 	}

@@ -13,10 +13,10 @@ import (
 	"strings"
 )
 
-type articleMarkdownGenerator struct {
+type articleMarkdownFetcher struct {
 }
 
-func (g *articleMarkdownGenerator) GetTitleAndContent(url string) (string, string, error) {
+func (g *articleMarkdownFetcher) Fetch(url string) (string, string, error) {
 	title, content, err := g.getTitleAndContent1(url)
 	if err == nil {
 		return title, content, nil
@@ -25,7 +25,11 @@ func (g *articleMarkdownGenerator) GetTitleAndContent(url string) (string, strin
 	return g.getTitleAndContent2(url)
 }
 
-func (g *articleMarkdownGenerator) getTitleAndContent1(url string) (string, string, error) {
+func (g *articleMarkdownFetcher) IsFetchable(url string) bool {
+	return true
+}
+
+func (g *articleMarkdownFetcher) getTitleAndContent1(url string) (string, string, error) {
 	title, htmlContent, err := g.extractReadable(url)
 	if err != nil {
 		return "", "", errors.Wrap(err, "failed to extract readable")
@@ -39,7 +43,7 @@ func (g *articleMarkdownGenerator) getTitleAndContent1(url string) (string, stri
 	return title, markdownContent, nil
 }
 
-func (g *articleMarkdownGenerator) extractReadable(url string) (string, string, error) {
+func (g *articleMarkdownFetcher) extractReadable(url string) (string, string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", "", errors.Wrap(err, "failed to request url")
@@ -84,7 +88,7 @@ func (g *articleMarkdownGenerator) extractReadable(url string) (string, string, 
 	return result.Title, result.Content, nil
 }
 
-func (g *articleMarkdownGenerator) getTitleAndContent2(url string) (string, string, error) {
+func (g *articleMarkdownFetcher) getTitleAndContent2(url string) (string, string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", "", err

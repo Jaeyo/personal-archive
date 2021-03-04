@@ -7,10 +7,24 @@ import (
 	netUrl "net/url"
 )
 
-type articleYoutubeGenerator struct {
+type articleYoutubeFetcher struct {
 }
 
-func (g *articleYoutubeGenerator) IsKindOfYoutube(url string) bool {
+func (g *articleYoutubeFetcher) Fetch(url string) (string, string, error) {
+	title, err := g.getTitle(url)
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed to get title")
+	}
+
+	videoID, err := g.getVideoID(url)
+	if err != nil {
+		return "", "", errors.Wrap(err, "failed to get video id")
+	}
+
+	return title, videoID, nil
+}
+
+func (g *articleYoutubeFetcher) IsFetchable(url string) bool {
 	u, err := netUrl.Parse(url)
 	if err != nil {
 		return false
@@ -30,21 +44,7 @@ func (g *articleYoutubeGenerator) IsKindOfYoutube(url string) bool {
 	return cond
 }
 
-func (g *articleYoutubeGenerator) GetTitleAndContent(url string) (string, string, error) {
-	title, err := g.getTitle(url)
-	if err != nil {
-		return "", "", errors.Wrap(err, "failed to get title")
-	}
-
-	videoID, err := g.getVideoID(url)
-	if err != nil {
-		return "", "", errors.Wrap(err, "failed to get video id")
-	}
-
-	return title, videoID, nil
-}
-
-func (g *articleYoutubeGenerator) getTitle(url string) (string, error) {
+func (g *articleYoutubeFetcher) getTitle(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to request url")
@@ -57,7 +57,7 @@ func (g *articleYoutubeGenerator) getTitle(url string) (string, error) {
 	return getTitleFromHtml(html)
 }
 
-func (g *articleYoutubeGenerator) getVideoID(url string) (string, error) {
+func (g *articleYoutubeFetcher) getVideoID(url string) (string, error) {
 	u, err := netUrl.Parse(url)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to parse url")
