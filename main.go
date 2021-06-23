@@ -48,7 +48,7 @@ func startHttpServer() {
 	routeForControllers(e)
 	routeForFrontend(e)
 
-	if err := e.Start(":1121"); err != nil {
+	if err := e.Start(":1113"); err != nil {
 		if !strings.Contains(err.Error(), "Server closed") {
 			panic(err)
 		}
