@@ -41,7 +41,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 ## 🕹 Quick Start
 
 ```
-$ docker run -td -v ~/.personal-archive:/data -p 1121:1121 --name personal-archive lastiverse/personal-archive:latest
+$ docker run -td -v ~/.personal-archive:/data -p 1113:1113 --name personal-archive lastiverse/personal-archive:latest
 ```
 
 ## 🔨 Development
