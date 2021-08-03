@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios"
 import { isDev } from "../common/Conf"
 
 const fullURL = (url: string): string =>
-  isDev() ? 'http://localhost:1121' + url : url
+  isDev() ? 'http://localhost:1113' + url : url
 
 export const requestGet = (url: string): Promise<AxiosResponse> => handleError(() => axios.get(fullURL(url)))
 export const requestPost = (url: string, body: any): Promise<AxiosResponse> => handleError(() => axios.post(fullURL(url), body))
