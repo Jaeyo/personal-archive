@@ -1,5 +1,5 @@
 import React from "react"
-import { BrowserRouter, Route, Switch } from "react-router-dom"
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom"
 import { RecoilRoot } from "recoil"
 import CreateArticlePage from "./pages/createArticlePage/CreateArticlePage"
 import ArticlePage from "./pages/articlePage/ArticlePage"
@@ -60,7 +60,7 @@ const App = () => (
             <SettingPage />
           </Route>
           <Route path="/">
-            <CreateArticlePage />
+            <Redirect to="/tags/all" />
           </Route>
         </Switch>
       </div>
