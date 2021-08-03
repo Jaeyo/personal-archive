@@ -1,11 +1,10 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Link } from "react-router-dom"
-import { Alert, Button, Checkbox, List, Pagination } from "rsuite"
+import { Alert, Button, List, Pagination } from "rsuite"
 import Article from "../../models/Article"
-import ArticleTag from "./ArticleTag"
 import { Pagination as IPagination } from "../../common/Types"
 import { requestDeleteArticles } from "../../apis/ArticleApi"
+import ArticleListItem from "./ArticleListItem"
 
 
 interface Props {
@@ -36,19 +35,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
       <List hover>
         {
           articles.map((article, i) => (
-            <List.Item key={article.id} index={i}>
-              <Checkbox onChange={(_: any, checked: boolean) => select(article.id, checked)}>
-                <ArticleLink to={`/articles/${article.id}`}>
-                  {article.title}
-                </ArticleLink>
-                {
-                  article.tags.map(
-                    ({tag}) => <ArticleTag tag={tag} key={tag}/>
-                  )
-                }
-                <ReadingTimeSpan>{article.readingTime}</ReadingTimeSpan>
-              </Checkbox>
-            </List.Item>
+            <ArticleListItem article={article} idx={i} onSelect={select} key={i} />
           ))
         }
       </List>
@@ -106,10 +93,6 @@ const DeleteBtnDiv = styled.div`
 
 const DeleteBtn = styled(Button)`
   width: 100px;
-`
-
-const ArticleLink = styled(Link)`
-  margin-right: 15px;
 `
 
 const PaginationDiv = styled.div`

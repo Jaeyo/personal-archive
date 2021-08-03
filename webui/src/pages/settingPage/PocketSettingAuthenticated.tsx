@@ -4,10 +4,6 @@ import { Alert, Button, Form, Tag, Toggle } from "rsuite"
 import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
 import { FormLabel, FormRow, FormValue } from "../../component/common/Form"
 import TimeAgo from "javascript-time-ago"
-import en from "javascript-time-ago/locale/en"
-
-TimeAgo.addLocale(en)
-TimeAgo.setDefaultLocale('en-US')
 
 
 interface Props {
