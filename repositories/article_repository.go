@@ -86,6 +86,7 @@ func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) (m
 	var articles []*models.Article
 	if err := r.database.
 		Preload("Tags").
+		Order("created DESC").
 		Where("id IN ?", ids).
 		Offset(offset).
 		Limit(limit).
