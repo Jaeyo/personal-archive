@@ -27,7 +27,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
             <DeleteBtn
               color="red"
               loading={fetching}
-              onClick={deleteArticles(selectedIDs)}
+              onClick={() => deleteArticles(selectedIDs)}
             >
               Delete
             </DeleteBtn>
