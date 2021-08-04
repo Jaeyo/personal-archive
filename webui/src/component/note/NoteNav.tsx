@@ -4,24 +4,27 @@ import { Alert, Loader } from "rsuite"
 import { useHistory } from "react-router-dom"
 import { requestFindNoteTitles } from "../../apis/NoteApi"
 import Note from "../../models/Note"
+import { Loading } from "@kiwicom/orbit-components"
+import NavItem from "../common/NavItem"
 
 
 const NoteNav: FC = () => {
   const [fetching, notes] = useRequestFindNoteTitles()
   const history = useHistory()
 
+  if (fetching) {
+    return <Loading type="boxLoader" />
+  }
+
   return (
     <WrapperDiv>
-      {fetching && <Loader/>}
       {
         notes.map((note, i) => (
-          <NoteDiv key={note.id}>
-            <NoteOuterSpan>
-              <NoteInnerSpan role="button" onClick={() => history.push(`/notes/${note.id}`)}>
-                {note.title}
-              </NoteInnerSpan>
-            </NoteOuterSpan>
-          </NoteDiv>
+          <div>
+            <NavItem role="button" onClick={() => history.push(`/notes/${note.id}`)}>
+              {note.title}
+            </NavItem>
+          </div>
         ))
       }
     </WrapperDiv>

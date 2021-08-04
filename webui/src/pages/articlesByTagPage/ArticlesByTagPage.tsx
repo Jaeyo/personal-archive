@@ -8,6 +8,7 @@ import TagTitle from "./TagTitle"
 import { usePage } from "../../common/Hooks"
 import { emptyPagination, Pagination } from "../../common/Types"
 import ArticleList from "../../component/article/ArticleList"
+import AddArticle from "../../component/article/AddArticle"
 
 
 const ArticlesByTagPage: FC = () => {
@@ -18,6 +19,7 @@ const ArticlesByTagPage: FC = () => {
 
   return (
     <ArticleTagTreeLayout loading={fetching}>
+      <AddArticle />
       <TagTitle tag={tag}/>
       <ArticleList
         articles={articles}

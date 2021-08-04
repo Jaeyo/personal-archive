@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
 import styled from "styled-components"
-import { Alert, Icon, IconButton, Panel } from "rsuite"
+import { Alert, Icon, IconButton } from "rsuite"
 import NoteTitle from "./NoteTitle"
 import NoteNavLayout from "../../component/layout/NoteNavLayout"
 import Note from "../../models/Note"

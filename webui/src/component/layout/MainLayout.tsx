@@ -1,8 +1,10 @@
 import React, { FC, ReactNode, useEffect, useState } from "react"
-import { Container, Drawer, Icon, Input, InputGroup } from "rsuite"
+import { Drawer, Icon, Input, InputGroup } from "rsuite"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import { When } from "react-if"
+import { Box, ThemeProvider } from "@kiwicom/orbit-components"
+import getTokens from "@kiwicom/orbit-components/lib/getTokens"
 
 
 const desktop = {
@@ -33,10 +35,12 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
   const width = size === 'md' ? 1280 : 1680
   const bgColor = '#272c36'
 
+  const customTokens = getTokens({})
+
   return (
-    <OuterContainer $bgColor={bgColor}>
-      <InnerContainer $width={width}>
-        <TopNavContainer $left={0} $vertical $center $bg={bgColor} $zIndex={10}>
+    <ThemeProvider theme={{ orbit: customTokens }}>
+      <TempParent>
+        <TempHeader>
           <Logo>PA</Logo>
           <Menu onClick={() => history.push(`/tags/all`)}>
             <Icon icon="book2" size="lg" />
@@ -50,23 +54,22 @@ const MainLayout: FC<Props> = ({side, children, size = 'md' }) => {
           <Menu onClick={() => history.push(`/settings`)}>
             <Icon icon="cog" size="lg" />
           </Menu>
-        </TopNavContainer>
-        <When condition={side != null}>
-          <SubNavContainer $showNav={showSubNav}>
-            <SubNavBurger>
-              <Icon icon="bars" role="button" onClick={() => setShowSubNav(!showSubNav)} size="lg" />
-            </SubNavBurger>
-            <Container>
+        </TempHeader>
+        <TempBody>
+          <When condition={side != null}>
+            <TempNav>
               {side}
-            </Container>
-          </SubNavContainer>
-        </When>
-        <ContentContainer $sideExist={side != null}>
-          {children}
-        </ContentContainer>
-        <SearchDrawer show={showSearchDrawer} onClose={() => setShowSearchDrawer(false)} />
-      </InnerContainer>
-    </OuterContainer>
+            </TempNav>
+          </When>
+          <TempMain>
+            <ContentContainer $sideExist={side != null}>
+              {children}
+            </ContentContainer>
+            <SearchDrawer show={showSearchDrawer} onClose={() => setShowSearchDrawer(false)} />
+          </TempMain>
+        </TempBody>
+      </TempParent>
+    </ThemeProvider>
   )
 }
 
@@ -109,112 +112,47 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({ show, onClos
   )
 }
 
-const OuterContainer = styled(Container)<{ $bgColor: string }>`
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  overflow: auto;
-  background-color: ${({ $bgColor }) => $bgColor};
-`
-
-const InnerContainer = styled(Container)<{ $width: number }>`
-  position: relative;
-  margin: 0 auto;
+const TempParent = styled.div`
+  display: flex;
+  flex-direction: column;
   
-  // mobile
-  @media (max-width: 768px) {
-    width: 100%
-  }
-  
-  // desktop 
-  @media (min-width: 769px) {
-    width: ${({ $width }) => $width}px;
-  }
-`
-
-const TopNavContainer = styled(Container)<{ $bg: string }>`
-  position: fixed;
-  z-index: 20;
-  background-color: ${({ $bg }) => $bg};
- 
-  // mobile
-  @media (max-width: 768px) {
-    top: 0;
-    left: 0;
-    right: 0;
-    padding: 15px 20px 15px 30px;
-    height: ${mobile.topNavHeight}px;
-    // header align
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-columns: 1fr;
-  }
- 
-  // desktop 
-  @media (min-width: 769px) {
-    top: 0;
-    bottom: 0;
-    padding: 10px;
-    width: ${desktop.topNavWidth}px;
-    // vertical
-    display: flex;
-    flex-direction: column;
-    // center
-    text-align: center;
-  }
-`
-
-const SubNavContainer = styled(Container)<{ $showNav: boolean }>`
-  position: fixed;
-  z-index: 10;
- 
-  // mobile
-  @media (max-width: 768px) {
-    top: ${mobile.topNavHeight}px;
-    left: 0;
-    right: 0;
-    ${({ $showNav }) => $showNav && `
-      background-color: white;
-    `}
-    
-    // burger
-    & > :nth-child(1) {
-      height: ${mobile.subNavHeight}px;
-    }
-    
-    // display by $showNav
-    & > :nth-child(2) {
-      display: ${({ $showNav }) => $showNav ? 'block' : 'none'};
-    }
-  }
-  
-  // desktop
-  @media (min-width: 769px) {
-    // remove burger
-    & > :nth-child(1) {
-      display: none;
-    }
-    
-    top: 0;
-    bottom: 0;
-    padding: ${`10px 10px 10px ${desktop.topNavWidth}px`};
-    width: ${desktop.topNavWidth + desktop.subNavWidth}px;
-    border-right: 1px solid #eee;
-    background-color: white;
-  }
-`
-
-const SubNavBurger = styled(Container)`
-  text-align: right;
+  max-width: 1680px;
+  margin: 20px auto;
   padding: 10px;
-  display: inline;
 `
 
-const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
-  background-color: white;
+const TempHeader = styled.header`
+  display: grid;
+  grid-auto-flow: column;
+  grid-template-columns: 1fr;
+  padding: 10px;
+`
+
+const TempBody = styled.main`
+  /* Take the remaining height */
+  flex-grow: 1;
   
+  /* Layout the left sidebar, main content */
+  display: flex;
+  flex-direction: row;
+`
+
+const TempNav = styled.aside`
+  min-width: 300px;
+  height: 100%;
+  
+  padding: 10px;
+`
+
+const TempMain = styled.article`
+  /* Take the remaining width */
+  flex-grow: 1;
+  
+  padding: 10px;
+  overflow-x: wrap;
+`
+
+const ContentContainer = styled(Box)<{ $sideExist: boolean }>`
   // mobile
   @media (max-width: 768px) {
     padding: ${10 + mobile.topNavHeight}px 10px 10px 10px;
@@ -222,37 +160,22 @@ const ContentContainer = styled(Container)<{ $sideExist: boolean }>`
   
   // desktop
   @media (min-width: 769px) {
-    padding: 10px 10px 10px ${({ $sideExist }) => 10 + desktop.topNavWidth + ($sideExist ? desktop.subNavWidth : 0)}px;
+    padding: 10px;
   }
+  
+  margin-bottom: 200px;
 `
 
 const Logo = styled.h1`
-  display: inline;
   font-size: 22px;
   line-height: 1;
-  
-  // desktop
-  @media (min-width: 769px) {
-    margin: 30px 0;
-  }
+  margin: auto 0;
 `
 
 const MenuSpan = styled.span`
-  // mobile
-  @media (max-width: 768px) {
-    padding: 2px 4px;
-    margin: 0 4px;
-    cursor: pointer;
-    color: white;
-  }
-
-  // desktop 
-  @media (min-width: 769px) {
-    padding: 11px 0;
-    margin: 6px 0;
-    cursor: pointer;
-    color: white;
-  }
+  padding: 6px 6px;
+  margin: 0 6px;
+  cursor: pointer;
 `
 
 export default MainLayout
