@@ -1,9 +1,11 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, Form, Tag, Toggle } from "rsuite"
 import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
-import { FormLabel, FormRow, FormValue } from "../../component/common/Form"
 import TimeAgo from "javascript-time-ago"
+import { toast } from "react-hot-toast"
+import { Button, List, ListItem, Switch, Tag } from "@kiwicom/orbit-components"
+import { ChevronRight } from "@kiwicom/orbit-components/icons"
+import { AiOutlineSync } from "react-icons/all"
 
 
 interface Props {
@@ -18,34 +20,29 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
 
   return (
     <>
-      <Form layout="horizontal">
-        <FormRow>
-          <FormLabel>Status</FormLabel>
-          <StatusTag color="green">Connected</StatusTag>
-        </FormRow>
-        <FormRow>
-          <FormLabel>Username</FormLabel>
-          <FormValue>{username}</FormValue>
-        </FormRow>
-        <FormRow>
-          <FormLabel>Sync</FormLabel>
-          <SyncToggle
+      <List type="primary">
+        <ListItem label="Status" icon={<ChevronRight />}>
+          <Tag selected size="small">Connected</Tag>
+        </ListItem>
+        <ListItem label="Username" icon={<ChevronRight />}>
+          <span>{username}</span>
+        </ListItem>
+        <ListItem label="Sync" icon={<ChevronRight />}>
+          <Switch
+            icon={<AiOutlineSync />}
             checked={isSyncChecked}
-            checkedChildren="Sync"
-            unCheckedChildren="Not Sync"
+            onChange={() => syncToggle(!isSyncChecked)}
             disabled={syncToggleFetching}
-            onChange={syncToggle}
           />
           <LastSyncTime lastSyncTime={lastSyncTime}/>
-        </FormRow>
-      </Form>
+        </ListItem>
+      </List>
       <BtnDiv>
         <Button
           onClick={deactivate}
           loading={activateFetching}
-          color="red"
-          appearance="ghost"
-          size="sm"
+          type="white"
+          size="small"
         >
           Disconnect
         </Button>
@@ -62,7 +59,7 @@ const useDeactivate = (): [boolean, () => void] => {
     requestPocketUnauth()
       .then(() => window.location.reload())
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
@@ -78,8 +75,8 @@ const useSyncToggle = (isSyncOn: boolean): [boolean, boolean, (checked: boolean)
     setFetching(true)
     setSyncChecked(checked)
     requestPocketSync(checked)
-      .then(() => Alert.info(`Pocket sync ${checked ? 'ON' : 'OFF'}`))
-      .catch(err => Alert.error(err.toString()))
+      .then(() => toast.success(`Pocket sync ${checked ? 'ON' : 'OFF'}`))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }
 
@@ -91,14 +88,6 @@ const LastSyncTime: FC<{ lastSyncTime: Date | null }> = ({lastSyncTime}) =>
     null :
     <Desc>Last Sync: {new TimeAgo('en-US').format(new Date(lastSyncTime))}</Desc>
 
-
-const StatusTag = styled(Tag)`
-  margin: 8px 0;
-`
-
-const SyncToggle = styled(Toggle)`
-  margin: 8px 0;
-`
 
 const Desc = styled.span`
   color: gray;

@@ -1,21 +1,21 @@
 import React, { FC } from "react"
-import styled from "styled-components"
-import { Panel } from "rsuite"
 import SimpleLayout from "../../component/layout/SimpleLayout"
 import PocketSetting from "./PocketSetting"
+import { CardSection, Card } from "@kiwicom/orbit-components"
+import { FaGetPocket } from "react-icons/fa"
 
 
 const SettingPage: FC = () => (
   <SimpleLayout>
-    <Panel bordered>
-      <Title>Pocket</Title>
-      <PocketSetting />
-    </Panel>
+    <Card
+      title="Pocket"
+      icon={<FaGetPocket />}
+    >
+      <CardSection>
+        <PocketSetting />
+      </CardSection>
+    </Card>
   </SimpleLayout>
 )
-
-const Title = styled.h2`
-  font-size: 18px;
-`
 
 export default SettingPage

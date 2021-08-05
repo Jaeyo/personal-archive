@@ -12,5 +12,5 @@ export const requestFindArticleTags = async (): Promise<[ArticleTagCount[], numb
 }
 
 export const requestUpdateTag = async (tag: string, newTag: string): Promise<void> => {
-  await requestPut(`/apis/article-tags/tag/${tag}`, {tag: newTag})
+  await requestPut(`/apis/article-tags/tag/${encodeURIComponent(tag)}`, {tag: newTag})
 }

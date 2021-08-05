@@ -1,24 +1,23 @@
 import React, { FC } from "react"
-import { Container, Loader } from "rsuite"
 import styled from "styled-components"
 import MainLayout from "./MainLayout"
+import { Loading } from "@kiwicom/orbit-components"
 
 interface Props {
   loading?: boolean
-  size?: 'md' | 'lg'
 }
 
-const SimpleLayout: FC<Props> = ({loading, children, size = 'md' }) => (
-  <MainLayout size={size}>
+const SimpleLayout: FC<Props> = ({loading, children }) => (
+  <MainLayout>
     <StyledContent>
-      {loading ? <Loader center/> : null}
+      {loading ? <Loading type="boxLoader"/> : null}
       {children}
     </StyledContent>
   </MainLayout>
 
 )
 
-const StyledContent = styled(Container)`
+const StyledContent = styled.div`
   padding: 20px;
   margin-bottom: 200px;
 `

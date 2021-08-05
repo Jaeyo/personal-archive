@@ -1,7 +1,7 @@
 import React, { FC, useState } from "react"
 import Article from "../../models/Article"
 import { Tweet } from "react-twitter-widgets"
-import { Loader } from "rsuite"
+import { Loading } from "@kiwicom/orbit-components"
 
 
 interface Props {
@@ -13,7 +13,7 @@ const ArticleContentTweet: FC<Props> = ({article}) => {
 
   return (
     <>
-      { isFetching ? <Loader /> : null }
+      { isFetching ? <Loading type="boxLoader" /> : null }
       <Tweet
         tweetId={article.content}
         onLoad={() => setFetching(false)}

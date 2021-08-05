@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
-import { Alert } from "rsuite"
 import SimpleLayout from "../../component/layout/SimpleLayout"
-import TitleInput from "../../component/note/TitleInput"
 import { requestEditParagraph, requestGetNote } from "../../apis/NoteApi"
 import NoteEditor from "../../component/note/editor/NoteEditor"
 import Article from "../../models/Article"
+import { toast } from "react-hot-toast"
+import { InputField } from "@kiwicom/orbit-components"
 
 
 const EditNoteParagraphPage: FC = () => {
@@ -15,8 +15,8 @@ const EditNoteParagraphPage: FC = () => {
   const [submitFetching, submit] = useSubmit(noteID, paragraphID)
 
   return (
-    <SimpleLayout loading={loadFetching} size="lg">
-      <TitleInput disabled value={title}/>
+    <SimpleLayout loading={loadFetching}>
+      <InputField disabled value={title}/>
       <NoteEditor
         content={content}
         referenceArticles={referencedArticles}
@@ -44,7 +44,7 @@ const useRequestGetNote = (noteID: number, paragraphID: number): [boolean, strin
 
         const paragraph = note.paragraphs.find(p => p.id === paragraphID)
         if (!paragraph) {
-          Alert.error('invalid paragraph id')
+          toast.error('invalid paragraph id')
           setTimeout(() => history.goBack(), 3000)
           return
         }
@@ -57,7 +57,7 @@ const useRequestGetNote = (noteID: number, paragraphID: number): [boolean, strin
         setReferencedArticles(referencedArticles)
         setReferencedWebURLs(referencedWebURLs)
       })
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }, [noteID, paragraphID, history])
 
@@ -73,7 +73,7 @@ const useSubmit = (noteID: number, paragraphID: number): [
 
   const submit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
     if (content.trim().length === 0) {
-      Alert.error('content required')
+      toast.error('content required')
       return
     }
 
@@ -82,7 +82,7 @@ const useSubmit = (noteID: number, paragraphID: number): [
     requestEditParagraph(noteID, paragraphID, content, articleIDs, referenceWebURLs)
       .then(() => history.push(`/notes/${noteID}`))
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }

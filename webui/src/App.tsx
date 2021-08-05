@@ -13,7 +13,7 @@ import NewNotePage from "./pages/newNotePage/NewNotePage"
 import NotePage from "./pages/notePage/NotePage"
 import EditNoteParagraphPage from "./pages/editNoteParagraphPage/EditNoteParagraphPage"
 import NewNoteParagraphPage from "./pages/newNoteParagraphPage/NewNoteParagraphPage"
-import "rsuite/dist/styles/rsuite-default.css"
+import { Toaster } from "react-hot-toast"
 
 
 const App = () => (
@@ -65,6 +65,7 @@ const App = () => (
         </Switch>
       </div>
     </BrowserRouter>
+    <Toaster position="top-right" />
   </RecoilRoot>
 )
 

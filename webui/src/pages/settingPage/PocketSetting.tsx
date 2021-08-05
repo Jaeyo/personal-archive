@@ -1,16 +1,17 @@
 import React, { FC, useEffect, useState } from "react"
-import { Alert, Loader } from "rsuite"
 import { Else, If, Then } from "react-if"
 import { requestGetPocketAuth } from "../../apis/SettingApi"
 import PocketSettingUnauthenticated from "./PocketSettingUnauthenticated"
 import PocketSettingAuthenticated from "./PocketSettingAuthenticated"
+import { toast } from "react-hot-toast"
+import { Loading } from "@kiwicom/orbit-components"
 
 
 const PocketSetting: FC = () => {
   const [fetching, isAuthenticated, username, isSyncOn, lastSyncTime] = useRequestGetPocketAuth()
 
   if (fetching) {
-    return <Loader/>
+    return <Loading type="boxLoader"/>
   }
 
   return (
@@ -45,7 +46,7 @@ const useRequestGetPocketAuth = (): [boolean, boolean, string | null, boolean, D
         setSyncOn(isSyncOn)
         setLastSyncTime(lastSyncTime)
       })
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }, [])
 

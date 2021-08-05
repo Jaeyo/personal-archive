@@ -1,10 +1,10 @@
 import React, { FC, useState } from "react"
-import { Alert } from "rsuite"
 import { useHistory } from "react-router-dom"
 import Note from "../../models/Note"
 import { requestDeleteNote, requestUpdateTitle } from "../../apis/NoteApi"
 import ManagedTitle from "../../component/common/ManagedTitle"
 import { reloadAfterTick } from "../../common/Utils"
+import { toast } from "react-hot-toast"
 
 
 interface Props {
@@ -12,34 +12,34 @@ interface Props {
 }
 
 const NoteTitle: FC<Props> = ({note}) => {
-  const [submitFetching, submit] = useSubmit(note.id)
+  const [editFetching, edit] = useEdit(note.id)
   const [deleteFetching, deleteArticle] = useDelete(note.id)
 
   return (
     <ManagedTitle
       title={note ? note.title : '...'}
-      onSubmit={submit}
+      onEdit={edit}
       onDelete={deleteArticle}
-      submitFetching={submitFetching}
+      editFetching={editFetching}
       deleteFetching={deleteFetching}
     />
   )
 }
 
-const useSubmit = (noteID: number): [boolean, (title: string) => void] => {
+const useEdit = (noteID: number): [boolean, (title: string) => void] => {
   const [fetching, setFetching] = useState(false)
 
-  const submit = (title: string) => {
+  const edit = (title: string) => {
     setFetching(true)
     requestUpdateTitle(noteID, title)
       .then(() => window.location.reload())
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
 
-  return [fetching, submit]
+  return [fetching, edit]
 }
 
 const useDelete = (noteID: number): [boolean, () => void] => {
@@ -58,7 +58,7 @@ const useDelete = (noteID: number): [boolean, () => void] => {
         }
       })
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }

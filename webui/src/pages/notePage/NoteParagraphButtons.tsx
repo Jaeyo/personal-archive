@@ -2,9 +2,12 @@ import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import Paragraph from "../../models/Paragraph"
-import { Alert, Button, Icon, IconButton, Popover, Whisper } from "rsuite"
 import Confirm from "../../component/common/Confirm"
 import { requestDeleteParagraph } from "../../apis/NoteApi"
+import { toast } from "react-hot-toast"
+import { ButtonGroup, Button, Popover } from "@kiwicom/orbit-components"
+import { ChevronDown, ChevronUp, Edit } from "@kiwicom/orbit-components/icons"
+import { FaTrash } from "react-icons/fa"
 
 
 interface Props {
@@ -14,58 +17,73 @@ interface Props {
 }
 
 const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown}) => {
+  const [opened, setOpened] = useState(false)
   const [fetching, deleteParagraph] = useDelete(paragraph)
   const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
   const history = useHistory()
 
   return (
     <Wrapper>
-      <Whisper
-        placement="bottomEnd"
-        trigger="hover"
-        enterable
-        speaker={
-          <Popover>
-            <IconButton
-              icon={<Icon icon="chevron-up"/>}
-              onClick={() => onMoveUp(paragraph.seq)}
-              size="xs"
-            />
-            &nbsp;
-            <IconButton
-              icon={<Icon icon="chevron-down"/>}
-              onClick={() => onMoveDown(paragraph.seq)}
-              size="xs"
-            />
-            &nbsp;
-            <IconButton
-              icon={<Icon icon="edit"/>}
-              onClick={() => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/edit`)}
-              size="xs"
-            />
-            &nbsp;
-            <IconButton
-              loading={fetching}
-              icon={<Icon icon={"trash"}/>}
-              onClick={() => setDeleteConfirmShow(true)}
-              size="xs"
-            />
-            <Confirm
-              show={deleteConfirmShow}
-              onOK={deleteParagraph}
-              onClose={() => setDeleteConfirmShow(false)}
-            >
-              DELETE?
-            </Confirm>
-          </Popover>
+      <Popover
+        preferredPosition="bottom"
+        opened={opened}
+        onClose={() => setOpened(false)}
+        content={
+          <ButtonWrapper>
+            <ButtonGroup>
+              <Button
+                iconLeft={<ChevronUp/>}
+                onClick={() => onMoveUp(paragraph.seq)}
+                type="secondary"
+                size="small"
+              >
+                Up
+              </Button>
+              <Button
+                iconLeft={<ChevronDown/>}
+                onClick={() => onMoveDown(paragraph.seq)}
+                type="secondary"
+                size="small"
+              >
+                Down
+              </Button>
+              <Button
+                iconLeft={<Edit/>}
+                onClick={() => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/edit`)}
+                type="secondary"
+                size="small"
+              >
+                Edit
+              </Button>
+              <Button
+                iconLeft={<FaTrash/>}
+                onClick={() => {
+                  setOpened(false)
+                  setDeleteConfirmShow(true)
+                }}
+                loading={fetching}
+                type="secondary"
+                size="small"
+              >
+                Delete
+              </Button>
+            </ButtonGroup>
+          </ButtonWrapper>
         }
       >
-        <IconButton
-          icon={<Icon icon="chevron-down" />}
-          circle
-          appearance="link"
+        <Button
+          iconLeft={<ChevronDown/>}
+          type="white"
+          onClick={() => setOpened(true)}
         />
-      </Whisper>
+      </Popover>
+      <Confirm
+        show={deleteConfirmShow}
+        onOK={deleteParagraph}
+        onClose={() => setDeleteConfirmShow(false)}
+      >
+        DELETE?
+      </Confirm>
     </Wrapper>
   )
 }
@@ -78,7 +96,7 @@ const useDelete = (paragraph: Paragraph): [boolean, () => void] => {
     requestDeleteParagraph(paragraph.noteID, paragraph.id)
       .then(() => window.location.reload())
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
@@ -88,6 +106,12 @@ const useDelete = (paragraph: Paragraph): [boolean, () => void] => {
 
 const Wrapper = styled.div`
   float: right;
+`
+
+const ButtonWrapper = styled.div`
+  button {
+    display: inline-flex;
+  }
 `
 
 export default NoteParagraphButtons

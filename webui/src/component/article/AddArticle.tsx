@@ -26,5 +26,8 @@ const AddArticle = () => {
 export default AddArticle
 
 const Container = styled.div`
-  float: right;
+  text-align: right;
+  button {
+    display: inline-flex;
+  }
 `

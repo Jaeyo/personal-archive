@@ -1,10 +1,11 @@
 import React, { FC, useState } from "react"
 import styled from "styled-components"
-import { Alert, Button, List, Pagination } from "rsuite"
 import Article from "../../models/Article"
 import { Pagination as IPagination } from "../../common/Types"
 import { requestDeleteArticles } from "../../apis/ArticleApi"
 import ArticleListItem from "./ArticleListItem"
+import { toast } from "react-hot-toast"
+import { Button, Pagination } from "@kiwicom/orbit-components"
 
 
 interface Props {
@@ -20,32 +21,34 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
   return (
     <>
       {
+        articles.map((article, i) => (
+          <ArticleListItem
+            article={article}
+            isSelected={selectedIDs.indexOf(article.id) >= 0}
+            onSelect={select}
+            key={i}
+          />
+        ))
+      }
+      {
         selectedIDs.length <= 0 ?
           null :
           <DeleteBtnDiv>
-            <DeleteBtn
-              color="red"
+            <Button
+              type="criticalSubtle"
+              size="small"
               loading={fetching}
               onClick={() => deleteArticles(selectedIDs)}
             >
               Delete
-            </DeleteBtn>
+            </Button>
           </DeleteBtnDiv>
       }
-      <List hover>
-        {
-          articles.map((article, i) => (
-            <ArticleListItem article={article} idx={i} onSelect={select} key={i} />
-          ))
-        }
-      </List>
       <PaginationDiv>
         <Pagination
-          activePage={pagination.page}
-          pages={pagination.totalPages}
-          prev
-          next
-          onSelect={onSelectPage}
+          pageCount={pagination.totalPages}
+          selectedPage={pagination.page}
+          onPageChange={onSelectPage}
         />
       </PaginationDiv>
     </>
@@ -78,7 +81,7 @@ const useDeleteArticles = (): [boolean, (ids: number[]) => void] => {
     requestDeleteArticles(ids)
       .then(() => window.location.reload())
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
@@ -88,23 +91,21 @@ const useDeleteArticles = (): [boolean, (ids: number[]) => void] => {
 
 const DeleteBtnDiv = styled.div`
   text-align: right;
-  margin-bottom: 15px;
-`
-
-const DeleteBtn = styled(Button)`
-  width: 100px;
+  margin-top: 15px;
+  
+  button {
+    display: inline-flex;
+  }
 `
 
 const PaginationDiv = styled.div`
   text-align: center;
   margin: 20px 0;
-`
-
-const ReadingTimeSpan = styled.span`
-  font-size: 11px;
-  color: #999;
-  margin-left: 10px;
-  border-bottom: 1px dashed #ddd;
+  
+  div[class*="Stack_"] {
+    display: inline-flex;
+    width: inherit;
+  }
 `
 
 export default ArticleList

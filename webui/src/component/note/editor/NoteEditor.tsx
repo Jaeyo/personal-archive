@@ -1,17 +1,18 @@
 import React, { FC, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
-import { Button, Toggle } from "rsuite"
 import { useHistory } from "react-router-dom"
 import AceEditor from "react-ace"
 import { Ace } from "ace-builds"
 import Article from "../../../models/Article"
 import References from "./References"
-import "ace-builds/src-noconflict/keybinding-vim"
-import "ace-builds/src-noconflict/mode-markdown"
-import "ace-builds/src-noconflict/theme-github"
 import { usePrevious } from "../../../common/Hooks"
 import Confirm from "../../common/Confirm"
 import ArticleContent from "../../../pages/articlePage/ArticleContent"
+import { Button, Switch } from "@kiwicom/orbit-components"
+import { VscOpenPreview } from "react-icons/vsc"
+import "ace-builds/src-noconflict/keybinding-vim"
+import "ace-builds/src-noconflict/mode-markdown"
+import "ace-builds/src-noconflict/theme-github"
 
 
 interface Props {
@@ -61,7 +62,7 @@ const NoteEditor: FC<Props> = (
     if (initRefWebURLs?.length !== prevInitRefWebURLs?.length) {
       setRefWebURLs(initRefWebURLs)
     }
-  }, [ prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs ])
+  }, [prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs])
 
   useEffect(() => {
     editor.current?.resize()
@@ -108,20 +109,19 @@ const NoteEditor: FC<Props> = (
   }
 
   const isPreviewable = showPreview && previewArticle != null
-  const editorWidth = isPreviewable ? '50%' : '100%'
+  const editorWidth = isPreviewable ? '48%' : '100%'
 
   return (
     <>
-      <div style={{textAlign: 'right'}}>
-        <Toggle
+      <PreviewSwitchWrapper>
+        <Switch
+          icon={<VscOpenPreview/>}
           checked={showPreview}
-          checkedChildren="preview"
-          unCheckedChildren="preview"
-          onChange={setShowPreview}
+          onChange={() => setShowPreview(!showPreview)}
         />
-      </div>
+      </PreviewSwitchWrapper>
       <div>
-        <EditAreaDiv width={editorWidth}>
+        <EditArea width={editorWidth}>
           <AceEditor
             mode="markdown"
             theme="github"
@@ -133,26 +133,30 @@ const NoteEditor: FC<Props> = (
             keyboardHandler="vim"
             tabSize={2}
             focus={true}
-            onLoad={instance => { editor.current = instance }}
+            onLoad={instance => {
+              editor.current = instance
+            }}
             commands={[
               {name: 'down', bindKey: {mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
               {name: 'up', bindKey: {mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
-              {name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => {
-                editor.blur()
-                setShowSubmitConfirm(true)
-             }},
+              {
+                name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => {
+                  editor.blur()
+                  setShowSubmitConfirm(true)
+                }
+              },
             ]}
             editorProps={{
               $blockScrolling: true,
             }}
           />
-        </EditAreaDiv>
+        </EditArea>
         {
           !isPreviewable ?
             null :
-            <PreviewDiv ref={previewNode}>
-              <ArticleContent article={previewArticle!} />
-            </PreviewDiv>
+            <Preview ref={previewNode}>
+              <ArticleContent article={previewArticle!}/>
+            </Preview>
         }
       </div>
       <References
@@ -163,23 +167,12 @@ const NoteEditor: FC<Props> = (
         onRemoveReferenceArticle={onRemoveRefArticle}
         onRemoveReferenceWeb={onRemoveRefWeb}
         onClickArticle={(article) => setPreviewArticle(article)}
+        onClickWeb={url => window.open(url, '_blank')}
       />
-      <SubmitBtnDiv>
-        <Button
-          appearance="subtle"
-          onClick={() => history.goBack()}
-        >
-          Cancel
-        </Button>
-        <Button
-          appearance="primary"
-          onClick={() => setShowSubmitConfirm(true)}
-          loading={fetching}
-          ref={submitBtnNode}
-        >
-          Submit
-        </Button>
-      </SubmitBtnDiv>
+      <SubmitWrapper>
+        <Button type="white" onClick={() => history.goBack()}>Cancel</Button>
+        <Button onClick={() => setShowSubmitConfirm(true)} loading={fetching} ref={submitBtnNode}>Submit</Button>
+      </SubmitWrapper>
       <Confirm
         show={showSubmitConfirm}
         onOK={onSubmit}
@@ -192,7 +185,12 @@ const NoteEditor: FC<Props> = (
 }
 
 
-const EditAreaDiv = styled.div<{ width: string }>`
+const PreviewSwitchWrapper = styled.div`
+  text-align: right;
+  margin: 10px 0;
+`
+
+const EditArea = styled.div<{ width: string }>`
   padding: 15px;
   float: left;
   width: ${props => props.width};
@@ -203,17 +201,21 @@ const EditAreaDiv = styled.div<{ width: string }>`
   }
 `
 
-const PreviewDiv = styled.div`
+const Preview = styled.div`
   padding: 15px;
   float: left;
-  width: 50%;
+  width: 48%;
   height: 800px;
   overflow: scroll;
 `
 
-const SubmitBtnDiv = styled.div`
+const SubmitWrapper = styled.div`
   text-align: right;
   margin-top: 25px;
+  
+  button {
+    display: inline-flex;
+  }
 `
 
 export default NoteEditor

@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { Alert } from "rsuite"
 import Article from "../../models/Article"
 import { requestGetArticle } from "../../apis/ArticleApi"
 import ArticleTitle from "../articlePage/ArticleTitle"
@@ -8,6 +7,7 @@ import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
 import EditArticleContentMarkdown from "./EditArticleContentMarkdown"
 import SimpleLayout from "../../component/layout/SimpleLayout"
+import { toast } from "react-hot-toast"
 
 
 const EditArticlePage: FC = () => {
@@ -15,7 +15,7 @@ const EditArticlePage: FC = () => {
   const [fetching, article] = useRequestGetArticle(id)
 
   return (
-    <SimpleLayout loading={fetching} size="lg">
+    <SimpleLayout loading={fetching}>
       {
         article && (
           <>
@@ -41,7 +41,7 @@ const useRequestGetArticle = (id: number): [boolean, Article | null] => {
         setArticle(article)
       })
       .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
   }, [id])
 
   return [fetching, article]

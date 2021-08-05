@@ -1,8 +1,9 @@
 import React, { FC, useState } from "react"
-import styled from "styled-components"
-import { Alert, Button, Form, Icon, Input, Tag, Tooltip, Whisper } from "rsuite"
 import { requestObtainPocketRequestToken } from "../../apis/SettingApi"
-import { FormLabel, FormRow } from "../../component/common/Form"
+import { toast } from "react-hot-toast"
+import { Button, InputField, List, ListItem, Tag, Tooltip } from "@kiwicom/orbit-components"
+import { ChevronRight, QuestionCircle } from "@kiwicom/orbit-components/icons"
+import styled from "styled-components"
 
 
 const PocketSettingUnauthenticated: FC = () => {
@@ -10,42 +11,47 @@ const PocketSettingUnauthenticated: FC = () => {
   const [fetching, activate] = useActivate()
 
   return (
-    <Form layout="horizontal">
-      <FormRow>
-        <FormLabel>Status</FormLabel>
-        <StatusTag color="red">Disconnected</StatusTag>
-      </FormRow>
-      <FormRow>
-        <FormLabel>
-          Consumer Key
-          &nbsp;
-          <Whisper placement="right" trigger="click" speaker={
-            <Tooltip>
-              <a href="https://getpocket.com/developer/docs/authentication" target="_blank" rel="noreferrer">
+    <List type="primary">
+      <ListItem label="Status" icon={<ChevronRight />}>
+        <Tag size="small">Disconnected</Tag>
+      </ListItem>
+      <ListItem
+        label={
+          <>
+            Consumer Key
+            &nbsp;
+            <Tooltip content={
+              <a
+                href="https://getpocket.com/developer/docs/authentication"
+                target="_blank"
+                rel="noreferrer"
+                style={{ wordWrap: 'break-word', color: 'white' }}
+              >
                 https://getpocket.com/developer/docs/authentication
               </a>
+            }>
+              <QuestionCircle size="small" />
             </Tooltip>
-          }>
-            <Icon icon="question" style={{cursor: 'pointer'}}/>
-          </Whisper>
-        </FormLabel>
-
-        <Input
-          value={consumerKey}
-          onChange={v => setConsumerKey(v)}
-          style={{maxWidth: '400px'}}
-          size="sm"
-        />
-        <ConnectBtn
-          onClick={activate}
-          loading={fetching}
-          color="green"
-          size="sm"
-        >
-          Connect
-        </ConnectBtn>
-      </FormRow>
-    </Form>
+          </>
+        }
+        icon={<ChevronRight />}
+      >
+        <ConsumerKeyInputWrapper>
+          <InputField
+            value={consumerKey}
+            onChange={e => setConsumerKey((e.target as any).value)}
+            size="small"
+          />
+          <Button
+            onClick={() => activate(consumerKey)}
+            loading={fetching}
+            size="small"
+          >
+            Connect
+          </Button>
+        </ConsumerKeyInputWrapper>
+      </ListItem>
+    </List>
   )
 }
 
@@ -54,7 +60,7 @@ const useActivate = (): [boolean, (consumerKey: string) => void] => {
 
   const activate = (consumerKey: string) => {
     if (consumerKey.length <= 0) {
-      Alert.error('consumer key required')
+      toast.error('consumer key required')
       return
     }
 
@@ -65,7 +71,7 @@ const useActivate = (): [boolean, (consumerKey: string) => void] => {
         window.location.href = `https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectURI}`
       })
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
@@ -73,12 +79,17 @@ const useActivate = (): [boolean, (consumerKey: string) => void] => {
   return [fetching, activate]
 }
 
-const StatusTag = styled(Tag)`
-  margin: 8px 0;
-`
-
-const ConnectBtn = styled(Button)`
-  margin: 4px 0 4px 10px;
+const ConsumerKeyInputWrapper = styled.div`
+  div[class*="InputField__Field"] {
+    display: inline-block;
+    margin-top: 6px;
+    max-width: 400px;
+  }
+  
+  button {
+    display: inline-flex;
+    margin-left: 10px;
+  }
 `
 
 export default PocketSettingUnauthenticated

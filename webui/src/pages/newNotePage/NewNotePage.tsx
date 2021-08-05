@@ -1,11 +1,11 @@
 import React, { FC, useState } from "react"
-import { Alert } from "rsuite"
 import { useHistory } from "react-router-dom"
 import Article from "../../models/Article"
 import { requestCreateNote } from "../../apis/NoteApi"
 import NoteEditor from "../../component/note/editor/NoteEditor"
 import SimpleLayout from "../../component/layout/SimpleLayout"
-import TitleInput from "../../component/note/TitleInput"
+import { toast } from "react-hot-toast"
+import { InputField } from "@kiwicom/orbit-components"
 
 
 const NewNotePage: FC = () => {
@@ -16,8 +16,12 @@ const NewNotePage: FC = () => {
     submit(title, content, referenceArticles, referenceWebURLs)
 
   return (
-    <SimpleLayout size="lg">
-      <TitleInput value={title} onChange={setTitle} placeholder="Title"/>
+    <SimpleLayout>
+      <InputField
+        value={title}
+        onChange={e => setTitle((e.target as any).value)}
+        placeholder="Title"
+      />
       <NoteEditor
         content=""
         referenceArticles={[]}
@@ -38,12 +42,12 @@ const useSubmit = (): [
 
   const submit = (title: string, content: string, referenceArticles: Article[], referenceWebURLs: string[]) => {
     if (title.trim().length === 0) {
-      Alert.error('title required')
+      toast.error('title required')
       return
     }
 
     if (content.trim().length === 0) {
-      Alert.error('content required')
+      toast.error('content required')
       return
     }
 
@@ -52,7 +56,7 @@ const useSubmit = (): [
     requestCreateNote(title, content, articleIDs, referenceWebURLs)
       .then(note => history.push(`/notes/${note.id}`))
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }

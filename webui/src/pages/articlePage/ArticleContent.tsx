@@ -4,8 +4,9 @@ import ArticleContentTweet from "./ArticleContentTweet"
 import ArticleContentSlideShare from "./ArticleContentSlideShare"
 import ArticleContentYoutube from "./ArticleContentYoutube"
 import { useHistory } from "react-router-dom"
-import { Button } from "rsuite"
 import MarkdownContent from "../../component/common/MarkdownContent"
+import { Button } from "@kiwicom/orbit-components"
+import styled from "styled-components"
 
 
 interface Props {
@@ -22,16 +23,23 @@ const ArticleContent: FC<Props> = ({article}) => {
       article.kind === Kind.Youtube ?
         <ArticleContentYoutube article={article}/> :
         <>
-          <div style={{textAlign: 'right'}}>
+          <EditButtonWrapper>
             <Button
-              appearance="link"
+              type="white"
               onClick={() => history.push(`/articles/${article.id}/edit`)}
             >
               EDIT
             </Button>
-          </div>
+          </EditButtonWrapper>
           <MarkdownContent content={article.content}/>
         </>
 }
+
+const EditButtonWrapper = styled.div`
+  text-align: right;
+  button {
+    display: inline-flex;
+  }
+`
 
 export default ArticleContent

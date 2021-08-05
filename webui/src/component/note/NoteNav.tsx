@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from "react"
 import styled from "styled-components"
-import { Alert, Loader } from "rsuite"
 import { useHistory } from "react-router-dom"
 import { requestFindNoteTitles } from "../../apis/NoteApi"
 import Note from "../../models/Note"
 import { Loading } from "@kiwicom/orbit-components"
 import NavItem from "../common/NavItem"
+import { toast } from "react-hot-toast"
 
 
 const NoteNav: FC = () => {
@@ -20,7 +20,7 @@ const NoteNav: FC = () => {
     <WrapperDiv>
       {
         notes.map((note, i) => (
-          <div>
+          <div key={i}>
             <NavItem role="button" onClick={() => history.push(`/notes/${note.id}`)}>
               {note.title}
             </NavItem>
@@ -39,7 +39,7 @@ const useRequestFindNoteTitles = (): [boolean, Note[]] => {
     setFetching(true)
     requestFindNoteTitles()
       .then(notes => setNotes(notes))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }, [])
 
@@ -58,25 +58,6 @@ const WrapperDiv = styled.div`
   -ms-overflow-style: none;
   // hide scroll bar for firefix
   scrollbar-width: none;
-`
-
-const NoteDiv = styled.div`
-  padding: 3px 12px;
-`
-
-const NoteOuterSpan = styled.span`
-  padding: 6px;
-  display: inline-block;
-  
-  :hover {
-    background-color: #eee;
-  }
-`
-
-const NoteInnerSpan = styled.span`
-  cursor: pointer;
-  padding: 2px;
-  border-bottom: 1px dashed #ddd;
 `
 
 export default NoteNav

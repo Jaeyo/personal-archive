@@ -2,13 +2,14 @@ import React, { FC, RefObject, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import AceEditor from "react-ace"
 import Article from "../../models/Article"
-import { Alert, Button } from "rsuite"
 import { requestUpdateContent } from "../../apis/ArticleApi"
 import { useHistory } from "react-router-dom"
 import MarkdownContent from "../../component/common/MarkdownContent"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
+import { toast } from "react-hot-toast"
+import { Button } from "@kiwicom/orbit-components"
 
 
 interface Props {
@@ -30,9 +31,9 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
   const onSubmit = () => submit(article!.id, content)
 
   return (
-    <WrapperDiv>
-      <EditWrapperDiv>
-        <EditAreaDiv>
+    <Wrapper>
+      <EditAreaWrapper>
+        <EditArea>
           <AceEditor
             mode="markdown"
             theme="github"
@@ -57,16 +58,16 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
               $blockScrolling: true,
             }}
           />
-        </EditAreaDiv>
-        <PreviewDiv ref={previewNode}>
+        </EditArea>
+        <Preview ref={previewNode}>
           <MarkdownContent content={content}/>
-        </PreviewDiv>
-      </EditWrapperDiv>
-      <SubmitDiv>
-        <Button onClick={() => history.goBack()}>Cancel</Button>
+        </Preview>
+      </EditAreaWrapper>
+      <SubmitWrapper>
         <Button loading={fetching} onClick={onSubmit}>Submit</Button>
-      </SubmitDiv>
-    </WrapperDiv>
+        <Button type="white" onClick={() => history.goBack()}>Cancel</Button>
+      </SubmitWrapper>
+    </Wrapper>
   )
 }
 
@@ -94,7 +95,7 @@ const useSubmit = (): [boolean, (articleID: number, content: string) => void] =>
     requestUpdateContent(articleID, content)
       .then(() => window.location.href = `/articles/${articleID}`)
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
@@ -102,18 +103,18 @@ const useSubmit = (): [boolean, (articleID: number, content: string) => void] =>
   return [fetching, submit]
 }
 
-const WrapperDiv = styled.div`
+const Wrapper = styled.div`
   margin-top: 30px;
 `
 
-const EditWrapperDiv = styled.div`
+const EditAreaWrapper = styled.div`
   width: 100%;
 `
 
-const EditAreaDiv = styled.div`
-  padding: 15px;
+const EditArea = styled.div`
   float: left;
-  width: 50%;
+  padding: 15px;
+  width: 48%;
   
   // ace editor 에서 vim 활성화시 커서가 안보이는 버그 때문에 삽입
   .ace_cursor {
@@ -121,16 +122,19 @@ const EditAreaDiv = styled.div`
   }
 `
 
-const PreviewDiv = styled.div`
-  padding: 15px;
+const Preview = styled.div`
   float: left;
-  width: 50%;
+  padding: 15px;
+  width: 48%;
   height: 800px;
   overflow: scroll;
 `
 
-const SubmitDiv = styled.div`
+const SubmitWrapper = styled.div`
   text-align: right;
+  button {
+    display: inline-flex;
+  }
 `
 
 export default EditArticleContentMarkdown

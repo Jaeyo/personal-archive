@@ -1,6 +1,5 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
-import { Alert } from "rsuite"
 import { requestFindArticlesByTag } from "../../apis/ArticleApi"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import Article from "../../models/Article"
@@ -9,6 +8,7 @@ import { usePage } from "../../common/Hooks"
 import { emptyPagination, Pagination } from "../../common/Types"
 import ArticleList from "../../component/article/ArticleList"
 import AddArticle from "../../component/article/AddArticle"
+import { toast } from "react-hot-toast"
 
 
 const ArticlesByTagPage: FC = () => {
@@ -24,7 +24,7 @@ const ArticlesByTagPage: FC = () => {
       <ArticleList
         articles={articles}
         pagination={pagination}
-        onSelectPage={page => history.push(`/tags/${tag}?page=${page}`)}
+        onSelectPage={page => history.push(`/tags/${encodeURIComponent(tag)}?page=${page}`)}
       />
     </ArticleTagTreeLayout>
   )
@@ -45,7 +45,7 @@ const useRequestFindArticlesByTag = (tag: string, page: number): [boolean, Pagin
         setPagination(pagination)
       })
       .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
   }, [tag, page])
 
   return [fetching, pagination, articles]

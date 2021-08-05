@@ -1,10 +1,11 @@
-import React, { FC, RefObject, useEffect, useRef, useState } from "react"
-import { Alert, Button, Input, Loader, TagPicker } from "rsuite"
+import React, { FC, useState } from "react"
 import { useRecoilValue } from "recoil"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { articleTagsState } from "../../states/ArticleTags"
 import { requestCreateArticleByURL } from "../../apis/ArticleApi"
-import { toTagPickerItemTypes } from "../../common/Types"
+import { toast } from "react-hot-toast"
+import { Button, InputField, Loading } from "@kiwicom/orbit-components"
+import TagSelector from "../../component/article/TagSelector"
 
 
 const CreateArticlePage: FC = () => {
@@ -12,48 +13,35 @@ const CreateArticlePage: FC = () => {
   const articleTags = useRecoilValue(articleTagsState)
   const [selectedTags, setSelectedTags] = useState([] as string[])
   const [fetching, submit] = useSubmit()
-  const urlInputRef = useInputFocus()
 
   const onSubmit = () => submit(url, selectedTags)
 
   return (
     <ArticleTagTreeLayout>
-      {fetching ? <Loader center/> : null}
-      <Input
-        inputRef={urlInputRef}
+      {fetching ? <Loading type="boxLoader" /> : null}
+      <InputField
         placeholder="URL"
         value={url}
-        onChange={v => setUrl(v)}
-        onPressEnter={onSubmit}
+        onChange={e => setUrl((e.target as any).value)}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            onSubmit()
+          }
+        }}
       />
-      <TagPicker
-        data={toTagPickerItemTypes(articleTags, selectedTags)}
-        creatable
-        cleanable={false}
-        style={{width: 500}}
-        menuStyle={{width: 500}}
-        tagProps={{color: 'red'}}
+      <TagSelector
+        tags={articleTags.map(tag => tag.tag)}
+        selectedTags={selectedTags}
         onChange={tags => setSelectedTags(tags)}
-        value={selectedTags}
       />
       <Button
         loading={fetching}
-        appearance="primary"
+        type="primary"
         onClick={onSubmit}>
         Submit
       </Button>
     </ArticleTagTreeLayout>
   )
-}
-
-const useInputFocus = (): RefObject<HTMLInputElement> => {
-  const urlInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    urlInputRef?.current?.focus()
-  }, [urlInputRef])
-
-  return urlInputRef
 }
 
 const useSubmit = (): [boolean, (url: string, selectedTags: string[]) => void] => {
@@ -66,7 +54,7 @@ const useSubmit = (): [boolean, (url: string, selectedTags: string[]) => void] =
         window.location.href = `/articles/${article.id}`
       })
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }

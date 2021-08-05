@@ -1,9 +1,10 @@
 import React, { FC, useState } from "react"
-import styled from "styled-components"
-import { Icon, IconButton, Tag, TagGroup } from "rsuite"
 import Article from "../../../models/Article"
 import AddReferenceArticleDrawer from "./AddReferenceArticleDrawer"
 import AddReferenceWebDrawer from "./AddReferenceWebDrawer"
+import { Button, Tag } from "@kiwicom/orbit-components"
+import { PlusCircle } from "@kiwicom/orbit-components/icons"
+import styled from "styled-components"
 
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
   onRemoveReferenceArticle: (article: Article) => void
   onRemoveReferenceWeb: (url: string) => void
   onClickArticle: (article: Article) => void
+  onClickWeb: (url: string) => void
 }
 
 const References: FC<Props> = (
@@ -25,6 +27,7 @@ const References: FC<Props> = (
     onRemoveReferenceArticle,
     onRemoveReferenceWeb,
     onClickArticle,
+    onClickWeb,
   }
 ) => {
   const [addReferenceArticleDrawerShow, setAddReferenceArticleDrawerShow] = useState(false)
@@ -32,50 +35,49 @@ const References: FC<Props> = (
 
   return (
     <>
-      <ReferenceTagGroup>
+      <TagWrapper>
         {
           referenceArticles.map(article => (
             <Tag
               key={article.id}
-              closable
-              onClose={() => onRemoveReferenceArticle(article)}
+              size="small"
+              onRemove={() => onRemoveReferenceArticle(article)}
+              onClick={() => onClickArticle(article)}
             >
-              <a href="#!" onClick={() => onClickArticle(article)}>
-                {article.title}
-              </a>
+              {article.title}
             </Tag>
           ))
         }
-        <AddReferenceBtn
-          icon={<Icon icon="plus"/>}
-          size="sm"
-          appearance="link"
+        <Button
+          iconLeft={<PlusCircle />}
+          size="small"
+          type="white"
           onClick={() => setAddReferenceArticleDrawerShow(true)}
         >
           Add article reference
-        </AddReferenceBtn>
-      </ReferenceTagGroup>
-      <ReferenceTagGroup>
+        </Button>
+      </TagWrapper>
+      <TagWrapper>
         {
           referenceWebURLs.map(url => (
             <Tag
               key={url}
-              closable
-              onClose={() => onRemoveReferenceWeb(url)}
+              onRemove={() => onRemoveReferenceWeb(url)}
+              onClick={() => onClickWeb(url)}
             >
               {url}
             </Tag>
           ))
         }
-        <AddReferenceBtn
-          icon={<Icon icon="plus"/>}
-          size="sm"
-          appearance="link"
+        <Button
+          iconLeft={<PlusCircle />}
+          size="small"
+          type="white"
           onClick={() => setAddReferenceWebDrawerShow(true)}
         >
           Add web reference
-        </AddReferenceBtn>
-      </ReferenceTagGroup>
+        </Button>
+      </TagWrapper>
       <AddReferenceArticleDrawer
         show={addReferenceArticleDrawerShow}
         onConfirm={(article: Article) => {
@@ -96,12 +98,8 @@ const References: FC<Props> = (
   )
 }
 
-const ReferenceTagGroup = styled(TagGroup)`
+const TagWrapper = styled.div`
   margin-top: 15px;
-`
-
-const AddReferenceBtn = styled(IconButton)`
-  margin-left: 10px;
 `
 
 export default References

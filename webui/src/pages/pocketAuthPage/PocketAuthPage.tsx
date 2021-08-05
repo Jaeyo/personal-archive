@@ -1,11 +1,12 @@
 import React, { FC, useEffect, useState } from "react"
-import { Alert, Loader } from "rsuite"
 import { requestPocketAuth } from "../../apis/SettingApi"
+import { toast } from "react-hot-toast"
+import { Loading } from "@kiwicom/orbit-components"
 
 
 const PocketAuthPage: FC = () => {
   const [fetching] = useRequestPocketAuth()
-  return fetching ? <Loader center/> : null
+  return fetching ? <Loading type="boxLoader" /> : null
 }
 
 const useRequestPocketAuth = (): [boolean] => {
@@ -17,7 +18,7 @@ const useRequestPocketAuth = (): [boolean] => {
         window.location.href = `/settings`
       })
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }, [])

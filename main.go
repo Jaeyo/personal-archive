@@ -74,18 +74,10 @@ func routeForFrontend(e *echo.Echo) {
 	e.Static("", "/app/static")
 
 	pages := []string{
-		"/articles/new",
-		"/articles/search",
-		"/articles/:id/edit",
-		"/articles/:id",
-		"/tags/:tag",
-		"/notes/:id/paragraphs/:paragraphID",
-		"/notes/:id/paragraphs",
-		"/notes/new",
-		"/notes/:id",
-		"/notes",
-		"/settings/pocket-auth",
-		"/settings",
+		"/articles/*",
+		"/tags/*",
+		"/notes/*",
+		"/settings/*",
 		"/",
 	}
 	for _, path := range pages {

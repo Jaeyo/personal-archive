@@ -1,13 +1,13 @@
 import React, { FC, useEffect, useState } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
-import { Alert } from "rsuite"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { usePage, useQuery } from "../../common/Hooks"
 import { requestSearchArticles } from "../../apis/ArticleApi"
 import Article from "../../models/Article"
 import { emptyPagination, Pagination } from "../../common/Types"
 import ArticleList from "../../component/article/ArticleList"
+import { toast } from "react-hot-toast"
 
 
 const SearchPage: FC = () => {
@@ -17,7 +17,7 @@ const SearchPage: FC = () => {
   const history = useHistory()
 
   if (keyword.length <= 1) {
-    Alert.error('keyword should be more than 2 characters')
+    toast.error('keyword should be more than 2 characters')
   }
 
   return (
@@ -48,7 +48,7 @@ const useRequestSearchArticles = (keyword: string, page: number): [ boolean, Art
         setArticles(articles)
         setPagination(pagination)
       })
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }, [keyword, page])
 

@@ -1,13 +1,15 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
 import styled from "styled-components"
-import { Alert, Icon, IconButton } from "rsuite"
 import NoteTitle from "./NoteTitle"
 import NoteNavLayout from "../../component/layout/NoteNavLayout"
 import Note from "../../models/Note"
 import { requestGetNote, requestSwapParagraphs } from "../../apis/NoteApi"
 import NoteParagraph from "./NoteParagraph"
 import Article from "../../models/Article"
+import { toast } from "react-hot-toast"
+import { Button } from "@kiwicom/orbit-components"
+import { Plus } from "@kiwicom/orbit-components/icons"
 
 
 const NotePage: FC = () => {
@@ -32,9 +34,11 @@ const NotePage: FC = () => {
           )
       }
       <AddButtonWrapper>
-        <IconButton
-          icon={<Icon icon="plus"/>}
+        <Button
+          iconLeft={<Plus />}
+          type="secondary"
           onClick={() => history.push(`/notes/${id}/paragraphs`)}
+          size="small"
         />
       </AddButtonWrapper>
     </NoteNavLayout>
@@ -61,7 +65,7 @@ const useRequestGetNote = (id: number): [
       })
       .finally(() => setFetching(false))
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         if (err.response?.status === 404) {
           setTimeout(() => history.push('/'), 1000)
         }
@@ -78,7 +82,7 @@ const useRequestGetNote = (id: number): [
     swapA.seq = seqB
     swapB.seq = seqA
     requestSwapParagraphs(id, swapA.id, swapB.id)
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
 
     setNote(Object.assign({}, note)) // refresh
   }
@@ -89,6 +93,10 @@ const useRequestGetNote = (id: number): [
 const AddButtonWrapper = styled.div`
   text-align: center;
   padding: 10px 0;
+  
+  button {
+    display: inline-flex;
+  }
 `
 
 export default NotePage

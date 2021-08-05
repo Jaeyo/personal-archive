@@ -1,5 +1,4 @@
 import React, { FC, useEffect, useState } from "react"
-import { Alert } from "rsuite"
 import { useRecoilState } from "recoil"
 import { useHistory } from "react-router-dom"
 import { requestFindArticleTags } from "../../apis/ArticleTagApi"
@@ -8,6 +7,7 @@ import { ArticleTagCount } from "../../models/ArticleTag"
 import { Treebeard } from "react-treebeard"
 import { Loading } from "@kiwicom/orbit-components"
 import NavItem from "../common/NavItem"
+import { toast } from "react-hot-toast"
 
 
 const ArticleTagTreeNav: FC = () => {
@@ -78,7 +78,7 @@ const useRequestFindArticleTags = (): [boolean, ArticleTagCount[], number, numbe
         setAllCount(allCount)
       })
       .finally(() => setFetching(false))
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
   }, [setArticleTags, setUntaggedCount])
 
   return [fetching, articleTags, untaggedCount, allCount]
@@ -108,7 +108,7 @@ const appendTreeNode = (nodes: TreeNode[], tag: string, name: string, count: num
         tag: '',
         count: 0,
         innerName: parentInnerName,
-        name: '',
+        name: parentInnerName,
         children: [],
         toggled: true,
       }
@@ -116,21 +116,27 @@ const appendTreeNode = (nodes: TreeNode[], tag: string, name: string, count: num
     } else {
       parentNode = parentFiltered[0]
     }
-    parentNode.count += count
-    parentNode.name = `${parentNode.innerName} (${parentNode.count})`
 
     appendTreeNode(parentNode.children, tag, childInnerName, count)
     return
   }
 
-  nodes.push({
-    tag,
-    count,
-    innerName: name,
-    name: `${name} (${count})`,
-    children: [],
-    toggled: true,
-  })
+  const filtered = nodes.filter(node => node.innerName === name)
+  if (filtered.length === 0) {
+    nodes.push({
+      tag,
+      count,
+      innerName: name,
+      name: `${name} (${count})`,
+      children: [],
+      toggled: true,
+    })
+    return
+  }
+
+  const found = filtered[0]
+  found.count = count
+  found.name = `${name} (${count})`
 }
 
 const refineNodeName = (name: string): string => {

@@ -1,5 +1,4 @@
 import React, { FC } from "react"
-import { Loader } from "rsuite"
 import ArticleTagTreeNav from "../article/ArticleTagTreeNav"
 import MainLayout from "./MainLayout"
 import { Loading } from "@kiwicom/orbit-components"

@@ -1,11 +1,13 @@
 import React, { FC } from "react"
 import styled from "styled-components"
 import { Link } from "react-router-dom"
-import { Icon, Tag } from "rsuite"
 import MarkdownContent from "../../component/common/MarkdownContent"
 import Paragraph from "../../models/Paragraph"
 import Article from "../../models/Article"
 import NoteParagraphButtons from "./NoteParagraphButtons"
+import { FaRegStickyNote } from "react-icons/fa"
+import { IoEarthOutline } from "react-icons/all"
+import { Tag } from "@kiwicom/orbit-components"
 
 
 interface Props {
@@ -27,9 +29,9 @@ const NoteParagraph: FC<Props> = ({paragraph, referencedArticles, onMoveUp, onMo
       <div style={{textAlign: 'right'}}>
         {
           currentReferencedArticles.map(article => (
-            <Tag key={`article-${article.id}`}>
+            <Tag key={`article-${article.id}`} size="small">
               <Link to={`/articles/${article.id}`}>
-                <Icon icon="sticky-note-o"/>
+                <FaRegStickyNote />
                 &nbsp;
                 {article.title}
               </Link>
@@ -38,8 +40,8 @@ const NoteParagraph: FC<Props> = ({paragraph, referencedArticles, onMoveUp, onMo
         }
         {
           paragraph.referenceWebs.map(web => (
-            <Tag key={`web-${web.id}`}>
-              <Icon icon="web"/>
+            <Tag key={`web-${web.id}`} size="small">
+              <IoEarthOutline />
               &nbsp;
               <a href={web.url} target="_blank" rel="noreferrer">{web.url}</a>
             </Tag>

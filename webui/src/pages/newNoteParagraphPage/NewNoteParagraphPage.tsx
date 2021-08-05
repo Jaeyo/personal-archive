@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
-import { Alert } from "rsuite"
 import SimpleLayout from "../../component/layout/SimpleLayout"
-import TitleInput from "../../component/note/TitleInput"
 import { requestCreateParagraph, requestGetNote } from "../../apis/NoteApi"
 import NoteEditor from "../../component/note/editor/NoteEditor"
 import Article from "../../models/Article"
+import { toast } from "react-hot-toast"
+import { InputField } from "@kiwicom/orbit-components"
 
 
 const NewNoteParagraphPage: FC = () => {
@@ -14,8 +14,8 @@ const NewNoteParagraphPage: FC = () => {
   const [submitFetching, submit] = useSubmit(noteID)
 
   return (
-    <SimpleLayout loading={loadFetching} size="lg">
-      <TitleInput disabled value={title}/>
+    <SimpleLayout loading={loadFetching}>
+      <InputField disabled value={title}/>
       <NoteEditor
         content=""
         referenceArticles={[]}
@@ -30,7 +30,6 @@ const NewNoteParagraphPage: FC = () => {
 const useRequestGetNote = (noteID: number): [boolean, string] => {
   const [fetching, setFetching] = useState(false)
   const [title, setTitle] = useState('...')
-  const history = useHistory()
 
   useEffect(() => {
     setFetching(true)
@@ -38,7 +37,7 @@ const useRequestGetNote = (noteID: number): [boolean, string] => {
       .then(([note, articles]) => {
         setTitle(note.title)
       })
-      .catch(err => Alert.error(err.toString()))
+      .catch(err => toast.error(err.toString()))
       .finally(() => setFetching(false))
   }, [noteID])
 
@@ -54,7 +53,7 @@ const useSubmit = (noteID: number): [
 
   const submit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
     if (content.trim().length === 0) {
-      Alert.error('content required')
+      toast.error('content required')
       return
     }
 
@@ -63,7 +62,7 @@ const useSubmit = (noteID: number): [
     requestCreateParagraph(noteID, content, articleIDs, referenceWebURLs)
       .then(() => history.push(`/notes/${noteID}`))
       .catch(err => {
-        Alert.error(err.toString())
+        toast.error(err.toString())
         setFetching(false)
       })
   }
