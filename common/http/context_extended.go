@@ -3,8 +3,8 @@ package http
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/sirupsen/logrus"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 )
@@ -14,24 +14,23 @@ type ContextExtended struct {
 }
 
 func (c ContextExtended) ParamInt64(name string) (int64, error) {
-	return strconv.ParseInt(c.Param(name), 10, 64)
+	return strconv.ParseInt(c.ParamStr(name), 10, 64)
 }
 
 func (c ContextExtended) ParamStr(name string) string {
-	return strings.Replace(c.Param(name), "%2F", "/", -1)
+	return decodeUriComponent(c.Param(name))
 }
 
 func (c ContextExtended) QueryParamStr(name string) string {
-	return strings.Replace(c.QueryParam(name), "%2F", "/", -1)
+	return decodeUriComponent(c.QueryParam(name))
 }
 
 func (c ContextExtended) QueryParamInt(name string) (int, error) {
-	return strconv.Atoi(c.QueryParam(name))
+	return strconv.Atoi(c.QueryParamStr(name))
 }
 
 func (c ContextExtended) QueryParamInt64SliceWithComma(name string) ([]int64, error) {
-	splited := strings.Split(c.QueryParam(name), ",")
-	logrus.Debugf("splited: %v", splited)
+	splited := strings.Split(c.QueryParamStr(name), ",")
 	slice := []int64{}
 	for _, value := range splited {
 		intValue, err := strconv.ParseInt(value, 10, 64)
@@ -96,4 +95,12 @@ func Provide(fn func(ContextExtended) error) func(ctx echo.Context) error {
 	return func(ctx echo.Context) error {
 		return fn(ContextExtended{ctx})
 	}
+}
+
+func decodeUriComponent(input string) string {
+	decoded, err := url.QueryUnescape(input)
+	if err != nil {
+		return input
+	}
+	return decoded
 }
