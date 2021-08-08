@@ -101,6 +101,14 @@ const MarkdownDiv = styled.div`
     }
   }
   
+  code {
+    padding: 2px 4px;
+    font-size: 90%;
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 4px;
+  }
+  
   // mobile
   @media (max-width: 768px) {
     img {
