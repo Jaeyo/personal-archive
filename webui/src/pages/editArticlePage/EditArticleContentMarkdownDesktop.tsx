@@ -2,25 +2,24 @@ import React, { FC, RefObject, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import AceEditor from "react-ace"
 import Article from "../../models/Article"
-import { requestUpdateContent } from "../../apis/ArticleApi"
 import { useHistory } from "react-router-dom"
 import MarkdownContent from "../../component/common/MarkdownContent"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
-import { toast } from "react-hot-toast"
 import { Button } from "@kiwicom/orbit-components"
+import { useEditContent } from "./hooks"
 
 
 interface Props {
   article: Article
 }
 
-const EditArticleContentMarkdown: FC<Props> = ({article}) => {
+const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
   const [content, setContent] = useState('')
   const history = useHistory()
   const [previewNode, previewDown, previewUp] = usePreviewNode()
-  const [fetching, submit] = useSubmit()
+  const [fetching, edit] = useEditContent()
 
   useEffect(() => {
     if (article) {
@@ -28,7 +27,7 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
     }
   }, [article])
 
-  const onSubmit = () => submit(article!.id, content)
+  const onEdit = () => edit(article!.id, content)
 
   return (
     <Wrapper>
@@ -51,7 +50,7 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
               {
                 name: 'submit',
                 bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'},
-                exec: editor => submit(article!.id, editor.getValue())
+                exec: editor => edit(article!.id, editor.getValue())
               },
             ]}
             editorProps={{
@@ -64,7 +63,7 @@ const EditArticleContentMarkdown: FC<Props> = ({article}) => {
         </Preview>
       </EditAreaWrapper>
       <SubmitWrapper>
-        <Button loading={fetching} onClick={onSubmit}>Submit</Button>
+        <Button loading={fetching} onClick={onEdit}>Submit</Button>
         <Button type="white" onClick={() => history.goBack()}>Cancel</Button>
       </SubmitWrapper>
     </Wrapper>
@@ -85,22 +84,6 @@ const usePreviewNode = (): [RefObject<HTMLDivElement>, () => void, () => void] =
   }
 
   return [previewNode, previewDown, previewUp]
-}
-
-const useSubmit = (): [boolean, (articleID: number, content: string) => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const submit = (articleID: number, content: string) => {
-    setFetching(true)
-    requestUpdateContent(articleID, content)
-      .then(() => window.location.href = `/articles/${articleID}`)
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, submit]
 }
 
 const Wrapper = styled.div`
@@ -137,4 +120,4 @@ const SubmitWrapper = styled.div`
   }
 `
 
-export default EditArticleContentMarkdown
+export default EditArticleContentMarkdownDesktop
