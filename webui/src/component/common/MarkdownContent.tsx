@@ -96,8 +96,12 @@ const MarkdownDiv = styled.div`
   em {
     strong {
       background-color: #F2E39B;
+      color: #c7254e;
+      font-size: 90%;
       padding: 2px 5px;
       font-style: normal;
+      border-radius: 4px;
+      border: 1px solid #cda982;
     }
   }
   
