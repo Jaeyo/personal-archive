@@ -15,82 +15,18 @@ interface Props {
   deleteFetching: boolean
 }
 
-const ManagedTitle: FC<Props> = ({ title, onEdit, onDelete, editFetching, deleteFetching }) => {
-  const [isEditMode, setEditMode] = useState(false)
-  const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
-  const [titleModified, setTitleModified] = useState(title)
-
-  const toggleEditMode = (activated: boolean) => {
-    setTitleModified(title)
-    setEditMode(activated)
-  }
-
-  if (true) {
-    return (
-      <div>
-        <Title>{title}</Title>
-        <Options
-          title={title}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          editFetching={editFetching}
-          deleteFetching={deleteFetching}
-        />
-      </div>
-    )
-  }
-
-  if (!isEditMode) {
-    return (
-      <div>
-        <Title>{title}</Title>
-        <ButtonGroupWrapper>
-          <ButtonGroup>
-            <Button
-              iconLeft={<Edit/>}
-              type="secondary"
-              onClick={() => toggleEditMode(true)}
-              size="small"
-            />
-            <Button
-              loading={deleteFetching}
-              iconLeft={<FaTrash/>}
-              type="secondary"
-              onClick={() => setDeleteConfirmShow(true)}
-              size="small"
-            />
-          </ButtonGroup>
-        </ButtonGroupWrapper>
-        <Confirm
-          show={deleteConfirmShow}
-          onOK={() => {
-            setDeleteConfirmShow(false)
-            onDelete()
-          }}
-          onClose={() => setDeleteConfirmShow(false)}
-        >
-          DELETE?
-        </Confirm>
-      </div>
-    )
-  }
-
-  return (
-    <InputDiv>
-      <TitleInput
-        value={titleModified}
-        onChange={e => setTitleModified((e.target as any).value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') {
-            onEdit(titleModified)
-          }
-        }}
-      />
-      <Button loading={editFetching} onClick={() => onEdit(titleModified)}>Submit</Button>
-      <Button onClick={() => toggleEditMode(false)}>Cancel</Button>
-    </InputDiv>
-  )
-}
+const ManagedTitle: FC<Props> = ({ title, onEdit, onDelete, editFetching, deleteFetching }) => (
+  <div>
+    <Title>{title}</Title>
+    <Options
+      title={title}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      editFetching={editFetching}
+      deleteFetching={deleteFetching}
+    />
+  </div>
+)
 
 const Options: FC<{
   title: string,
@@ -210,24 +146,6 @@ const ButtonWrapper = styled.div`
   }
   div[class*="Popover_"] {
     display: inline;
-  }
-`
-
-const InputDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-top: 18px;
-  margin-bottom: 18px;
-`
-
-const TitleInput = styled(InputField)`
-  flex: auto;
-`
-
-const ButtonGroupWrapper = styled.span`
-  margin-left: 6px;
-  div[class*="ButtonGroup"] {
-    display: inline-flex;
   }
 `
 
