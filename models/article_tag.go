@@ -6,7 +6,7 @@ import (
 
 type ArticleTag struct {
 	ID        int64  `gorm:"column:id;primarykey" json:"id"`
-	Tag       string `gorm:"column:tag;type:varchar(60);not null" json:"tag"`
+	Tag       string `gorm:"column:tag;type:varchar(512);not null" json:"tag"`
 	ArticleID int64  `gorm:"column:article_id;type:integer;not null" json:"articleID"`
 }
 
