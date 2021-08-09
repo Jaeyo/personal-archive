@@ -48,8 +48,8 @@ func validateTags(tags []string) error {
 			return fmt.Errorf("'untagged' tag reserved")
 		} else if tag == "all" {
 			return fmt.Errorf("'all' tag reserved")
-		} else if len(tag) > 36 {
-			return fmt.Errorf("tag should be less than 36: %s", tag)
+		} else if len(tag) > 512 {
+			return fmt.Errorf("tag should be less than 512: %s", tag)
 		}
 	}
 	return nil
