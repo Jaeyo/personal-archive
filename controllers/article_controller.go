@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/jaeyo/personal-archive/common/http"
 	"github.com/jaeyo/personal-archive/controllers/reqres"
-	"github.com/jaeyo/personal-archive/models"
+	"github.com/jaeyo/personal-archive/dtos"
 	"github.com/jaeyo/personal-archive/repositories"
 	"github.com/jaeyo/personal-archive/services"
 	"github.com/labstack/echo/v4"
@@ -26,6 +26,7 @@ func NewArticleController() *ArticleController {
 func (c *ArticleController) Route(e *echo.Echo) {
 	e.POST("/apis/articles", http.Provide(c.CreateArticleByURL))
 	e.GET("/apis/articles/:id", http.Provide(c.GetArticle))
+	e.GET("/apis/articles/:id/content", http.Provide(c.GetArticleContent))
 	e.PUT("/apis/articles/:id/title", http.Provide(c.UpdateTitle))
 	e.PUT("/apis/articles/:id/tags", http.Provide(c.UpdateTags))
 	e.PUT("/apis/articles/:id/content", http.Provide(c.UpdateContent))
@@ -49,8 +50,8 @@ func (c *ArticleController) CreateArticleByURL(ctx http.ContextExtended) error {
 	}
 
 	return ctx.Success(reqres.ArticleResponse{
-		OK:      true,
-		Article: article,
+		OK:          true,
+		ArticleMeta: article,
 	})
 }
 
@@ -60,7 +61,7 @@ func (c *ArticleController) GetArticle(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	article, err := c.articleRepository.GetByID(id)
+	article, err := c.articleRepository.GetMetaByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.NotFoundf("failed to get article: %s", err.Error())
@@ -69,8 +70,28 @@ func (c *ArticleController) GetArticle(ctx http.ContextExtended) error {
 	}
 
 	return ctx.Success(reqres.ArticleResponse{
+		OK:          true,
+		ArticleMeta: article,
+	})
+}
+
+func (c *ArticleController) GetArticleContent(ctx http.ContextExtended) error {
+	id, err := ctx.ParamInt64("id")
+	if err != nil {
+		return ctx.BadRequest("invalid id")
+	}
+
+	content, err := c.articleRepository.GetContentByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return ctx.NotFoundf("failed to get article: %s", err.Error())
+		}
+		return ctx.InternalServerError(err, "failed to get article")
+	}
+
+	return ctx.Success(reqres.ArticleContentResponse{
 		OK:      true,
-		Article: article,
+		Content: content,
 	})
 }
 
@@ -135,32 +156,32 @@ func (c *ArticleController) FindArticlesByTag(ctx http.ContextExtended) error {
 	page, offset, limit := ctx.PageOffsetLimit()
 
 	var (
-		articles []*models.Article
-		cnt int64
-		err error
+		articles []*dtos.ArticleMeta
+		cnt      int64
+		err      error
 	)
 
 	if tag == "untagged" {
-		articles, cnt, err = c.articleRepository.FindUntaggedWithPage(offset, limit)
+		articles, cnt, err = c.articleRepository.FindMetaUntaggedWithPage(offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find untagged articles")
 		}
 	} else if tag == "all" {
-		articles, cnt, err = c.articleRepository.FindAllWithPage(offset, limit)
+		articles, cnt, err = c.articleRepository.FindMetaWithPage(offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find all articles")
 		}
 	} else {
-		articles, cnt, err = c.articleRepository.FindByTagWithPage(tag, offset, limit)
+		articles, cnt, err = c.articleRepository.FindMetaByTagWithPage(tag, offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find articles by tag")
 		}
 	}
 
 	return ctx.Success(reqres.ArticlesResponse{
-		OK:         true,
-		Articles:   articles,
-		Pagination: http.NewPagination(page, cnt),
+		OK:           true,
+		ArticleMetas: articles,
+		Pagination:   http.NewPagination(page, cnt),
 	})
 }
 
@@ -177,9 +198,9 @@ func (c *ArticleController) SearchArticle(ctx http.ContextExtended) error {
 	}
 
 	return ctx.Success(reqres.ArticlesResponse{
-		OK:         true,
-		Articles:   articles,
-		Pagination: http.NewPagination(page, cnt),
+		OK:           true,
+		ArticleMetas: articles,
+		Pagination:   http.NewPagination(page, cnt),
 	})
 }
 
@@ -203,7 +224,7 @@ func (c *ArticleController) DeleteArticles(ctx http.ContextExtended) error {
 	}
 
 	if err := c.articleService.DeleteByIDs(ids); err != nil {
-		return ctx.InternalServerError(err,"failed to delete articles")
+		return ctx.InternalServerError(err, "failed to delete articles")
 	}
 
 	return ctx.Success(http.SuccessResponse{OK: true})

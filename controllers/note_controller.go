@@ -70,15 +70,15 @@ func (c *NoteController) GetNote(ctx http.ContextExtended) error {
 		return ctx.InternalServerError(err, "failed to get note")
 	}
 
-	articles, err := c.articleRepository.FindByIDs(note.Paragraphs.ExtractReferenceArticleArticleIDs())
+	articleMetas, err := c.articleRepository.FindMetaByIDs(note.Paragraphs.ExtractReferenceArticleArticleIDs())
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to find articles")
 	}
 
 	return ctx.Success(reqres.NoteAndReferenceArticlesResponse{
-		OK:                 true,
-		Note:               note,
-		ReferencedArticles: articles,
+		OK:                     true,
+		Note:                   note,
+		ReferencedArticleMetas: articleMetas,
 	})
 }
 

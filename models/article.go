@@ -49,13 +49,3 @@ func (a *Article) BeforeSave(db *gorm.DB) error {
 	a.LastModified = time.Now()
 	return nil
 }
-
-type Articles []*Article
-
-func (a Articles) ExtractTagIDs() []int64 {
-	ids := []int64{}
-	for _, article := range a {
-		ids = append(ids, article.Tags.ExtractIDs()...)
-	}
-	return ids
-}

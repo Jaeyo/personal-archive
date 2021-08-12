@@ -2,6 +2,7 @@ package reqres
 
 import (
 	"github.com/jaeyo/personal-archive/common/http"
+	"github.com/jaeyo/personal-archive/dtos"
 	"github.com/jaeyo/personal-archive/models"
 )
 
@@ -32,7 +33,7 @@ type NoteResponse struct {
 type NoteAndReferenceArticlesResponse struct {
 	OK                 bool              `json:"ok"`
 	Note               *models.Note      `json:"note"`
-	ReferencedArticles []*models.Article `json:"referencedArticles"`
+	ReferencedArticleMetas []*dtos.ArticleMeta `json:"referencedArticleMetas"`
 }
 
 type UpdateNoteTitleRequest struct {

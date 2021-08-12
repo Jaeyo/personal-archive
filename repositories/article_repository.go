@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"github.com/jaeyo/personal-archive/dtos"
 	"github.com/jaeyo/personal-archive/internal"
 	"github.com/jaeyo/personal-archive/models"
 	"sync"
@@ -8,12 +9,14 @@ import (
 
 type ArticleRepository interface {
 	Save(article *models.Article) error
-	FindAllWithPage(offset, limit int) (models.Articles, int64, error)
-	FindByIDsWithPage(ids []int64, offset, limit int) (models.Articles, int64, error)
-	FindByIDs(ids []int64) (models.Articles, error)
+	FindMetaWithPage(offset, limit int) (dtos.ArticleMetas, int64, error)
+	FindMetaByIDsWithPage(ids []int64, offset, limit int) (dtos.ArticleMetas, int64, error)
+	FindMetaByIDs(ids []int64) (dtos.ArticleMetas, error)
+	GetMetaByID(id int64) (*dtos.ArticleMeta, error)
 	GetByID(id int64) (*models.Article, error)
-	FindByTagWithPage(tag string, offset, limit int) (models.Articles, int64, error)
-	FindUntaggedWithPage(offset, limit int) (models.Articles, int64, error)
+	FindMetaByTagWithPage(tag string, offset, limit int) (dtos.ArticleMetas, int64, error)
+	FindMetaUntaggedWithPage(offset, limit int) (dtos.ArticleMetas, int64, error)
+	GetContentByID(id int64) (string, error)
 	GetUntaggedCount() (int64, error)
 	GetAllCount() (int64, error)
 	ExistByTitle(title string) (bool, error)
@@ -56,63 +59,72 @@ func (r *articleRepository) Save(article *models.Article) error {
 
 }
 
-func (r *articleRepository) FindAllWithPage(offset, limit int) (models.Articles, int64, error) {
-	var articles []*models.Article
+func (r *articleRepository) FindMetaWithPage(offset, limit int) (dtos.ArticleMetas, int64, error) {
+	var articleMetas []*dtos.ArticleMeta
 	if err := r.database.
 		Preload("Tags").
 		Order("created DESC").
 		Offset(offset).
 		Limit(limit).
-		Find(&articles).Error; err != nil {
+		Find(&articleMetas).Error; err != nil {
 		return nil, -1, err
 	}
 
 	var cnt int64
 	if err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Count(&cnt).Error; err != nil {
 		return nil, -1, err
 	}
 
-	ensureArticleAssociationNotNil(articles)
-	return articles, cnt, nil
+	ensureArticleMetaAssociationNotNil(articleMetas)
+	return articleMetas, cnt, nil
 }
 
-func (r *articleRepository) FindByIDsWithPage(ids []int64, offset, limit int) (models.Articles, int64, error) {
+func (r *articleRepository) FindMetaByIDsWithPage(ids []int64, offset, limit int) (dtos.ArticleMetas, int64, error) {
 	if len(ids) == 0 {
-		return []*models.Article{}, 0, nil
+		return []*dtos.ArticleMeta{}, 0, nil
 	}
 
-	var articles []*models.Article
+	var articleMetas []*dtos.ArticleMeta
 	if err := r.database.
 		Preload("Tags").
 		Order("created DESC").
 		Where("id IN ?", ids).
 		Offset(offset).
 		Limit(limit).
-		Find(&articles).Error; err != nil {
+		Find(&articleMetas).Error; err != nil {
 		return nil, -1, err
 	}
 
-	ensureArticleAssociationNotNil(articles)
-	return articles, int64(len(ids)), nil
+	ensureArticleMetaAssociationNotNil(articleMetas)
+	return articleMetas, int64(len(ids)), nil
 }
 
-func (r *articleRepository) FindByIDs(ids []int64) (models.Articles, error) {
+func (r *articleRepository) FindMetaByIDs(ids []int64) (dtos.ArticleMetas, error) {
 	if len(ids) == 0 {
-		return []*models.Article{}, nil
+		return []*dtos.ArticleMeta{}, nil
 	}
 
-	var articles []*models.Article
+	var articleMetas []*dtos.ArticleMeta
 	if err := r.database.
 		Preload("Tags").
 		Where("id IN ?", ids).
-		Find(&articles).Error; err != nil {
+		Find(&articleMetas).Error; err != nil {
 		return nil, err
 	}
 
-	ensureArticleAssociationNotNil(articles)
-	return articles, nil
+	ensureArticleMetaAssociationNotNil(articleMetas)
+	return articleMetas, nil
+}
+
+func (r *articleRepository) GetMetaByID(id int64) (*dtos.ArticleMeta, error) {
+	var articleMeta dtos.ArticleMeta
+	err := r.database.
+		Preload("Tags").
+		First(&articleMeta, id).Error
+	ensureArticleMetaAssociationNotNil([]*dtos.ArticleMeta{&articleMeta})
+	return &articleMeta, err
 }
 
 func (r *articleRepository) GetByID(id int64) (*models.Article, error) {
@@ -124,8 +136,8 @@ func (r *articleRepository) GetByID(id int64) (*models.Article, error) {
 	return &article, err
 }
 
-func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) (models.Articles, int64, error) {
-	var articles []*models.Article
+func (r *articleRepository) FindMetaByTagWithPage(tag string, offset, limit int) (dtos.ArticleMetas, int64, error) {
+	var articleMetas []*dtos.ArticleMeta
 	if err := r.database.
 		Preload("Tags").
 		Joins("JOIN article_tag ON article_tag.article_id = article.id").
@@ -133,52 +145,69 @@ func (r *articleRepository) FindByTagWithPage(tag string, offset, limit int) (mo
 		Order("article.created DESC").
 		Offset(offset).
 		Limit(limit).
-		Find(&articles).Error; err != nil {
+		Find(&articleMetas).Error; err != nil {
 		return nil, -1, err
 	}
 
 	var cnt int64
 	if err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Joins("JOIN article_tag ON article_tag.article_id = article.id").
 		Where("article_tag.tag = ?", tag).
 		Count(&cnt).Error; err != nil {
 		return nil, -1, err
 	}
 
-	ensureArticleAssociationNotNil(articles)
-	return articles, cnt, nil
+	ensureArticleMetaAssociationNotNil(articleMetas)
+	return articleMetas, cnt, nil
 }
 
-func (r *articleRepository) FindUntaggedWithPage(offset, limit int) (models.Articles, int64, error) {
-	var articles []*models.Article
+func (r *articleRepository) FindMetaUntaggedWithPage(offset, limit int) (dtos.ArticleMetas, int64, error) {
+	var articleMetas []*dtos.ArticleMeta
 	if err := r.database.
 		Joins("LEFT JOIN article_tag ON article_tag.article_id = article.id").
 		Where("article_tag.id IS NULL").
 		Order("article.created DESC").
 		Offset(offset).
 		Limit(limit).
-		Find(&articles).Error; err != nil {
+		Find(&articleMetas).Error; err != nil {
 		return nil, -1, err
 	}
 
 	var cnt int64
 	if err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Joins("LEFT JOIN article_tag ON article_tag.article_id = article.id").
 		Where("article_tag.id IS NULL").
 		Count(&cnt).Error; err != nil {
 		return nil, -1, err
 	}
 
-	ensureArticleAssociationNotNil(articles)
-	return articles, cnt, nil
+	ensureArticleMetaAssociationNotNil(articleMetas)
+	return articleMetas, cnt, nil
+}
+
+func (r *articleRepository) GetContentByID(id int64) (string, error) {
+	type Result struct {
+		Content string
+	}
+	var result Result
+
+	if err := r.database.
+		Model(&models.Article{}).
+		Where("id = ?", id).
+		Select("content").
+		Find(&result).Error; err != nil {
+		return "", err
+	}
+
+	return result.Content, nil
 }
 
 func (r *articleRepository) GetUntaggedCount() (int64, error) {
 	var cnt int64
 	err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Joins("LEFT JOIN article_tag ON article_tag.article_id = article.id").
 		Where("article_tag.id IS NULL").
 		Count(&cnt).Error
@@ -188,7 +217,7 @@ func (r *articleRepository) GetUntaggedCount() (int64, error) {
 func (r *articleRepository) GetAllCount() (int64, error) {
 	var cnt int64
 	err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Count(&cnt).Error
 	return cnt, err
 }
@@ -196,7 +225,7 @@ func (r *articleRepository) GetAllCount() (int64, error) {
 func (r *articleRepository) ExistByTitle(title string) (bool, error) {
 	var cnt int64
 	err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Where("title = ?", title).
 		Count(&cnt).Error
 	return cnt > 0, err
@@ -205,7 +234,7 @@ func (r *articleRepository) ExistByTitle(title string) (bool, error) {
 func (r *articleRepository) ExistByIDs(ids []int64) (bool, error) {
 	var cnt int64
 	err := r.database.
-		Model(&models.Article{}).
+		Model(&dtos.ArticleMeta{}).
 		Where("id IN ?", ids).
 		Count(&cnt).Error
 	return cnt == int64(len(ids)), err
@@ -217,6 +246,14 @@ func (r *articleRepository) DeleteByIDs(ids []int64) error {
 	}
 
 	return r.articleSearchRepository.Deletes(ids)
+}
+
+func ensureArticleMetaAssociationNotNil(articleMetas []*dtos.ArticleMeta) {
+	for _, articleMeta := range articleMetas {
+		if articleMeta.Tags == nil {
+			articleMeta.Tags = models.ArticleTags{}
+		}
+	}
 }
 
 func ensureArticleAssociationNotNil(articles []*models.Article) {

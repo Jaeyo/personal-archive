@@ -3,7 +3,7 @@ package reqres
 import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/common/http"
-	"github.com/jaeyo/personal-archive/models"
+	"github.com/jaeyo/personal-archive/dtos"
 )
 
 type CreateArticleByURLRequest struct {
@@ -32,14 +32,19 @@ type UpdateContentRequest struct {
 }
 
 type ArticleResponse struct {
-	OK      bool            `json:"ok"`
-	Article *models.Article `json:"article"`
+	OK          bool              `json:"ok"`
+	ArticleMeta *dtos.ArticleMeta `json:"articleMeta"`
 }
 
 type ArticlesResponse struct {
-	OK         bool              `json:"ok"`
-	Articles   []*models.Article `json:"articles"`
-	Pagination *http.Pagination   `json:"pagination"`
+	OK           bool                `json:"ok"`
+	ArticleMetas []*dtos.ArticleMeta `json:"articleMetas"`
+	Pagination   *http.Pagination    `json:"pagination"`
+}
+
+type ArticleContentResponse struct {
+	OK      bool
+	Content string `json:"content"`
 }
 
 func validateTags(tags []string) error {

@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"github.com/jaeyo/personal-archive/dtos"
 	"github.com/jaeyo/personal-archive/models"
 	"github.com/jaeyo/personal-archive/repositories"
 	"github.com/jaeyo/personal-archive/services/generators"
@@ -11,8 +12,8 @@ import (
 
 type ArticleService interface {
 	Initialize()
-	CreateByURL(url string, tags []string) (*models.Article, error)
-	Search(keyword string, offset, limit int) ([]*models.Article, int64, error)
+	CreateByURL(url string, tags []string) (*dtos.ArticleMeta, error)
+	Search(keyword string, offset, limit int) ([]*dtos.ArticleMeta, int64, error)
 	UpdateTitle(id int64, newTitle string) error
 	UpdateTags(id int64, tags []string) error
 	UpdateContent(id int64, content string) error
@@ -48,7 +49,7 @@ func (s *articleService) Initialize() {
 	}
 }
 
-func (s *articleService) CreateByURL(url string, tags []string) (*models.Article, error) {
+func (s *articleService) CreateByURL(url string, tags []string) (*dtos.ArticleMeta, error) {
 	article, err := s.articleGenerator.NewArticle(url, tags)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to generate new article")
@@ -58,21 +59,21 @@ func (s *articleService) CreateByURL(url string, tags []string) (*models.Article
 		return nil, errors.Wrap(err, "failed to save article")
 	}
 
-	return article, nil
+	return dtos.NewArticleMeta(article), nil
 }
 
-func (s *articleService) Search(keyword string, offset, limit int) ([]*models.Article, int64, error) {
+func (s *articleService) Search(keyword string, offset, limit int) ([]*dtos.ArticleMeta, int64, error) {
 	ids, err := s.articleSearchRepository.Search(keyword)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to search")
 	}
 
-	articles, cnt, err := s.articleRepository.FindByIDsWithPage(ids, offset, limit)
+	articleMetas, cnt, err := s.articleRepository.FindMetaByIDsWithPage(ids, offset, limit)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to find article by ids")
 	}
 
-	return articles, cnt, nil
+	return articleMetas, cnt, nil
 }
 
 func (s *articleService) UpdateTitle(id int64, newTitle string) error {
@@ -140,7 +141,7 @@ func (s *articleService) UpdateContent(id int64, content string) error {
 }
 
 func (s *articleService) DeleteByIDs(ids []int64) error {
-	articles, err := s.articleRepository.FindByIDs(ids)
+	articles, err := s.articleRepository.FindMetaByIDs(ids)
 	if err != nil {
 		return errors.Wrap(err, "failed to find articles")
 	} else if len(ids) != len(articles) {
