@@ -33,7 +33,7 @@ export const useRequestGetArticle = (): [
 
   const getArticle = (id: number): Promise<void> =>
     fetchGet(`/apis/articles/${id}`, resp => {
-      setArticle(resp.data.articleMeta)
+      setArticle(new Article(resp.data.articleMeta))
     })
 
   return [fetching, useCallback(getArticle, [fetchGet]), article, error]
