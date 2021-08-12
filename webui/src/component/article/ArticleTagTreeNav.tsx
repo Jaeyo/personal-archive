@@ -1,17 +1,17 @@
-import React, { FC, useEffect, useState } from "react"
-import { useRecoilState } from "recoil"
+import React, { FC, useEffect } from "react"
 import { useHistory } from "react-router-dom"
-import { requestFindArticleTags } from "../../apis/ArticleTagApi"
-import { articleTagsState } from "../../states/ArticleTags"
-import { ArticleTagCount } from "../../models/ArticleTag"
+import { useRequestFindArticleTags } from "../../apis/ArticleTagApi"
 import { Treebeard } from "react-treebeard"
 import { Loading } from "@kiwicom/orbit-components"
 import NavItem from "../common/NavItem"
-import { toast } from "react-hot-toast"
 
 
 const ArticleTagTreeNav: FC = () => {
-  const [fetching, articleTags, untaggedCount, allCount] = useRequestFindArticleTags()
+  const [fetching, findArticleTags, articleTags, untaggedCount, allCount] = useRequestFindArticleTags()
+
+  useEffect(() => {
+      findArticleTags()
+  }, [findArticleTags])
 
   if (fetching) {
     return <Loading type="boxLoader" />
@@ -61,27 +61,6 @@ const TreeNodeContainer: FC<{ name: string, tag: string }> = ({ name, tag }) => 
       {name}
     </NavItem>
   )
-}
-
-const useRequestFindArticleTags = (): [boolean, ArticleTagCount[], number, number] => {
-  const [fetching, setFetching] = useState(false)
-  const [articleTags, setArticleTags] = useRecoilState(articleTagsState)
-  const [untaggedCount, setUntaggedCount] = useState(0)
-  const [allCount, setAllCount] = useState(0)
-
-  useEffect(() => {
-    setFetching(true)
-    requestFindArticleTags()
-      .then(([articleTags, untaggedCount, allCount]) => {
-        setArticleTags(articleTags)
-        setUntaggedCount(untaggedCount)
-        setAllCount(allCount)
-      })
-      .finally(() => setFetching(false))
-      .catch(err => toast.error(err.toString()))
-  }, [setArticleTags, setUntaggedCount])
-
-  return [fetching, articleTags, untaggedCount, allCount]
 }
 
 interface TreeNode {

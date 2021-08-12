@@ -1,13 +1,11 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import Article from "../../models/Article"
-import { requestGetArticle } from "../../apis/ArticleApi"
+import { useRequestGetArticle } from "../../apis/ArticleApi"
 import ArticleTitle from "../articlePage/ArticleTitle"
 import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
 import EditArticleContentMarkdownDesktop from "./EditArticleContentMarkdownDesktop"
 import SimpleLayout from "../../component/layout/SimpleLayout"
-import { toast } from "react-hot-toast"
 import { Desktop, Mobile } from "@kiwicom/orbit-components"
 import EditArticleContentMarkdownMobile from "./EditArticleContentMarkdownMobile"
 import styled from "styled-components"
@@ -15,7 +13,11 @@ import styled from "styled-components"
 
 const EditArticlePage: FC = () => {
   const {id} = useParams() as any
-  const [fetching, article] = useRequestGetArticle(id)
+  const [fetching, getArticle, article] = useRequestGetArticle()
+
+  useEffect(() => {
+    getArticle(id)
+  }, [ id, getArticle ])
 
   return (
     <SimpleLayout loading={fetching}>
@@ -38,23 +40,6 @@ const EditArticlePage: FC = () => {
       }
     </SimpleLayout>
   )
-}
-
-const useRequestGetArticle = (id: number): [boolean, Article | null] => {
-  const [fetching, setFetching] = useState(false)
-  const [article, setArticle] = useState(null as Article | null)
-
-  useEffect(() => {
-    setFetching(true)
-    requestGetArticle(id)
-      .then(article => {
-        setArticle(article)
-      })
-      .finally(() => setFetching(false))
-      .catch(err => toast.error(err.toString()))
-  }, [id])
-
-  return [fetching, article]
 }
 
 const EditorWrapper = styled.div`

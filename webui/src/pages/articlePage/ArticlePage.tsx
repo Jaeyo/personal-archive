@@ -1,18 +1,27 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC, useEffect } from "react"
 import { useHistory, useParams } from "react-router-dom"
-import { requestGetArticle } from "../../apis/ArticleApi"
-import Article from "../../models/Article"
+import { useRequestGetArticle } from "../../apis/ArticleApi"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import ArticleTitle from "./ArticleTitle"
 import ArticleTags from "./ArticleTags"
 import ArticleLink from "./ArticleLink"
 import ArticleContent from "./ArticleContent"
-import { toast } from "react-hot-toast"
 
 
 const ArticlePage: FC = () => {
   const {id} = useParams() as any
-  const [fetching, article] = useRequestGetArticle(id)
+  const [fetching, getArticle, article, error] = useRequestGetArticle()
+  const history = useHistory()
+
+  useEffect(() => {
+    getArticle(id)
+  }, [ id, getArticle ])
+
+  useEffect(() => {
+    if (error && error.response?.status === 404) {
+      setTimeout(() => history.push('/'), 1000)
+    }
+  }, [error, history])
 
   return (
     <ArticleTagTreeLayout loading={fetching}>
@@ -28,29 +37,6 @@ const ArticlePage: FC = () => {
       }
     </ArticleTagTreeLayout>
   )
-}
-
-const useRequestGetArticle = (id: number): [boolean, Article | null] => {
-  const [fetching, setFetching] = useState(false)
-  const [article, setArticle] = useState(null as Article | null)
-  const history = useHistory()
-
-  useEffect(() => {
-    setFetching(true)
-    requestGetArticle(id)
-      .then(article => {
-        setArticle(article)
-      })
-      .finally(() => setFetching(false))
-      .catch(err => {
-        toast.error(err.toString())
-        if (err.response?.status === 404) {
-          setTimeout(() => history.push('/'), 1000)
-        }
-      })
-  }, [id, history])
-
-  return [fetching, article]
 }
 
 export default ArticlePage

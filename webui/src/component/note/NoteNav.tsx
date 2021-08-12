@@ -1,16 +1,18 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC, useEffect } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
-import { requestFindNoteTitles } from "../../apis/NoteApi"
-import Note from "../../models/Note"
+import { useRequestFindNoteTitles } from "../../apis/NoteApi"
 import { Loading } from "@kiwicom/orbit-components"
 import NavItem from "../common/NavItem"
-import { toast } from "react-hot-toast"
 
 
 const NoteNav: FC = () => {
-  const [fetching, notes] = useRequestFindNoteTitles()
+  const [fetching, findNoteTitles, notes] = useRequestFindNoteTitles()
   const history = useHistory()
+
+  useEffect(() => {
+    findNoteTitles()
+  }, [ findNoteTitles ])
 
   if (fetching) {
     return <Loading type="boxLoader" />
@@ -29,21 +31,6 @@ const NoteNav: FC = () => {
       }
     </WrapperDiv>
   )
-}
-
-const useRequestFindNoteTitles = (): [boolean, Note[]] => {
-  const [fetching, setFetching] = useState(false)
-  const [notes, setNotes] = useState([] as Note[])
-
-  useEffect(() => {
-    setFetching(true)
-    requestFindNoteTitles()
-      .then(notes => setNotes(notes))
-      .catch(err => toast.error(err.toString()))
-      .finally(() => setFetching(false))
-  }, [])
-
-  return [fetching, notes]
 }
 
 const WrapperDiv = styled.div`

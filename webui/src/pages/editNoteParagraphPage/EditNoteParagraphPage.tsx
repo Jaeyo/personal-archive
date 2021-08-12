@@ -1,21 +1,24 @@
 import React, { FC, useEffect, useState } from "react"
 import { useHistory, useParams } from "react-router-dom"
 import SimpleLayout from "../../component/layout/SimpleLayout"
-import { requestEditParagraph, requestGetNote } from "../../apis/NoteApi"
+import { useRequestEditParagraph, useRequestGetNote } from "../../apis/NoteApi"
 import NoteEditor from "../../component/note/editor/NoteEditor"
 import Article from "../../models/Article"
 import { toast } from "react-hot-toast"
 import { InputField } from "@kiwicom/orbit-components"
+import Note from "../../models/Note"
 
 
 const EditNoteParagraphPage: FC = () => {
   const params = useParams() as any
   const [noteID, paragraphID] = [parseInt(params.id, 10), parseInt(params.paragraphID, 10)]
-  const [loadFetching, title, content, referencedArticles, referencedWebURLs] = useRequestGetNote(noteID, paragraphID)
+  const [fetching, note, content, referencedArticles, referencedWebURLs] = useNoteAndParagraph(noteID, paragraphID)
   const [submitFetching, submit] = useSubmit(noteID, paragraphID)
 
+  const title = note ? note.title : ''
+
   return (
-    <SimpleLayout loading={loadFetching}>
+    <SimpleLayout loading={fetching}>
       <InputField disabled value={title}/>
       <NoteEditor
         content={content}
@@ -28,47 +31,52 @@ const EditNoteParagraphPage: FC = () => {
   )
 }
 
-const useRequestGetNote = (noteID: number, paragraphID: number): [boolean, string, string, Article[], string[]] => {
-  const [fetching, setFetching] = useState(false)
-  const [title, setTitle] = useState('...')
+const useNoteAndParagraph = (noteID: number, paragraphID: number): [
+  boolean,
+  Note | null,
+  string,
+  Article[],
+  string[],
+] => {
+  const [fetching, getNote, note, articles] = useRequestGetNote()
   const [content, setContent] = useState('')
   const [referencedArticles, setReferencedArticles] = useState([] as Article[])
   const [referencedWebURLs, setReferencedWebURLs] = useState([] as string[])
   const history = useHistory()
 
   useEffect(() => {
-    setFetching(true)
-    requestGetNote(noteID)
-      .then(([note, articles]) => {
-        setTitle(note.title)
+    getNote(noteID)
+  }, [])
 
-        const paragraph = note.paragraphs.find(p => p.id === paragraphID)
-        if (!paragraph) {
-          toast.error('invalid paragraph id')
-          setTimeout(() => history.goBack(), 3000)
-          return
-        }
+  useEffect(() => {
+    if (!note) {
+      return
+    }
 
-        const referencedArticleIDs = paragraph.referenceArticles.map(a => a.articleID)
-        const referencedWebURLs = paragraph.referenceWebs.map(w => w.url)
-        const referencedArticles = articles.filter(a => referencedArticleIDs.includes(a.id))
+    const paragraph = note!.paragraphs.find(p => p.id === paragraphID)
+    if (!paragraph) {
+      toast.error('invalid paragraph id')
+      setTimeout(() => history.goBack(), 3000)
+      return
+    }
 
-        setContent(paragraph.content)
-        setReferencedArticles(referencedArticles)
-        setReferencedWebURLs(referencedWebURLs)
-      })
-      .catch(err => toast.error(err.toString()))
-      .finally(() => setFetching(false))
-  }, [noteID, paragraphID, history])
+    const referencedArticleIDs = paragraph.referenceArticles.map(a => a.articleID)
+    const referencedWebURLs = paragraph.referenceWebs.map(w => w.url)
+    const referencedArticles = articles.filter(a => referencedArticleIDs.includes(a.id))
 
-  return [fetching, title, content, referencedArticles, referencedWebURLs]
+    setContent(paragraph.content)
+    setReferencedArticles(referencedArticles)
+    setReferencedWebURLs(referencedWebURLs)
+  }, [note, articles])
+
+  return [fetching, note, content, referencedArticles, referencedWebURLs]
 }
 
 const useSubmit = (noteID: number, paragraphID: number): [
   boolean,
   (content: string, referencedArticles: Article[], referencedWebURLs: string[]) => void,
 ] => {
-  const [fetching, setFetching] = useState(false)
+  const [fetching, editParagraph] = useRequestEditParagraph()
   const history = useHistory()
 
   const submit = (content: string, referencedArticles: Article[], referenceWebURLs: string[]) => {
@@ -77,14 +85,9 @@ const useSubmit = (noteID: number, paragraphID: number): [
       return
     }
 
-    setFetching(true)
     const articleIDs = referencedArticles.map(a => a.id)
-    requestEditParagraph(noteID, paragraphID, content, articleIDs, referenceWebURLs)
+    editParagraph(noteID, paragraphID, content, articleIDs, referenceWebURLs)
       .then(() => history.push(`/notes/${noteID}`))
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
   }
   return [fetching, submit]
 }

@@ -1,8 +1,7 @@
-import React, { FC, useState } from "react"
+import React, { FC } from "react"
 import styled from "styled-components"
-import { requestPocketSync, requestPocketUnauth } from "../../apis/SettingApi"
+import { useRequestPocketSync, useRequestPocketUnauth } from "../../apis/SettingApi"
 import TimeAgo from "javascript-time-ago"
-import { toast } from "react-hot-toast"
 import { Button, List, ListItem, Switch, Tag } from "@kiwicom/orbit-components"
 import { ChevronRight } from "@kiwicom/orbit-components/icons"
 import { AiOutlineSync } from "react-icons/all"
@@ -14,9 +13,13 @@ interface Props {
   lastSyncTime: Date | null
 }
 
-const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime}) => {
-  const [activateFetching, deactivate] = useDeactivate()
-  const [syncToggleFetching, isSyncChecked, syncToggle] = useSyncToggle(isSyncOn)
+const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn: defaultIsSyncOn, lastSyncTime}) => {
+  const [deactivateFetching, unauthPocket] = useRequestPocketUnauth()
+  const [syncToggleFetching, setPocketSync, isSyncOn] = useRequestPocketSync(defaultIsSyncOn)
+
+  const deactivate = () =>
+    unauthPocket()
+      .then(() => window.location.reload())
 
   return (
     <>
@@ -30,8 +33,8 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
         <ListItem label="Sync" icon={<ChevronRight />}>
           <Switch
             icon={<AiOutlineSync />}
-            checked={isSyncChecked}
-            onChange={() => syncToggle(!isSyncChecked)}
+            checked={isSyncOn}
+            onChange={() => setPocketSync(!isSyncOn)}
             disabled={syncToggleFetching}
           />
           <LastSyncTime lastSyncTime={lastSyncTime}/>
@@ -40,7 +43,7 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
       <BtnDiv>
         <Button
           onClick={deactivate}
-          loading={activateFetching}
+          loading={deactivateFetching}
           type="white"
           size="small"
         >
@@ -49,38 +52,6 @@ const PocketSettingAuthenticated: FC<Props> = ({username, isSyncOn, lastSyncTime
       </BtnDiv>
     </>
   )
-}
-
-const useDeactivate = (): [boolean, () => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const deactivate = () => {
-    setFetching(true)
-    requestPocketUnauth()
-      .then(() => window.location.reload())
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, deactivate]
-}
-
-const useSyncToggle = (isSyncOn: boolean): [boolean, boolean, (checked: boolean) => void] => {
-  const [fetching, setFetching] = useState(false)
-  const [isSyncChecked, setSyncChecked] = useState(isSyncOn)
-
-  const syncToggle = (checked: boolean) => {
-    setFetching(true)
-    setSyncChecked(checked)
-    requestPocketSync(checked)
-      .then(() => toast.success(`Pocket sync ${checked ? 'ON' : 'OFF'}`))
-      .catch(err => toast.error(err.toString()))
-      .finally(() => setFetching(false))
-  }
-
-  return [fetching, isSyncChecked, syncToggle]
 }
 
 const LastSyncTime: FC<{ lastSyncTime: Date | null }> = ({lastSyncTime}) =>

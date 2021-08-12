@@ -3,9 +3,8 @@ import styled from "styled-components"
 import { useRecoilValue } from "recoil"
 import Article from "../../models/Article"
 import { articleTagsState } from "../../states/ArticleTags"
-import { requestUpdateTags } from "../../apis/ArticleApi"
+import { useRequestUpdateTags } from "../../apis/ArticleApi"
 import ArticleTag from "../../component/article/ArticleTag"
-import { toast } from "react-hot-toast"
 import { Button } from "@kiwicom/orbit-components"
 import TagSelector from "../../component/article/TagSelector"
 import { FaTags } from "react-icons/fa"
@@ -20,7 +19,13 @@ const ArticleTags: FC<Props> = ({article}) => {
   const [isEditMode, setEditMode] = useState(false)
   const [selectedTags, setSelectedTags] = useState([] as string[])
   const articleTags = useRecoilValue(articleTagsState)
-  const [fetching, submit] = useSubmit(article)
+  const [fetching, updateTags] = useRequestUpdateTags()
+
+  const onSubmit = () =>
+    updateTags(article.id, selectedTags)
+      .then(() => {
+        window.location.href = `/articles/${article.id}`
+      })
 
   useEffect(() => {
     if (article) {
@@ -57,26 +62,10 @@ const ArticleTags: FC<Props> = ({article}) => {
         selectedTags={selectedTags}
         onChange={tags => setSelectedTags(tags)}
       />
-      <Button loading={fetching} onClick={() => submit(selectedTags)}>Submit</Button>
+      <Button loading={fetching} onClick={onSubmit}>Submit</Button>
       <Button onClick={() => setEditMode(false)}>Cancel</Button>
     </InputDiv>
   )
-}
-
-const useSubmit = (article: Article): [boolean, (selectedTags: string[]) => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const submit = (selectedTags: string[]) => {
-    setFetching(true)
-    requestUpdateTags(article!.id, selectedTags)
-      .then(() => window.location.reload())
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, submit]
 }
 
 const ShowDiv = styled.div`

@@ -36,7 +36,7 @@ const ArticleListItem: FC<Props> = ({ article, isSelected, onSelect}) => (
 )
 
 const getMetaText = (article: Article): string =>
-  `${article.readingTime} / created ${new TimeAgo('en-us').format(article.created)}`
+  `created ${new TimeAgo('en-us').format(article.created)}`
 
 const Wrapper = styled.div`
   display: flex;

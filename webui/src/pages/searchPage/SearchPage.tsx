@@ -1,11 +1,9 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC, useEffect } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { usePage, useQuery } from "../../common/Hooks"
-import { requestSearchArticles } from "../../apis/ArticleApi"
-import Article from "../../models/Article"
-import { emptyPagination, Pagination } from "../../common/Types"
+import { useRequestSearchArticles } from "../../apis/ArticleApi"
 import ArticleList from "../../component/article/ArticleList"
 import { toast } from "react-hot-toast"
 
@@ -13,12 +11,18 @@ import { toast } from "react-hot-toast"
 const SearchPage: FC = () => {
   const keyword = useQuery().get('q') || ''
   const page = usePage()
-  const [ fetching, articles, pagination ] = useRequestSearchArticles(keyword, page)
+  const [ fetching, searchArticles, _, articles, pagination] = useRequestSearchArticles()
   const history = useHistory()
 
-  if (keyword.length <= 1) {
-    toast.error('keyword should be more than 2 characters')
-  }
+  useEffect(() => {
+    if (keyword.length <= 1) {
+      toast.error('keyword should be more than 2 characters')
+      return
+    }
+
+    searchArticles(keyword, page)
+  }, [keyword, page, searchArticles])
+
 
   return (
     <ArticleTagTreeLayout loading={fetching}>
@@ -30,29 +34,6 @@ const SearchPage: FC = () => {
       />
     </ArticleTagTreeLayout>
   )
-}
-
-const useRequestSearchArticles = (keyword: string, page: number): [ boolean, Article[], Pagination ] => {
-  const [fetching, setFetching] = useState(false)
-  const [articles, setArticles] = useState([] as Article[])
-  const [pagination, setPagination] = useState(emptyPagination)
-
-  useEffect(() => {
-    if (keyword.length <= 1) {
-      return
-    }
-
-    setFetching(true)
-    requestSearchArticles(keyword, page)
-      .then(([articles, pagination]) => {
-        setArticles(articles)
-        setPagination(pagination)
-      })
-      .catch(err => toast.error(err.toString()))
-      .finally(() => setFetching(false))
-  }, [keyword, page])
-
-  return [ fetching, articles, pagination ]
 }
 
 const Keyword = styled.h1`

@@ -3,8 +3,8 @@ import styled from "styled-components"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import remarkBreaks from "remark-breaks"
-import {Prism as SyntaxHighlighter} from "react-syntax-highlighter"
-import {nord} from "react-syntax-highlighter/dist/esm/styles/prism"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { nord } from "react-syntax-highlighter/dist/esm/styles/prism"
 
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const renderers = {
-  code: ({language, value}: any) => <SyntaxHighlighter style={nord} language={language} children={value} />
+  code: ({language, value}: any) => <SyntaxHighlighter style={nord} language={language} children={value}/>
 }
 
 const MarkdownContent: FC<Props> = ({ content }) => (

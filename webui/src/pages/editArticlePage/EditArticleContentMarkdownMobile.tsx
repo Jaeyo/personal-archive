@@ -1,9 +1,9 @@
 import React, { FC, useEffect, useState } from "react"
 import Article from "../../models/Article"
-import { Button, Textarea } from "@kiwicom/orbit-components"
+import { Button, Loading, Textarea } from "@kiwicom/orbit-components"
 import styled from "styled-components"
-import { useEditContent } from "./hooks"
 import { useHistory } from "react-router-dom"
+import { useRequestGetArticleContent, useRequestUpdateContent } from "../../apis/ArticleApi"
 
 
 interface Props {
@@ -12,14 +12,25 @@ interface Props {
 
 const EditArticleContentMarkdownMobile: FC<Props> = ({ article }) => {
   const [ content, setContent ] = useState('')
-  const [fetching, edit] = useEditContent()
+  const [editFetching, updateContent] = useRequestUpdateContent()
+  const [contentFetching, getContent, fetchedContent] = useRequestGetArticleContent()
   const history = useHistory()
 
   useEffect(() => {
-    setContent(article.content)
-  }, [ article ])
+    if (article) {
+      getContent(article.id).then(() => setContent(fetchedContent))
+    }
+  }, [ article, getContent, fetchedContent ])
 
-  const onEdit = () => edit(article!.id, content)
+  const onEdit = (articleID: number, content: string) =>
+    updateContent(articleID, content)
+      .then(() => {
+        window.location.href = `/articles/${articleID}`
+      })
+
+  if (contentFetching) {
+    return <Loading type="boxLoader" />
+  }
 
   return (
     <Wrapper>
@@ -31,7 +42,7 @@ const EditArticleContentMarkdownMobile: FC<Props> = ({ article }) => {
         spaceAfter="normal"
       />
       <SubmitWrapper>
-        <Button loading={fetching} onClick={onEdit}>Submit</Button>
+        <Button loading={editFetching} onClick={() => onEdit(article!.id, content)}>Submit</Button>
         <Button type="white" onClick={() => history.goBack()}>Cancel</Button>
       </SubmitWrapper>
     </Wrapper>

@@ -4,11 +4,11 @@ import AceEditor from "react-ace"
 import Article from "../../models/Article"
 import { useHistory } from "react-router-dom"
 import MarkdownContent from "../../component/common/MarkdownContent"
+import { Button, Loading } from "@kiwicom/orbit-components"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
-import { Button } from "@kiwicom/orbit-components"
-import { useEditContent } from "./hooks"
+import { useRequestGetArticleContent, useRequestUpdateContent } from "../../apis/ArticleApi"
 
 
 interface Props {
@@ -19,15 +19,24 @@ const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
   const [content, setContent] = useState('')
   const history = useHistory()
   const [previewNode, previewDown, previewUp] = usePreviewNode()
-  const [fetching, edit] = useEditContent()
+  const [editFetching, updateContent] = useRequestUpdateContent()
+  const [contentFetching, getContent, fetchedContent] = useRequestGetArticleContent()
 
   useEffect(() => {
     if (article) {
-      setContent(article.content)
+      getContent(article.id).then(() => setContent(fetchedContent))
     }
-  }, [article])
+  }, [article, getContent, fetchedContent])
 
-  const onEdit = () => edit(article!.id, content)
+  const onEdit = (articleID: number, content: string) =>
+    updateContent(articleID, content)
+      .then(() => {
+        window.location.href = `/articles/${articleID}`
+      })
+
+  if (contentFetching) {
+    return <Loading type="boxLoader" />
+  }
 
   return (
     <Wrapper>
@@ -50,7 +59,7 @@ const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
               {
                 name: 'submit',
                 bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'},
-                exec: editor => edit(article!.id, editor.getValue())
+                exec: editor => onEdit(article!.id, editor.getValue())
               },
             ]}
             editorProps={{
@@ -63,7 +72,7 @@ const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
         </Preview>
       </EditAreaWrapper>
       <SubmitWrapper>
-        <Button loading={fetching} onClick={onEdit}>Submit</Button>
+        <Button loading={editFetching} onClick={() => onEdit(article!.id, content)}>Submit</Button>
         <Button type="white" onClick={() => history.goBack()}>Cancel</Button>
       </SubmitWrapper>
     </Wrapper>

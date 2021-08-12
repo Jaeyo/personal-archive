@@ -1,15 +1,14 @@
 import React, { FC } from "react"
 import YouTube from "react-youtube"
-import Article from "../../models/Article"
 
 
 interface Props {
-  article: Article
+  content: string
 }
 
-const ArticleContentYoutube: FC<Props> = ({ article }) => (
+const ArticleContentYoutube: FC<Props> = ({ content }) => (
   <YouTube
-    videoId={article.content}
+    videoId={content}
     opts={{
       playerVars: {
         autoplay: 1,

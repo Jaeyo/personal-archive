@@ -1,21 +1,20 @@
 import React, { FC, useState } from "react"
-import Article from "../../models/Article"
 import { Tweet } from "react-twitter-widgets"
 import { Loading } from "@kiwicom/orbit-components"
 
 
 interface Props {
-  article: Article
+  content: string
 }
 
-const ArticleContentTweet: FC<Props> = ({article}) => {
+const ArticleContentTweet: FC<Props> = ({ content }) => {
   const [ isFetching, setFetching ] = useState(true)
 
   return (
     <>
       { isFetching ? <Loading type="boxLoader" /> : null }
       <Tweet
-        tweetId={article.content}
+        tweetId={content}
         onLoad={() => setFetching(false)}
       />
     </>

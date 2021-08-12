@@ -1,12 +1,13 @@
-import React, { FC } from "react"
+import React, { FC, useEffect } from "react"
 import Article, { Kind } from "../../models/Article"
 import ArticleContentTweet from "./ArticleContentTweet"
 import ArticleContentSlideShare from "./ArticleContentSlideShare"
 import ArticleContentYoutube from "./ArticleContentYoutube"
 import { useHistory } from "react-router-dom"
 import MarkdownContent from "../../component/common/MarkdownContent"
-import { Button } from "@kiwicom/orbit-components"
+import { Button, Loading } from "@kiwicom/orbit-components"
 import styled from "styled-components"
+import { useRequestGetArticleContent } from "../../apis/ArticleApi"
 
 
 interface Props {
@@ -14,14 +15,23 @@ interface Props {
 }
 
 const ArticleContent: FC<Props> = ({article}) => {
+  const [fetching, getContent, content] = useRequestGetArticleContent()
   const history = useHistory()
 
+  useEffect(() => {
+    getContent(article.id)
+  }, [ article, getContent ])
+
+  if (fetching) {
+    return <Loading type="boxLoader" />
+  }
+
   return article.kind === Kind.Tweet ?
-    <ArticleContentTweet article={article}/> :
+    <ArticleContentTweet content={content} /> :
     article.kind === Kind.SlideShare ?
-      <ArticleContentSlideShare article={article}/> :
+      <ArticleContentSlideShare content={content} /> :
       article.kind === Kind.Youtube ?
-        <ArticleContentYoutube article={article}/> :
+        <ArticleContentYoutube content={content} /> :
         <>
           <EditButtonWrapper>
             <Button
@@ -31,7 +41,7 @@ const ArticleContent: FC<Props> = ({article}) => {
               EDIT
             </Button>
           </EditButtonWrapper>
-          <MarkdownContent content={article.content}/>
+          <MarkdownContent content={content}/>
         </>
 }
 

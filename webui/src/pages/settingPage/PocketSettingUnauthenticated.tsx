@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react"
-import { requestObtainPocketRequestToken } from "../../apis/SettingApi"
+import { useRequestObtainPocketRequestToken } from "../../apis/SettingApi"
 import { toast } from "react-hot-toast"
 import { Button, InputField, List, ListItem, Tag, Tooltip } from "@kiwicom/orbit-components"
 import { ChevronRight, QuestionCircle } from "@kiwicom/orbit-components/icons"
@@ -56,7 +56,7 @@ const PocketSettingUnauthenticated: FC = () => {
 }
 
 const useActivate = (): [boolean, (consumerKey: string) => void] => {
-  const [fetching, setFetching] = useState(false)
+  const [fetching, obtainPocketRequestToken] = useRequestObtainPocketRequestToken()
 
   const activate = (consumerKey: string) => {
     if (consumerKey.length <= 0) {
@@ -65,14 +65,9 @@ const useActivate = (): [boolean, (consumerKey: string) => void] => {
     }
 
     const redirectURI = `${window.location.protocol}//${window.location.host}/settings/pocket-auth`
-    setFetching(true)
-    requestObtainPocketRequestToken(consumerKey, redirectURI)
+    obtainPocketRequestToken(consumerKey, redirectURI)
       .then(requestToken => {
         window.location.href = `https://getpocket.com/auth/authorize?request_token=${requestToken}&redirect_uri=${redirectURI}`
-      })
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
       })
   }
 

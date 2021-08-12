@@ -15,7 +15,7 @@ interface Props {
   deleteFetching: boolean
 }
 
-const ManagedTitle: FC<Props> = ({ title, onEdit, onDelete, editFetching, deleteFetching }) => (
+const ManagedTitle: FC<Props> = ({title, onEdit, onDelete, editFetching, deleteFetching}) => (
   <div>
     <Title>{title}</Title>
     <Options
@@ -34,7 +34,7 @@ const Options: FC<{
   onDelete: () => void,
   editFetching: boolean,
   deleteFetching: boolean,
-}> = ({ title, onEdit, onDelete, editFetching, deleteFetching }) => {
+}> = ({title, onEdit, onDelete, editFetching, deleteFetching}) => {
   const [isOpened, setOpened] = useState(false)
   const [isEditPromptOpened, setEditPromptOpened] = useState(false)
   const [isDeleteConfirmOpened, setDeleteConfirmOpened] = useState(false)
@@ -99,12 +99,12 @@ const EditPrompt: FC<{
   defaultTitle: string,
   onEdit: (title: string) => void,
   onClose: () => void,
-}> = ({ isOpened, defaultTitle, onEdit, onClose }) => {
-  const [ newTitle, setNewTitle ] = useState('')
+}> = ({isOpened, defaultTitle, onEdit, onClose}) => {
+  const [newTitle, setNewTitle] = useState('')
 
   useEffect(() => {
     setNewTitle(defaultTitle)
-  }, [ defaultTitle ])
+  }, [defaultTitle])
 
   return (
     <Confirm
@@ -129,7 +129,7 @@ const DeleteConfirm: FC<{
   isOpened: boolean,
   onDelete: () => void,
   onClose: () => void,
-}> = ({ isOpened, onDelete, onClose }) => (
+}> = ({isOpened, onDelete, onClose}) => (
   <Confirm
     show={isOpened}
     onOK={onDelete}

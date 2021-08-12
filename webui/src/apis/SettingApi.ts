@@ -1,30 +1,94 @@
-import { requestGet, requestPost, requestPut } from "./index"
+import { useGet, usePost, usePut } from "./index"
+import { AxiosError } from "axios"
+import { useCallback, useState } from "react"
 
 
-export const requestObtainPocketRequestToken = async (consumerKey: string, redirectURI: string): Promise<string> => {
-  const resp = await requestPost(`/apis/settings/pocket/request-token`, {consumerKey, redirectURI})
-  return resp.data.requestToken
+export const useRequestObtainPocketRequestToken = (): [
+  boolean,
+  (consumerKey: string, redirectURI: string) => Promise<void>,
+  string,
+  AxiosError | null,
+] => {
+  const [fetching, fetchPost, error] = usePost()
+  const [requestToken, setRequestToken] = useState('')
+
+  const obtainPocketRequestToken = (consumerKey: string, redirectURI: string): Promise<void> =>
+    fetchPost(`/apis/settings/pocket/request-token`, {consumerKey, redirectURI}, resp => {
+      setRequestToken(resp.data.requestToken)
+    })
+
+  return [fetching, useCallback(obtainPocketRequestToken, [fetchPost]), requestToken, error]
 }
 
-export const requestPocketAuth = async (): Promise<boolean> => {
-  const resp = await requestPost(`/apis/settings/pocket/auth`, {})
-  return resp.data.isAllowed
+export const useRequestPocketAuth = (): [
+  boolean,
+  () => Promise<void>,
+  boolean,
+  AxiosError | null,
+] => {
+  const [fetching, fetchPost, error] = usePost()
+  const [isAllowed, setIsAllowed] = useState(false)
+
+  const authPocket = (): Promise<void> =>
+    fetchPost(`/apis/settings/pocket/auth`, {}, resp => {
+      setIsAllowed(resp.data.isAllowed)
+    })
+
+  return [fetching, useCallback(authPocket, [fetchPost]), isAllowed, error]
 }
 
-export const requestPocketUnauth = async (): Promise<void> => {
-  await requestPost(`/apis/settings/pocket/unauth`, {})
+export const useRequestPocketUnauth = (): [
+  boolean,
+  () => Promise<void>,
+  AxiosError | null,
+] => {
+  const [fetching, fetchPost, error] = usePost()
+
+  const unauthPocket = (): Promise<void> =>
+    fetchPost(`/apis/settings/pocket/unauth`, {})
+
+  return [fetching, useCallback(unauthPocket, [fetchPost]), error]
 }
 
-export const requestGetPocketAuth = async (): Promise<[boolean, string, boolean, Date]> => {
-  const resp = await requestGet(`/apis/settings/pocket/auth`)
-  return [
-    resp.data.isAuthenticated,
-    resp.data.username,
-    resp.data.isSyncOn,
-    resp.data.lastSyncTime,
-  ]
+export const useRequestGetPocketAuth = (): [
+  boolean,
+  () => Promise<void>,
+  boolean,
+  string,
+  boolean,
+  Date,
+  AxiosError | null,
+] => {
+  const [fetching, fetchGet, error] = useGet()
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [username, setUsername] = useState('')
+  const [isSyncOn, setIsSyncOn] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState(new Date(0))
+
+  const getPocketAuth = (): Promise<void> =>
+    fetchGet(`/apis/settings/pocket/auth`, resp => {
+      setIsAuthenticated(resp.data.isAuthenticated)
+      setUsername(resp.data.username)
+      setIsSyncOn(resp.data.isSyncOn)
+      setLastSyncTime(resp.data.lastSyncTime)
+    })
+
+  return [fetching, useCallback(getPocketAuth, [fetchGet]), isAuthenticated, username, isSyncOn, lastSyncTime, error]
 }
 
-export const requestPocketSync = async (isSyncOn: boolean): Promise<void> => {
-  await requestPut(`/apis/settings/pocket/sync`, {isSyncOn})
+export const useRequestPocketSync = (defaultIsSyncOn: boolean): [
+  boolean,
+  (isSyncOn: boolean) => Promise<void>,
+  boolean,
+  AxiosError | null,
+] => {
+  const [fetching, fetchPut, error] = usePut()
+  const [isSyncOn, setIsSyncOn] = useState(defaultIsSyncOn)
+
+  const setPocketSync = (isSyncOn: boolean): Promise<void> => {
+    setIsSyncOn(isSyncOn)
+    return fetchPut(`/apis/settings/pocket/sync`, {isSyncOn})
+  }
+
+  return [fetching, useCallback(setPocketSync, [fetchPut]), isSyncOn, error]
 }

@@ -1,14 +1,13 @@
 import React, { FC } from "react"
 import styled from "styled-components"
-import Article from "../../models/Article"
 
 
 interface Props {
-  article: Article
+  content: string
 }
 
-const ArticleContentSlideShare: FC<Props> = ({ article }) => (
-  <Wrapper dangerouslySetInnerHTML={{ __html: article.content }} />
+const ArticleContentSlideShare: FC<Props> = ({ content }) => (
+  <Wrapper dangerouslySetInnerHTML={{ __html: content }} />
 )
 
 const Wrapper = styled.div`

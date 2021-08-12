@@ -3,9 +3,8 @@ import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import Paragraph from "../../models/Paragraph"
 import Confirm from "../../component/common/Confirm"
-import { requestDeleteParagraph } from "../../apis/NoteApi"
-import { toast } from "react-hot-toast"
-import { ButtonGroup, Button, Popover } from "@kiwicom/orbit-components"
+import { useRequestDeleteParagraph } from "../../apis/NoteApi"
+import { Button, ButtonGroup, Popover } from "@kiwicom/orbit-components"
 import { ChevronDown, ChevronUp, Edit } from "@kiwicom/orbit-components/icons"
 import { FaTrash } from "react-icons/fa"
 
@@ -18,9 +17,12 @@ interface Props {
 
 const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown}) => {
   const [opened, setOpened] = useState(false)
-  const [fetching, deleteParagraph] = useDelete(paragraph)
+  const [fetching, deleteParagraph] = useRequestDeleteParagraph()
   const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
   const history = useHistory()
+
+  const onDeleteParagraph = () => deleteParagraph(paragraph.noteID, paragraph.id)
+    .then(() => window.location.reload())
 
   return (
     <Wrapper>
@@ -79,29 +81,13 @@ const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown}) => {
       </Popover>
       <Confirm
         show={deleteConfirmShow}
-        onOK={deleteParagraph}
+        onOK={onDeleteParagraph}
         onClose={() => setDeleteConfirmShow(false)}
       >
         DELETE?
       </Confirm>
     </Wrapper>
   )
-}
-
-const useDelete = (paragraph: Paragraph): [boolean, () => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const deleteParagraph = () => {
-    setFetching(true)
-    requestDeleteParagraph(paragraph.noteID, paragraph.id)
-      .then(() => window.location.reload())
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, deleteParagraph]
 }
 
 const Wrapper = styled.div`

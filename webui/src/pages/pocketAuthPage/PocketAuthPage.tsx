@@ -1,29 +1,19 @@
-import React, { FC, useEffect, useState } from "react"
-import { requestPocketAuth } from "../../apis/SettingApi"
-import { toast } from "react-hot-toast"
+import React, { FC, useEffect } from "react"
+import { useRequestPocketAuth } from "../../apis/SettingApi"
 import { Loading } from "@kiwicom/orbit-components"
 
 
 const PocketAuthPage: FC = () => {
-  const [fetching] = useRequestPocketAuth()
-  return fetching ? <Loading type="boxLoader" /> : null
-}
+  const [fetching, authPocket] = useRequestPocketAuth()
 
-const useRequestPocketAuth = (): [boolean] => {
-  const [fetching, setFetching] = useState(false)
   useEffect(() => {
-    setFetching(true)
-    requestPocketAuth()
-      .then(isAllowed => {
+    authPocket()
+      .then(() => {
         window.location.href = `/settings`
       })
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }, [])
+  }, [ authPocket ])
 
-  return [fetching]
+  return fetching ? <Loading type="boxLoader" /> : null
 }
 
 export default PocketAuthPage

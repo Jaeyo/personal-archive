@@ -2,9 +2,8 @@ import React, { FC, useState } from "react"
 import styled from "styled-components"
 import Article from "../../models/Article"
 import { Pagination as IPagination } from "../../common/Types"
-import { requestDeleteArticles } from "../../apis/ArticleApi"
+import { useRequestDeleteArticles } from "../../apis/ArticleApi"
 import ArticleListItem from "./ArticleListItem"
-import { toast } from "react-hot-toast"
 import { Button, Pagination } from "@kiwicom/orbit-components"
 
 
@@ -16,7 +15,12 @@ interface Props {
 
 const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
   const [selectedIDs, select] = useSelectedIDs()
-  const [fetching, deleteArticles] = useDeleteArticles()
+  const [fetching, deleteArticles] = useRequestDeleteArticles()
+
+  const onDelete = () => {
+    deleteArticles(selectedIDs)
+      .then(() => window.location.reload())
+  }
 
   return (
     <>
@@ -38,7 +42,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
               type="criticalSubtle"
               size="small"
               loading={fetching}
-              onClick={() => deleteArticles(selectedIDs)}
+              onClick={() => onDelete()}
             >
               Delete
             </Button>
@@ -67,26 +71,6 @@ const useSelectedIDs = (): [number[], (id: number, checked: boolean) => void] =>
   }
 
   return [selectedIDs, select]
-}
-
-const useDeleteArticles = (): [boolean, (ids: number[]) => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const deleteArticles = (ids: number[]) => {
-    if (ids.length <= 0) {
-      return
-    }
-
-    setFetching(true)
-    requestDeleteArticles(ids)
-      .then(() => window.location.reload())
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, deleteArticles]
 }
 
 const DeleteBtnDiv = styled.div`

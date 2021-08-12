@@ -1,8 +1,7 @@
 import React, { FC, useEffect, useState } from "react"
 import styled from "styled-components"
-import { requestUpdateTag } from "../../apis/ArticleTagApi"
+import { useRequestUpdateTag } from "../../apis/ArticleTagApi"
 import { VisibleProps } from "../../common/Props"
-import { toast } from "react-hot-toast"
 import { Button, InputField } from "@kiwicom/orbit-components"
 import { Edit } from "@kiwicom/orbit-components/icons"
 import Title from "../../component/common/Title"
@@ -15,13 +14,18 @@ interface Props {
 const TagTitle: FC<Props> = ({tag: initialTag}) => {
   const [isEditMode, setEditMode] = useState(false)
   const [tag, setTag] = useState('')
-  const [fetching, submit] = useSubmit()
+  const [fetching, updateTag] = useRequestUpdateTag()
 
   useEffect(() => {
     setTag(initialTag)
   }, [initialTag])
 
-  const onSubmit = () => submit(initialTag, tag)
+  const onSubmit = () => {
+    updateTag(initialTag, tag)
+      .then(() => {
+        window.location.href = `/tags/${encodeURIComponent(tag)}`
+      })
+  }
 
   if (!isEditMode) {
     return (
@@ -54,22 +58,6 @@ const TagTitle: FC<Props> = ({tag: initialTag}) => {
       <Button onClick={() => setEditMode(false)}>Cancel</Button>
     </InputDiv>
   )
-}
-
-const useSubmit = (): [boolean, (initialTag: string, tag: string) => void] => {
-  const [fetching, setFetching] = useState(false)
-
-  const submit = (initialTag: string, tag: string) => {
-    setFetching(true)
-    requestUpdateTag(initialTag, tag)
-      .then(() => window.location.href = `/tags/${encodeURIComponent(tag)}`)
-      .catch(err => {
-        toast.error(err.toString())
-        setFetching(false)
-      })
-  }
-
-  return [fetching, submit]
 }
 
 const ShowDiv = styled.div`
