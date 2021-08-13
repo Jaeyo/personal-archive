@@ -1,6 +1,5 @@
 import React from "react"
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom"
-import { RecoilRoot } from "recoil"
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom"
 import CreateArticlePage from "./pages/createArticlePage/CreateArticlePage"
 import ArticlePage from "./pages/articlePage/ArticlePage"
 import ArticlesByTagPage from "./pages/articlesByTagPage/ArticlesByTagPage"
@@ -17,56 +16,56 @@ import { Toaster } from "react-hot-toast"
 
 
 const App = () => (
-  <RecoilRoot>
+  <>
     <BrowserRouter>
       <div>
         <Switch>
           <Route path="/articles/new">
-            <CreateArticlePage />
+            <CreateArticlePage/>
           </Route>
           <Route path="/articles/search">
-            <SearchPage />
+            <SearchPage/>
           </Route>
           <Route path="/articles/:id/edit">
-            <EditArticlePage />
+            <EditArticlePage/>
           </Route>
           <Route path="/articles/:id">
-            <ArticlePage />
+            <ArticlePage/>
           </Route>
           <Route path="/tags/:tag">
-            <ArticlesByTagPage />
+            <ArticlesByTagPage/>
           </Route>
 
           <Route path="/notes/:id/paragraphs/:paragraphID">
-            <EditNoteParagraphPage />
+            <EditNoteParagraphPage/>
           </Route>
           <Route path="/notes/:id/paragraphs">
-            <NewNoteParagraphPage />
+            <NewNoteParagraphPage/>
           </Route>
           <Route path="/notes/new">
-            <NewNotePage />
+            <NewNotePage/>
           </Route>
           <Route path="/notes/:id">
-            <NotePage />
+            <NotePage/>
           </Route>
           <Route path="/notes">
-            <NoteListPage />
+            <NoteListPage/>
           </Route>
 
           <Route path="/settings/pocket-auth">
-            <PocketAuthPage />
+            <PocketAuthPage/>
           </Route>
           <Route path="/settings">
-            <SettingPage />
+            <SettingPage/>
           </Route>
           <Route path="/">
-            <Redirect to="/tags/all" />
+            <Redirect to="/tags/all"/>
           </Route>
         </Switch>
       </div>
     </BrowserRouter>
-    <Toaster position="top-right" />
-  </RecoilRoot>
+    <Toaster position="top-right"/>
+  </>
 )
 
 export default App
