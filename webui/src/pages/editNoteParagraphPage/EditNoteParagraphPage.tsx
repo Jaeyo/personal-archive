@@ -46,7 +46,7 @@ const useNoteAndParagraph = (noteID: number, paragraphID: number): [
 
   useEffect(() => {
     getNote(noteID)
-  }, [])
+  }, [getNote, noteID])
 
   useEffect(() => {
     if (!note) {
@@ -67,7 +67,7 @@ const useNoteAndParagraph = (noteID: number, paragraphID: number): [
     setContent(paragraph.content)
     setReferencedArticles(referencedArticles)
     setReferencedWebURLs(referencedWebURLs)
-  }, [note, articles])
+  }, [note, articles, history, paragraphID])
 
   return [fetching, note, content, referencedArticles, referencedWebURLs]
 }

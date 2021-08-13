@@ -1,5 +1,5 @@
 import React, { FC } from "react"
-import { Button, Modal, ModalFooter, ModalSection } from "@kiwicom/orbit-components"
+import { Button, Loading, Modal, ModalFooter, ModalSection } from "@kiwicom/orbit-components"
 import styled from "styled-components"
 import { If } from "react-if"
 
@@ -8,17 +8,22 @@ interface Props {
   show: boolean
   onOK: () => void
   onClose: () => void
+  loading?: boolean
 }
 
-const Confirm: FC<Props> = ({show, onOK, onClose, children}) => (
+const Confirm: FC<Props> = ({show, onOK, onClose, loading = false, children}) => (
   <If condition={show}>
     <Modal
       onClose={onClose}
-      fixedFooter
       size="small"
     >
       <ModalSection>
-        {children}
+        <If condition={loading}>
+          <Loading type="boxLoader" />
+        </If>
+        <If condition={!loading}>
+          {children}
+        </If>
       </ModalSection>
       <ModalFooter>
         <ButtonWrapper>

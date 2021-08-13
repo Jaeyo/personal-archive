@@ -30,7 +30,7 @@ const toOptionTypes = (tags: string[]): OptionType[] =>
   tags.map(tag => ({ label: tag, value: tag }))
 
 const Selector = styled(CreatableSelect)`
-  min-width: 400px;
+  min-width: 300px;
 `
 
 export default TagSelector
