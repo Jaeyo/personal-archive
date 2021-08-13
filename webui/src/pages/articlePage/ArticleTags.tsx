@@ -62,6 +62,7 @@ const EditPrompt: FC<{
   const onSubmit = () => {
     updateTags(articleID, selectedTags)
       .then(() => {
+        close()
         window.location.href = `/articles/${articleID}`
       })
   }

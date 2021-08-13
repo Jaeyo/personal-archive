@@ -3,8 +3,9 @@ import styled from "styled-components"
 import { useRequestUpdateTag } from "../../apis/ArticleTagApi"
 import { VisibleProps } from "../../common/Props"
 import { Button, InputField } from "@kiwicom/orbit-components"
-import { Edit } from "@kiwicom/orbit-components/icons"
+import { ChevronDown } from "@kiwicom/orbit-components/icons"
 import Title from "../../component/common/Title"
+import Confirm from "../../component/common/Confirm"
 
 
 interface Props {
@@ -12,63 +13,70 @@ interface Props {
 }
 
 const TagTitle: FC<Props> = ({tag: initialTag}) => {
-  const [isEditMode, setEditMode] = useState(false)
-  const [tag, setTag] = useState('')
-  const [fetching, updateTag] = useRequestUpdateTag()
-
-  useEffect(() => {
-    setTag(initialTag)
-  }, [initialTag])
-
-  const onSubmit = () => {
-    updateTag(initialTag, tag)
-      .then(() => {
-        window.location.href = `/tags/${encodeURIComponent(tag)}`
-      })
-  }
-
-  if (!isEditMode) {
-    return (
-      <ShowDiv>
-        <Title>Tag: {initialTag}</Title>
-          <EditButtonWrapper $visible={tag !== 'untagged' && tag !== 'all'}>
-            <Button
-              iconLeft={<Edit />}
-              type="secondary"
-              size="small"
-              onClick={() => setEditMode(true)}
-            />
-          </EditButtonWrapper>
-      </ShowDiv>
-    )
-  }
+  const [isEditPromptOpened, setEditPromptOpened] = useState(false)
 
   return (
-    <InputDiv>
-      <InputField
-        value={tag}
-        onChange={e => setTag((e.target as any).value)}
-        onKeyDown={e => {
-          if (e.key === 'Enter') {
-            onSubmit()
-          }
-        }}
+    <Wrapper>
+      <Title>Tag: {initialTag}</Title>
+      <EditButtonWrapper $visible={initialTag !== 'untagged' && initialTag !== 'all'}>
+        <Button
+          iconLeft={<ChevronDown/>}
+          type="white"
+          size="small"
+          onClick={() => setEditPromptOpened(true)}
+        />
+      </EditButtonWrapper>
+      <EditPrompt
+        isOpened={isEditPromptOpened}
+        onClose={() => setEditPromptOpened(false)}
+        defaultTitle={initialTag}
       />
-      <Button loading={fetching} onClick={onSubmit}>Submit</Button>
-      <Button onClick={() => setEditMode(false)}>Cancel</Button>
-    </InputDiv>
+    </Wrapper>
   )
 }
 
-const ShowDiv = styled.div`
-  margin-bottom: 11px;
-`
+const EditPrompt: FC<{
+  isOpened: boolean,
+  onClose: () => void,
+  defaultTitle: string,
+}> = ({isOpened, onClose: close, defaultTitle}) => {
+  const [title, setTitle] = useState('')
+  const [fetching, updateTag] = useRequestUpdateTag()
 
-const InputDiv = styled.div`
-  display: flex;
-  flex-direction: row;
-  margin-top: 18px;
-  margin-bottom: 18px;
+  useEffect(() => {
+    setTitle(defaultTitle)
+  }, [defaultTitle])
+
+  const onSubmit = () => {
+    updateTag(defaultTitle, title)
+      .then(() => {
+        close()
+        window.location.href = `/tags/${encodeURIComponent(title)}`
+      })
+  }
+
+  const onClose = () => {
+    setTitle(defaultTitle)
+    close()
+  }
+
+  return (
+    <Confirm
+      show={isOpened}
+      onOK={onSubmit}
+      onClose={onClose}
+      loading={fetching}
+    >
+      <InputField
+        value={title}
+        onChange={e => setTitle((e.target as any).value)}
+      />
+    </Confirm>
+  )
+}
+
+const Wrapper = styled.div`
+  margin-bottom: 11px;
 `
 
 const EditButtonWrapper = styled.div<VisibleProps>`
