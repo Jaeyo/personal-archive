@@ -30,8 +30,9 @@ const useApi = (): [
   const [fetching, setFetching] = useState(false)
   const [error, setError] = useState(null as AxiosError | null)
 
-  const fetchData = (apiFn: () => Promise<void>) =>
-    apiFn()
+  const fetchData = (apiFn: () => Promise<void>) => {
+    setFetching(true)
+    return apiFn()
       .catch(err => {
         if (err) {
           if (err.response != null && err.response.data != null && err.response.data.message != null) {
@@ -43,6 +44,7 @@ const useApi = (): [
         }
       })
       .finally(() => setFetching(false))
+  }
 
   return [ fetching, useCallback(fetchData, []), error ]
 }
