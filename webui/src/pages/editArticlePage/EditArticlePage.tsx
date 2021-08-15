@@ -20,7 +20,10 @@ const EditArticlePage: FC = () => {
   }, [ id, getArticle ])
 
   return (
-    <SimpleLayout loading={fetching}>
+    <SimpleLayout
+      loading={fetching}
+      title={article ? article.title : undefined}
+    >
       {
         article && (
           <>

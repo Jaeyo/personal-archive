@@ -6,13 +6,15 @@ import getTokens from "@kiwicom/orbit-components/lib/getTokens"
 import { When } from "react-if"
 import { MenuHamburger } from "@kiwicom/orbit-components/icons"
 import { FaRegNewspaper, FaRegStickyNote, FaRegSun, FaSearch } from "react-icons/fa"
+import { Helmet } from "react-helmet"
 
 
 interface Props {
   side?: ReactNode
+  title?: string
 }
 
-const MainLayout: FC<Props> = ({ side, children}) => {
+const MainLayout: FC<Props> = ({ side, title, children}) => {
   const [showSearchDrawer, setShowSearchDrawer] = useState(false)
   const [showNav, setShowNav] = useState(false)  // only works in mobile
   const history = useHistory()
@@ -27,6 +29,9 @@ const MainLayout: FC<Props> = ({ side, children}) => {
   return (
     <ThemeProvider theme={{orbit: customTokens}}>
       <Parent>
+        <Helmet>
+          <title>{getTitle(title)}</title>
+        </Helmet>
         <Header>
           <Logo>PA</Logo>
           <Menu onClick={() => history.push(`/tags/all`)}>
@@ -118,6 +123,13 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({show, onClose
       />
     </Drawer>
   )
+}
+
+const getTitle = (title: string | undefined): string => {
+  if (!title) {
+    return 'Personal Archive'
+  }
+  return `${title} - Personal Archive`
 }
 
 const Parent = styled.div`

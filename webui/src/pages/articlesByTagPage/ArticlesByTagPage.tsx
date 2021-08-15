@@ -19,7 +19,10 @@ const ArticlesByTagPage: FC = () => {
   }, [ tag, page, findArticlesByTag ])
 
   return (
-    <ArticleTagTreeLayout loading={fetching}>
+    <ArticleTagTreeLayout
+      loading={fetching}
+      title={tag}
+    >
       <AddArticle />
       <TagTitle tag={tag}/>
       <ArticleList

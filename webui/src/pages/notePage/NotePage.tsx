@@ -17,7 +17,10 @@ const NotePage: FC = () => {
   const [fetching, note, referencedArticles, swapParagraphSeq] = useNote(id)
 
   return (
-    <NoteNavLayout loading={fetching}>
+    <NoteNavLayout
+      loading={fetching}
+      title={note ? note.title : undefined}
+    >
       {note && <NoteTitle note={note}/>}
       {
         note && note.paragraphs

@@ -24,7 +24,10 @@ const ArticlePage: FC = () => {
   }, [error, history])
 
   return (
-    <ArticleTagTreeLayout loading={fetching}>
+    <ArticleTagTreeLayout
+      loading={fetching}
+      title={article ? article.title : undefined}
+    >
       {
         article && (
           <>
