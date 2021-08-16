@@ -8,12 +8,14 @@ import (
 )
 
 type SettingController struct {
-	pocketService services.PocketService
+	pocketService  services.PocketService
+	settingService services.SettingService
 }
 
 func NewSettingController() *SettingController {
 	return &SettingController{
-		pocketService: services.GetPocketService(),
+		pocketService:  services.GetPocketService(),
+		settingService: services.GetSettingService(),
 	}
 }
 
@@ -23,6 +25,8 @@ func (c *SettingController) Route(e *echo.Echo) {
 	e.POST("/apis/settings/pocket/unauth", http.Provide(c.Unauth))
 	e.GET("/apis/settings/pocket/auth", http.Provide(c.GetAuth))
 	e.PUT("/apis/settings/pocket/sync", http.Provide(c.ToggleSync))
+	e.GET("/apis/settings/editor/keyboard-handler", http.Provide(c.GetEditorKeyboardHandler))
+	e.PUT("/apis/settings/editor/keyboard-handler", http.Provide(c.SetEditorKeyboardHandler))
 }
 
 func (c *SettingController) ObtainPocketRequestToken(ctx http.ContextExtended) error {
@@ -90,6 +94,32 @@ func (c *SettingController) ToggleSync(ctx http.ContextExtended) error {
 
 	if err := c.pocketService.ToggleSync(req.IsSyncOn); err != nil {
 		return ctx.InternalServerError(err, "failed to update sync status")
+	}
+
+	return ctx.Success(http.SuccessResponse{OK: true})
+}
+
+func (c *SettingController) GetEditorKeyboardHandler(ctx http.ContextExtended) error {
+	keyboardHandler, err := c.settingService.GetEditorKeyboardHandler()
+	if err != nil {
+		return ctx.InternalServerError(err, "failed to get editor keyboard handler")
+	}
+
+	return ctx.Success(reqres.EditorKeyboardHandlerResponse{
+		OK:              true,
+		KeyboardHandler: keyboardHandler,
+	})
+
+}
+
+func (c *SettingController) SetEditorKeyboardHandler(ctx http.ContextExtended) error {
+	var req reqres.EditorKeyboardHandlerRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.BadRequestf("invalid request body: %s", err.Error())
+	}
+
+	if err := c.settingService.SetEditorKeyboardHandler(req.KeyboardHandler); err != nil {
+		return ctx.InternalServerError(err, "failed to update editor keyboard handler")
 	}
 
 	return ctx.Success(http.SuccessResponse{OK: true})

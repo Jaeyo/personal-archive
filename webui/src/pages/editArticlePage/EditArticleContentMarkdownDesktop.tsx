@@ -9,6 +9,7 @@ import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
 import { useRequestGetArticleContent, useRequestUpdateContent } from "../../apis/ArticleApi"
+import { useRequestGetEditorKeyboardHandler } from "../../apis/SettingApi"
 
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
+  const [_, getKeyboardHandler, keyboardHandler] = useRequestGetEditorKeyboardHandler()
   const [content, setContent] = useState('')
   const history = useHistory()
   const [previewNode, previewDown, previewUp] = usePreviewNode()
@@ -23,10 +25,12 @@ const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
   const [contentFetching, getContent, fetchedContent] = useRequestGetArticleContent()
 
   useEffect(() => {
+    getKeyboardHandler()
+
     if (article) {
       getContent(article.id).then(() => setContent(fetchedContent))
     }
-  }, [article, getContent, fetchedContent])
+  }, [getKeyboardHandler, article, getContent, fetchedContent])
 
   const onEdit = (articleID: number, content: string) =>
     updateContent(articleID, content)
@@ -50,7 +54,7 @@ const EditArticleContentMarkdownDesktop: FC<Props> = ({article}) => {
             width="100%"
             height="800px"
             wrapEnabled
-            keyboardHandler="vim"
+            keyboardHandler={keyboardHandler || 'vim'}
             tabSize={2}
             focus={true}
             commands={[

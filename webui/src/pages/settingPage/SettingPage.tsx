@@ -3,6 +3,8 @@ import SimpleLayout from "../../component/layout/SimpleLayout"
 import PocketSetting from "./PocketSetting"
 import { CardSection, Card } from "@kiwicom/orbit-components"
 import { FaGetPocket } from "react-icons/fa"
+import EditorSetting from "./EditorSetting"
+import { Edit } from "@kiwicom/orbit-components/icons"
 
 
 const SettingPage: FC = () => (
@@ -13,6 +15,14 @@ const SettingPage: FC = () => (
     >
       <CardSection>
         <PocketSetting />
+      </CardSection>
+    </Card>
+    <Card
+      title="Editor"
+      icon={<Edit />}
+    >
+      <CardSection>
+        <EditorSetting />
       </CardSection>
     </Card>
   </SimpleLayout>
