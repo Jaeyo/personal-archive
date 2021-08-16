@@ -13,10 +13,10 @@ type PocketRequestTokenResponse struct {
 }
 
 type GetPocketAuthResponse struct {
-	OK              bool      `json:"ok"`
-	IsAuthenticated bool      `json:"isAuthenticated"`
-	Username        string    `json:"username"`
-	IsSyncOn        bool      `json:"isSyncOn"`
+	OK              bool       `json:"ok"`
+	IsAuthenticated bool       `json:"isAuthenticated"`
+	Username        string     `json:"username"`
+	IsSyncOn        bool       `json:"isSyncOn"`
 	LastSyncTime    *time.Time `json:"lastSyncTime"`
 }
 
@@ -27,4 +27,13 @@ type PocketSyncRequest struct {
 type PocketAuthResponse struct {
 	OK        bool `json:"ok"`
 	IsAllowed bool `json:"isAllowed"`
+}
+
+type EditorKeyboardHandlerRequest struct {
+	KeyboardHandler string `json:"keyboardHandler"`
+}
+
+type EditorKeyboardHandlerResponse struct {
+	OK              bool   `json:"ok"`
+	KeyboardHandler string `json:"keyboardHandler"`
 }

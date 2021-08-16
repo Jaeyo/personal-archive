@@ -13,6 +13,7 @@ import { VscOpenPreview } from "react-icons/vsc"
 import "ace-builds/src-noconflict/keybinding-vim"
 import "ace-builds/src-noconflict/mode-markdown"
 import "ace-builds/src-noconflict/theme-github"
+import { useRequestGetEditorKeyboardHandler } from "../../../apis/SettingApi"
 
 
 interface Props {
@@ -32,6 +33,7 @@ const NoteEditor: FC<Props> = (
     fetching
   }
 ) => {
+  const [_, getKeyboardHandler, keyboardHandler] = useRequestGetEditorKeyboardHandler()
   const [content, setContent] = useState(initContent)
   const [refArticles, setRefArticles] = useState(initRefArticles)
   const [refWebURLs, setRefWebURLs] = useState(initRefWebURLs)
@@ -49,6 +51,8 @@ const NoteEditor: FC<Props> = (
   const prevInitRefWebURLs = usePrevious(initRefWebURLs)
 
   useEffect(() => {
+    getKeyboardHandler()
+
     if (initContent !== prevInitContent) {
       setContent(initContent)
     }
@@ -62,7 +66,7 @@ const NoteEditor: FC<Props> = (
     if (initRefWebURLs?.length !== prevInitRefWebURLs?.length) {
       setRefWebURLs(initRefWebURLs)
     }
-  }, [prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs])
+  }, [getKeyboardHandler, prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs])
 
   useEffect(() => {
     editor.current?.resize()
@@ -130,7 +134,7 @@ const NoteEditor: FC<Props> = (
             width="100%"
             height="800px"
             wrapEnabled
-            keyboardHandler="vim"
+            keyboardHandler={keyboardHandler || 'vim'}
             tabSize={2}
             focus={true}
             onLoad={instance => {

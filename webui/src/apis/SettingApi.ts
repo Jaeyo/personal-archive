@@ -92,3 +92,33 @@ export const useRequestPocketSync = (defaultIsSyncOn: boolean): [
 
   return [fetching, useCallback(setPocketSync, [fetchPut]), isSyncOn, error]
 }
+
+export const useRequestGetEditorKeyboardHandler = (): [
+  boolean,
+  () => Promise<void>,
+  string,
+  AxiosError | null,
+] => {
+  const [fetching, fetchGet, error] = useGet()
+  const [keyboardHandler, setKeyboardHandler] = useState('')
+
+  const getEditorKeyboardHandler = (): Promise<void> =>
+    fetchGet(`/apis/settings/editor/keyboard-handler`, resp => {
+      setKeyboardHandler(resp.data.keyboardHandler)
+    })
+
+  return [fetching, useCallback(getEditorKeyboardHandler, [fetchGet]), keyboardHandler, error]
+}
+
+export const useRequestSetEditorKeyboardHandler = (): [
+  boolean,
+  (keyboardHandler: string) => Promise<void>,
+  AxiosError | null,
+] => {
+  const [fetching, fetchPut, error] = usePut()
+
+  const setEditorKeyboardHandler = (keyboardHandler: string): Promise<void> =>
+    fetchPut(`/apis/settings/editor/keyboard-handler`, { keyboardHandler })
+
+  return [fetching, useCallback(setEditorKeyboardHandler, [fetchPut]), error]
+}
