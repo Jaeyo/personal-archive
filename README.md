@@ -59,5 +59,4 @@ $ make run-webui
 ## 🔭 Future work
 - Dark mode.
 - Authentication.
-- Nested tag tree.
 - Personalized reader configuration (e.g. font family / size ...)
