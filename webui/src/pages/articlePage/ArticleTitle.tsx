@@ -7,7 +7,7 @@ import { reloadAfterTick } from "../../common/Utils"
 
 
 interface Props {
-  article: Article | null
+  article: Article
 }
 
 const ArticleTitle: FC<Props> = ({article}) => {
@@ -16,12 +16,12 @@ const ArticleTitle: FC<Props> = ({article}) => {
   const history = useHistory()
 
   const onEdit = (title: string) => {
-    updateTitle(article!.id, title)
+    updateTitle(article.id, title)
       .then(() => window.location.reload())
   }
 
   const onDelete = () => {
-    deleteArticle(article!.id)
+    deleteArticle(article.id)
       .then(() => {
         if (history.length === 1) {
           history.push('/')
@@ -34,7 +34,7 @@ const ArticleTitle: FC<Props> = ({article}) => {
 
   return (
     <ManagedTitle
-      title={article ? article.title : '...'}
+      title={article.title}
       onEdit={onEdit}
       onDelete={onDelete}
       editFetching={editFetching}

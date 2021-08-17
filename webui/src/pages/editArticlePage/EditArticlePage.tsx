@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import { useRequestGetArticle } from "../../apis/ArticleApi"
+import { useRequestGetArticle, useRequestGetArticleContent } from "../../apis/ArticleApi"
 import ArticleTitle from "../articlePage/ArticleTitle"
 import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
@@ -14,28 +14,30 @@ import styled from "styled-components"
 const EditArticlePage: FC = () => {
   const {id} = useParams() as any
   const [fetching, getArticle, article] = useRequestGetArticle()
+  const [contentFetching, getContent, content] = useRequestGetArticleContent()
 
   useEffect(() => {
     getArticle(id)
-  }, [ id, getArticle ])
+    getContent(id)
+  }, [ id, getArticle, getContent ])
 
   return (
     <SimpleLayout
-      loading={fetching}
+      loading={fetching || contentFetching}
       title={article ? article.title : undefined}
     >
       {
-        article && (
+        article && !contentFetching && (
           <>
-            <ArticleTitle article={article}/>
-            <ArticleTags article={article}/>
-            <ArticleLink article={article}/>
+            <ArticleTitle article={article!}/>
+            <ArticleTags article={article!}/>
+            <ArticleLink article={article!}/>
             <EditorWrapper>
               <Desktop>
-                <EditArticleContentMarkdownDesktop article={article} />
+                <EditArticleContentMarkdownDesktop articleID={id} content={content} />
               </Desktop>
               <Mobile>
-                <EditArticleContentMarkdownMobile article={article} />
+                <EditArticleContentMarkdownMobile articleID={id} content={content} />
               </Mobile>
             </EditorWrapper>
           </>
