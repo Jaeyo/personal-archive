@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast"
 const SearchPage: FC = () => {
   const keyword = useQuery().get('q') || ''
   const page = usePage()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [ fetching, searchArticles, _, articles, pagination] = useRequestSearchArticles()
   const history = useHistory()
 

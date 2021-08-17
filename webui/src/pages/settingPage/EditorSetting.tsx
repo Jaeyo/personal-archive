@@ -5,6 +5,7 @@ import { Select, List, ListItem, Loading } from "@kiwicom/orbit-components"
 
 const EditorSetting: FC = () => {
   const [fetching, getEditorKeyboardHandler, keyboardHandlerOnServer] = useRequestGetEditorKeyboardHandler()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, submitEditorKeyboardHandler] = useRequestSetEditorKeyboardHandler()
   const [keyboardHandler, setKeyboardHandler] = useState('')
 

@@ -8,8 +8,7 @@ import Confirm from "../../common/Confirm"
 import ArticleContent from "../../../pages/articlePage/ArticleContent"
 import { Button, Switch, useMediaQuery } from "@kiwicom/orbit-components"
 import { VscOpenPreview } from "react-icons/vsc"
-import { useRequestGetEditorKeyboardHandler } from "../../../apis/SettingApi"
-import { Editor } from "@toast-ui/react-editor"
+import TuiEditor from "../../tui/TuiEditor"
 
 
 interface Props {
@@ -29,12 +28,12 @@ const NoteEditor: FC<Props> = (
     fetching
   }
 ) => {
-  const [_, getKeyboardHandler, keyboardHandler] = useRequestGetEditorKeyboardHandler()
   const [refArticles, setRefArticles] = useState(initRefArticles)
   const [refWebURLs, setRefWebURLs] = useState(initRefWebURLs)
   const [previewArticle, setPreviewArticle] = useState((initRefArticles.length > 0 ? initRefArticles[0] : null) as Article | null)
   const [showPreview, setShowPreview] = useState(true)
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  const [editor, setEditor] = useState(null as any)
   const { isDesktop } = useMediaQuery()
 
   const previewNode = useRef<HTMLDivElement>(null)
@@ -43,8 +42,6 @@ const NoteEditor: FC<Props> = (
 
   const prevInitRefArticles = usePrevious(initRefArticles)
   const prevInitRefWebURLs = usePrevious(initRefWebURLs)
-
-  const editorRef = useRef<Editor>(null)
 
   useEffect(() => {
     if (initRefArticles?.length !== prevInitRefArticles?.length) {
@@ -59,9 +56,9 @@ const NoteEditor: FC<Props> = (
   }, [prevInitRefArticles, prevInitRefWebURLs, initRefArticles, initRefWebURLs])
 
   const onSubmit = useCallback(() => {
-    const content = editorRef.current?.getInstance().getMarkdown() as string
-    submit(content, refArticles, refWebURLs)
-  }, [refArticles, refWebURLs, submit])
+    const content = editor?.getMarkdown()
+    submit(content!, refArticles, refWebURLs)
+  }, [refArticles, refWebURLs, submit, editor])
 
   const previewDown = () => {
     const top = (previewNode.current?.scrollTop || 0) + 150
@@ -72,27 +69,6 @@ const NoteEditor: FC<Props> = (
     const top = (previewNode.current?.scrollTop || 0) - 150
     previewNode.current?.scrollTo({top})
   }
-
-  useEffect(() => {
-    const editor = editorRef.current?.getInstance()
-    if (!editor) {
-      return
-    }
-
-    const cm = editor.getCodeMirror()
-    cm.addKeyMap({
-      'Ctrl-Enter': onSubmit,
-      'Ctrl-J': previewDown,
-      'Ctrl-K': previewUp,
-    })
-
-    getKeyboardHandler()
-      .then(() => {
-        if (keyboardHandler === 'vim') {
-          cm.addKeyMap('vim')
-        }
-      })
-  }, [getKeyboardHandler, keyboardHandler, onSubmit])
 
   const onAddRefArticle = (article: Article) => {
     if (refArticles.find(a => a.id === article.id)) {
@@ -134,14 +110,15 @@ const NoteEditor: FC<Props> = (
       </PreviewSwitchWrapper>
       <div>
         <EditArea width={editorWidth}>
-          <Editor
-            ref={editorRef}
+          <TuiEditor
             initialValue={initialContent}
             height="800px"
-            initialEditType="markdown"
-            toolbarItems={[]}
-            hideModeSwitch
-            usageStatistics={false}
+            onSubmit={onSubmit}
+            keymaps={{
+              'Ctrl-J': previewDown,
+              'Ctrl-K': previewUp,
+            }}
+            onLoad={(editor: any) => setEditor(editor)}
           />
         </EditArea>
         {

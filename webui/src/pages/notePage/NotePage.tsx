@@ -53,7 +53,9 @@ const useNote = (id: number): [
   Article[],
   (seqA: number, seqB: number) => void,
 ] => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fetching, getNote, note, referencedArticles, _, setNote] = useRequestGetNote()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [__, swapParagraphs] = useRequestSwapParagraphs()
 
   useEffect(() => {

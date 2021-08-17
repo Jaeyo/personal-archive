@@ -1,13 +1,9 @@
-import React, { FC, useCallback, useEffect, useRef } from "react"
+import React, { FC, useCallback, useState } from "react"
 import { Button, useMediaQuery } from "@kiwicom/orbit-components"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import { useRequestUpdateContent } from "../../apis/ArticleApi"
-import { Editor } from "@toast-ui/react-editor"
-import { useRequestGetEditorKeyboardHandler } from "../../apis/SettingApi"
-import "codemirror/lib/codemirror.css"
-import "@toast-ui/editor/dist/toastui-editor.css"
-import "codemirror/keymap/vim.js"
+import TuiEditor from "../../component/tui/TuiEditor"
 
 
 interface Props {
@@ -16,52 +12,25 @@ interface Props {
 }
 
 const EditArticleContentMarkdown: FC<Props> = ({ articleID, content: initialContent }) => {
+  const [editor, setEditor] = useState(null as any)
   const [editFetching, updateContent] = useRequestUpdateContent()
   const history = useHistory()
-  const [_, getKeyboardHandler, keyboardHandler] = useRequestGetEditorKeyboardHandler()
   const { isDesktop } = useMediaQuery()
-  const editorRef = useRef<Editor>(null)
 
   const onEdit = useCallback(() => {
-    const content = editorRef.current?.getInstance().getMarkdown()
-    updateContent(articleID, content!)
-      .then(() => {
-        window.location.href = `/articles/${articleID}`
-      })
-  }, [articleID, updateContent])
-
-  useEffect(() => {
-    if (!isDesktop) {
-      return;
-    }
-
-    const editor = editorRef.current?.getInstance()
-    if (!editor) {
-      return
-    }
-
-    const cm = editor.getCodeMirror()
-    cm.addKeyMap({ 'Ctrl-Enter': onEdit })
-
-    getKeyboardHandler()
-      .then(() => {
-        if (keyboardHandler === 'vim') {
-          cm.addKeyMap('vim')
-        }
-      })
-  }, [isDesktop, getKeyboardHandler, keyboardHandler, editorRef, onEdit])
+    const content = editor?.getMarkdown()
+    updateContent(articleID, content)
+      .then(() => history.push(`/articles/${articleID}`))
+  }, [ updateContent, articleID, editor ])
 
   return (
     <Wrapper>
-      <Editor
-        ref={editorRef}
+      <TuiEditor
         previewStyle={isDesktop ? 'vertical' : undefined}
         initialValue={initialContent}
         height="600px"
-        initialEditType="markdown"
-        toolbarItems={[]}
-        hideModeSwitch
-        usageStatistics={false}
+        onSubmit={onEdit}
+        onLoad={(editor: any) => setEditor(editor)}
       />
       <SubmitWrapper>
         <Button loading={editFetching} onClick={() => onEdit()}>Submit</Button>
