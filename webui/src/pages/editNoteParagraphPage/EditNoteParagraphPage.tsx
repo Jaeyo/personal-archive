@@ -7,12 +7,13 @@ import Article from "../../models/Article"
 import { toast } from "react-hot-toast"
 import { InputField } from "@kiwicom/orbit-components"
 import Note from "../../models/Note"
+import Paragraph from "../../models/Paragraph"
 
 
 const EditNoteParagraphPage: FC = () => {
   const params = useParams() as any
   const [noteID, paragraphID] = [parseInt(params.id, 10), parseInt(params.paragraphID, 10)]
-  const [fetching, note, content, referencedArticles, referencedWebURLs] = useNoteAndParagraph(noteID, paragraphID)
+  const [fetching, note, paragraph, referencedArticles, referencedWebURLs] = useNoteAndParagraph(noteID, paragraphID)
   const [submitFetching, submit] = useSubmit(noteID, paragraphID)
 
   const title = note ? note.title : ''
@@ -20,13 +21,18 @@ const EditNoteParagraphPage: FC = () => {
   return (
     <SimpleLayout loading={fetching}>
       <InputField disabled value={title}/>
-      <NoteEditor
-        content={content}
-        referenceArticles={referencedArticles}
-        referenceWebURLs={referencedWebURLs}
-        onSubmit={submit}
-        fetching={submitFetching}
-      />
+      {
+        paragraph && (
+          <NoteEditor
+            content={paragraph.content}
+            referenceArticles={referencedArticles}
+            referenceWebURLs={referencedWebURLs}
+            onSubmit={submit}
+            fetching={submitFetching}
+          />
+        )
+      }
+
     </SimpleLayout>
   )
 }
@@ -34,12 +40,12 @@ const EditNoteParagraphPage: FC = () => {
 const useNoteAndParagraph = (noteID: number, paragraphID: number): [
   boolean,
   Note | null,
-  string,
+  Paragraph | null,
   Article[],
   string[],
 ] => {
   const [fetching, getNote, note, articles] = useRequestGetNote()
-  const [content, setContent] = useState('')
+  const [paragraph, setParagraph] = useState(null as Paragraph | null)
   const [referencedArticles, setReferencedArticles] = useState([] as Article[])
   const [referencedWebURLs, setReferencedWebURLs] = useState([] as string[])
   const history = useHistory()
@@ -64,12 +70,12 @@ const useNoteAndParagraph = (noteID: number, paragraphID: number): [
     const referencedWebURLs = paragraph.referenceWebs.map(w => w.url)
     const referencedArticles = articles.filter(a => referencedArticleIDs.includes(a.id))
 
-    setContent(paragraph.content)
+    setParagraph(paragraph)
     setReferencedArticles(referencedArticles)
     setReferencedWebURLs(referencedWebURLs)
   }, [note, articles, history, paragraphID])
 
-  return [fetching, note, content, referencedArticles, referencedWebURLs]
+  return [fetching, note, paragraph, referencedArticles, referencedWebURLs]
 }
 
 const useSubmit = (noteID: number, paragraphID: number): [

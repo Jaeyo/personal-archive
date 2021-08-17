@@ -1,19 +1,15 @@
-import React, { FC, useEffect, useRef, useState } from "react"
+import React, { FC, useCallback, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
-import AceEditor from "react-ace"
-import { Ace } from "ace-builds"
 import Article from "../../../models/Article"
 import References from "./References"
 import { usePrevious } from "../../../common/Hooks"
 import Confirm from "../../common/Confirm"
 import ArticleContent from "../../../pages/articlePage/ArticleContent"
-import { Button, Switch } from "@kiwicom/orbit-components"
+import { Button, Switch, useMediaQuery } from "@kiwicom/orbit-components"
 import { VscOpenPreview } from "react-icons/vsc"
-import "ace-builds/src-noconflict/keybinding-vim"
-import "ace-builds/src-noconflict/mode-markdown"
-import "ace-builds/src-noconflict/theme-github"
 import { useRequestGetEditorKeyboardHandler } from "../../../apis/SettingApi"
+import { Editor } from "@toast-ui/react-editor"
 
 
 interface Props {
@@ -26,7 +22,7 @@ interface Props {
 
 const NoteEditor: FC<Props> = (
   {
-    content: initContent,
+    content: initialContent,
     referenceArticles: initRefArticles,
     referenceWebURLs: initRefWebURLs,
     onSubmit: submit,
@@ -34,29 +30,23 @@ const NoteEditor: FC<Props> = (
   }
 ) => {
   const [_, getKeyboardHandler, keyboardHandler] = useRequestGetEditorKeyboardHandler()
-  const [content, setContent] = useState(initContent)
   const [refArticles, setRefArticles] = useState(initRefArticles)
   const [refWebURLs, setRefWebURLs] = useState(initRefWebURLs)
   const [previewArticle, setPreviewArticle] = useState((initRefArticles.length > 0 ? initRefArticles[0] : null) as Article | null)
   const [showPreview, setShowPreview] = useState(true)
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
+  const { isDesktop } = useMediaQuery()
 
   const previewNode = useRef<HTMLDivElement>(null)
   const submitBtnNode = useRef<HTMLButtonElement>(null)
-  const editor = useRef<Ace.Editor | null>(null)
   const history = useHistory()
 
-  const prevInitContent = usePrevious(initContent)
   const prevInitRefArticles = usePrevious(initRefArticles)
   const prevInitRefWebURLs = usePrevious(initRefWebURLs)
 
+  const editorRef = useRef<Editor>(null)
+
   useEffect(() => {
-    getKeyboardHandler()
-
-    if (initContent !== prevInitContent) {
-      setContent(initContent)
-    }
-
     if (initRefArticles?.length !== prevInitRefArticles?.length) {
       setRefArticles(initRefArticles)
       if (initRefArticles.length > 0) {
@@ -66,15 +56,43 @@ const NoteEditor: FC<Props> = (
     if (initRefWebURLs?.length !== prevInitRefWebURLs?.length) {
       setRefWebURLs(initRefWebURLs)
     }
-  }, [getKeyboardHandler, prevInitContent, prevInitRefArticles, prevInitRefWebURLs, initContent, initRefArticles, initRefWebURLs])
+  }, [prevInitRefArticles, prevInitRefWebURLs, initRefArticles, initRefWebURLs])
+
+  const onSubmit = useCallback(() => {
+    const content = editorRef.current?.getInstance().getMarkdown() as string
+    submit(content, refArticles, refWebURLs)
+  }, [refArticles, refWebURLs, submit])
+
+  const previewDown = () => {
+    const top = (previewNode.current?.scrollTop || 0) + 150
+    previewNode.current?.scrollTo({top})
+  }
+
+  const previewUp = () => {
+    const top = (previewNode.current?.scrollTop || 0) - 150
+    previewNode.current?.scrollTo({top})
+  }
 
   useEffect(() => {
-    editor.current?.resize()
-  }, [showPreview, previewArticle])
+    const editor = editorRef.current?.getInstance()
+    if (!editor) {
+      return
+    }
 
-  const onSubmit = () => {
-    submit(content, refArticles, refWebURLs)
-  }
+    const cm = editor.getCodeMirror()
+    cm.addKeyMap({
+      'Ctrl-Enter': onSubmit,
+      'Ctrl-J': previewDown,
+      'Ctrl-K': previewUp,
+    })
+
+    getKeyboardHandler()
+      .then(() => {
+        if (keyboardHandler === 'vim') {
+          cm.addKeyMap('vim')
+        }
+      })
+  }, [getKeyboardHandler, keyboardHandler, onSubmit])
 
   const onAddRefArticle = (article: Article) => {
     if (refArticles.find(a => a.id === article.id)) {
@@ -102,17 +120,7 @@ const NoteEditor: FC<Props> = (
     setRefWebURLs(refWebURLs.filter(u => u !== url))
   }
 
-  const previewDown = () => {
-    const top = (previewNode.current?.scrollTop || 0) + 150
-    previewNode.current?.scrollTo({top})
-  }
-
-  const previewUp = () => {
-    const top = (previewNode.current?.scrollTop || 0) - 150
-    previewNode.current?.scrollTo({top})
-  }
-
-  const isPreviewable = showPreview && previewArticle != null
+  const isPreviewable = isDesktop && showPreview && previewArticle != null
   const editorWidth = isPreviewable ? '48%' : '100%'
 
   return (
@@ -126,33 +134,14 @@ const NoteEditor: FC<Props> = (
       </PreviewSwitchWrapper>
       <div>
         <EditArea width={editorWidth}>
-          <AceEditor
-            mode="markdown"
-            theme="github"
-            value={content}
-            onChange={v => setContent(v)}
-            width="100%"
+          <Editor
+            ref={editorRef}
+            initialValue={initialContent}
             height="800px"
-            wrapEnabled
-            keyboardHandler={keyboardHandler || 'vim'}
-            tabSize={2}
-            focus={true}
-            onLoad={instance => {
-              editor.current = instance
-            }}
-            commands={[
-              {name: 'down', bindKey: {mac: 'ctrl+j', win: 'ctrl+j'}, exec: previewDown},
-              {name: 'up', bindKey: {mac: 'ctrl+k', win: 'ctrl+k'}, exec: previewUp},
-              {
-                name: 'submit', bindKey: {mac: 'ctrl+enter', win: 'ctrl+enter'}, exec: editor => {
-                  editor.blur()
-                  setShowSubmitConfirm(true)
-                }
-              },
-            ]}
-            editorProps={{
-              $blockScrolling: true,
-            }}
+            initialEditType="markdown"
+            toolbarItems={[]}
+            hideModeSwitch
+            usageStatistics={false}
           />
         </EditArea>
         {
@@ -198,11 +187,6 @@ const EditArea = styled.div<{ width: string }>`
   padding: 15px;
   float: left;
   width: ${props => props.width};
-  
-  // ace editor 에서 vim 활성화시 커서가 안보이는 버그 때문에 삽입
-  .ace_cursor {
-    display: block !important;
-  }
 `
 
 const Preview = styled.div`
