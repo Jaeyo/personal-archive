@@ -36,7 +36,7 @@ const TuiEditor = ({previewStyle = undefined, initialValue, height, onSubmit, ke
         }
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ getKeyboardHandler, keyboardHandler ])
+  }, [ getKeyboardHandler, keyboardHandler, onSubmit ])
 
   return (
     <Editor

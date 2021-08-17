@@ -21,7 +21,7 @@ const EditArticleContentMarkdown: FC<Props> = ({ articleID, content: initialCont
     const content = editor?.getMarkdown()
     updateContent(articleID, content)
       .then(() => history.push(`/articles/${articleID}`))
-  }, [ updateContent, articleID, editor ])
+  }, [ updateContent, articleID, editor, history ])
 
   return (
     <Wrapper>
