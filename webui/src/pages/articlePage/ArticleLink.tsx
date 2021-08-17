@@ -24,6 +24,7 @@ const LinkSpan = styled.span`
 
 const UrlLink = styled.a`
   word-break: break-all;
+  font-size: 13px;
 `
 
 export default ArticleLink
