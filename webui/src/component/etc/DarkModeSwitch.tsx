@@ -41,9 +41,7 @@ const useDarkMode = (): [
     setTimeout(() => {
       if (isEnabled) {
         enableDarkMode({
-          brightness: 100,
-          contrast: 90,
-          sepia: 10,
+          scrollbarColor: '#222',
         })
       } else {
         disableDarkMode()
