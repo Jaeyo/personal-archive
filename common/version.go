@@ -17,12 +17,11 @@ func NewVersionReader() VersionReader {
 }
 
 func (r *versionReader) Read() (string, error) {
-	verFile := "/app/VERSION.txt"
 	if IsLocal() {
-		verFile = "./VERSION.txt"
+		return "test", nil
 	}
 
-	ver, err := ioutil.ReadFile(verFile)
+	ver, err := ioutil.ReadFile("/app/VERSION.txt")
 	if err != nil {
 		return "", errors.Wrap(err, "failed to read version.txt file")
 	}

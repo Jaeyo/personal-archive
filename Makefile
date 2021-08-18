@@ -1,5 +1,9 @@
 NAME := personal-archive
-VERSION :=  $(shell cat VERSION.txt)
+VERSION := $(shell git describe | cut -c2-)
+
+.PHONY: version
+version:
+	@echo $(VERSION)
 
 .PHONY: deps
 deps:
@@ -35,7 +39,7 @@ build-webui:
 .PHONY: build-container
 build-container:
 	@echo "\n\033[1;33m+ $@\033[0m"
-	@docker build -t lastiverse/$(NAME):$(VERSION) .
+	@docker build --build-arg VERSION=$(VERSION) -t lastiverse/$(NAME):$(VERSION) .
 	@docker tag lastiverse/$(NAME):$(VERSION) lastiverse/$(NAME):latest
 
 .PHONY: push-container

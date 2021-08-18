@@ -1,11 +1,15 @@
 # BUILDER
 FROM golang:1.15.6-alpine3.12 as builder
 
+ARG VERSION
+
 RUN apk --update add yarn make musl-dev gcc util-linux-dev
 
 RUN mkdir /build
 WORKDIR /build
 COPY . .
+
+RUN echo $VERSION > /build/VERSION.txt
 
 RUN make build build-webui
 
