@@ -11,6 +11,7 @@
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
     "axios": "^0.21.1",
+    "darkreader": "^4.9.34",
     "highlight.js": "^11.2.0",
     "javascript-time-ago": "^2.3.4",
     "react": "^17.0.1",
@@ -22,6 +23,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.1",
     "react-select": "^4.3.1",
+    "react-toggle": "^4.1.2",
     "react-treebeard": "^3.2.4",
     "react-twitter-widgets": "^1.9.5",
     "react-youtube": "^7.13.0",
@@ -58,6 +60,7 @@
     "@types/react-router-dom": "^5.1.7",
     "@types/react-select": "^4.0.17",
     "@types/react-syntax-highlighter": "^13.5.0",
+    "@types/react-toggle": "^4.0.3",
     "@types/recoil": "^0.0.1",
     "@types/styled-components": "^5.1.7"
   }

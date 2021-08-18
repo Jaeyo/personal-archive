@@ -11,11 +11,13 @@ const (
 	EditorKeyboardHandler = "editor.keyboard_handler"
 )
 
-const EditorDefaultKeyboardHandler = "vim"
+const (
+	EditorDefaultKeyboardHandler = "vim"
+)
 
 type SettingService interface {
 	GetEditorKeyboardHandler() (string, error)
-	SetEditorKeyboardHandler(keyboardHandler string) (error)
+	SetEditorKeyboardHandler(keyboardHandler string) error
 }
 
 type settingService struct {

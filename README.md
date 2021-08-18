@@ -57,6 +57,5 @@ $ make run-webui
 ```
 
 ## 🔭 Future work
-- Dark mode.
 - Authentication.
 - Personalized reader configuration (e.g. font family / size ...)

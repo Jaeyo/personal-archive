@@ -7,6 +7,7 @@ import { When } from "react-if"
 import { MenuHamburger } from "@kiwicom/orbit-components/icons"
 import { FaRegNewspaper, FaRegStickyNote, FaRegSun, FaSearch } from "react-icons/fa"
 import { Helmet } from "react-helmet"
+import DarkModeSwitch from "../etc/DarkModeSwitch"
 
 
 interface Props {
@@ -46,6 +47,7 @@ const MainLayout: FC<Props> = ({ side, title, children}) => {
           <Menu onClick={() => history.push(`/settings`)}>
             <FaRegSun size="21px" />
           </Menu>
+          <DarkModeSwitch />
         </Header>
         <Middle>
           <Mobile>

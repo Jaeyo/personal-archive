@@ -34,7 +34,7 @@ const MarkdownDiv = styled.div`
   em {
     strong {
       background-color: #F2E39B;
-      color: #c7254e;
+      color: #222;
       font-size: 90%;
       padding: 2px 5px;
       font-style: normal;

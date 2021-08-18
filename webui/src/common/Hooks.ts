@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 
 export const useQuery = () => new URLSearchParams(useLocation().search)
@@ -17,4 +17,17 @@ export const usePrevious = <T>(value: T): T => {
   }, [ value ])
 
   return ref.current!
+}
+
+export const useLocalStorage = (key: string, defaultValue: string): [
+  string,
+  (value: string) => void,
+] => {
+  const [value, setValue] = useState(localStorage.getItem(key) || defaultValue)
+
+  useEffect(() => {
+    localStorage.setItem(key, value)
+  }, [key, value])
+
+  return [value, setValue]
 }
