@@ -2,20 +2,18 @@ import React, { FC, useState } from "react"
 import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { useRequestCreateArticleByURL } from "../../apis/ArticleApi"
 import { Button, InputField, Loading } from "@kiwicom/orbit-components"
+import { useHistory } from "react-router-dom"
 
 
 // TODO IMME: convert to modal
 const CreateArticlePage: FC = () => {
   const [url, setUrl] = useState('')
   const [fetching, createArticleByURL, article] = useRequestCreateArticleByURL()
+  const history = useHistory()
 
   const onSubmit = () =>
     createArticleByURL(url, [])
-      .then(() => {
-        if (article) {
-          window.location.href = `/articles/${article.id}`
-        }
-      })
+      .then(() => history.push(`/articles/${article!.id}`))
 
   return (
     <ArticleTagTreeLayout>

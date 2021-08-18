@@ -23,6 +23,8 @@ const ArticlePage: FC = () => {
     }
   }, [error, history])
 
+  const onReload = () => getArticle(id)
+
   return (
     <ArticleTagTreeLayout
       loading={fetching}
@@ -31,10 +33,10 @@ const ArticlePage: FC = () => {
       {
         article && (
           <>
-            <ArticleTitle article={article}/>
-            <ArticleTags article={article}/>
-            <ArticleLink article={article}/>
-            <ArticleContent article={article}/>
+            <ArticleTitle article={article} onReload={onReload} />
+            <ArticleTags article={article} onReload={onReload} />
+            <ArticleLink article={article} />
+            <ArticleContent article={article} />
           </>
         )
       }

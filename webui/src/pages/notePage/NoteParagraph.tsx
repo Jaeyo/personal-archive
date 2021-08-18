@@ -15,16 +15,22 @@ interface Props {
   referencedArticles: Article[]
   onMoveUp: (seq: number) => void
   onMoveDown: (seq: number) => void
+  onReload: () => void
 }
 
-const NoteParagraph: FC<Props> = ({paragraph, referencedArticles, onMoveUp, onMoveDown}) => {
+const NoteParagraph: FC<Props> = ({paragraph, referencedArticles, onMoveUp, onMoveDown, onReload}) => {
   const currentReferencedArticleIDs = paragraph.referenceArticles.map(a => a.articleID)
   const currentReferencedArticles = referencedArticles
     .filter((article: Article) => currentReferencedArticleIDs.includes(article.id))
 
   return (
     <WrapperPanel>
-      <NoteParagraphButtons paragraph={paragraph} onMoveUp={onMoveUp} onMoveDown={onMoveDown}/>
+      <NoteParagraphButtons
+        paragraph={paragraph}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        onReload={onReload}
+      />
       <MarkdownContent content={paragraph.content}/>
       <div style={{textAlign: 'right'}}>
         {

@@ -18,6 +18,11 @@ const EditArticlePage: FC = () => {
     getContent(id)
   }, [ id, getArticle, getContent ])
 
+  const onReload = () => {
+    getArticle(id)
+    getContent(id)
+  }
+
   return (
     <SimpleLayout
       loading={fetching || contentFetching}
@@ -26,9 +31,9 @@ const EditArticlePage: FC = () => {
       {
         article && !contentFetching && (
           <>
-            <ArticleTitle article={article!}/>
-            <ArticleTags article={article!}/>
-            <ArticleLink article={article!}/>
+            <ArticleTitle article={article!} onReload={onReload} />
+            <ArticleTags article={article!} onReload={onReload} />
+            <ArticleLink article={article!} />
             <EditArticleContentMarkdown articleID={id} content={content} />
           </>
         )

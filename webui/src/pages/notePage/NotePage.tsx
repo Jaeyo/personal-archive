@@ -14,14 +14,20 @@ import { Plus } from "@kiwicom/orbit-components/icons"
 const NotePage: FC = () => {
   const {id} = useParams() as any
   const history = useHistory()
-  const [fetching, note, referencedArticles, swapParagraphSeq] = useNote(id)
+  const [fetching, onReload, swapParagraphSeq, note, referencedArticles] = useNote(id)
 
   return (
     <NoteNavLayout
       loading={fetching}
       title={note ? note.title : undefined}
     >
-      {note && <NoteTitle note={note}/>}
+      {
+        note &&
+        <NoteTitle
+          note={note}
+          onReload={onReload}
+        />
+      }
       {
         note && note.paragraphs
           .sort((a, b) => a.seq - b.seq)
@@ -32,6 +38,7 @@ const NotePage: FC = () => {
               referencedArticles={referencedArticles}
               onMoveUp={seq => swapParagraphSeq(seq, seq - 1)}
               onMoveDown={seq => swapParagraphSeq(seq, seq + 1)}
+              onReload={onReload}
             />
           )
       }
@@ -49,9 +56,10 @@ const NotePage: FC = () => {
 
 const useNote = (id: number): [
   boolean,
+  () => void,
+  (seqA: number, seqB: number) => void,
   Note | null,
   Article[],
-  (seqA: number, seqB: number) => void,
 ] => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [fetching, getNote, note, referencedArticles, _, setNote] = useRequestGetNote()
@@ -61,6 +69,8 @@ const useNote = (id: number): [
   useEffect(() => {
     getNote(id)
   }, [ id, getNote ])
+
+  const onReload = () => getNote(id)
 
   const swapParagraphSeq = (seqA: number, seqB: number) => {
     const swapA = note?.paragraphs.find(p => p.seq === seqA)
@@ -76,7 +86,7 @@ const useNote = (id: number): [
     setNote(Object.assign({}, note)) // refresh
   }
 
-  return [fetching, note, referencedArticles, swapParagraphSeq]
+  return [fetching, onReload, swapParagraphSeq, note, referencedArticles]
 }
 
 const AddButtonWrapper = styled.div`

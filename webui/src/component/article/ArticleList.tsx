@@ -11,16 +11,16 @@ interface Props {
   articles: Article[]
   pagination: IPagination
   onSelectPage: (page: number) => void
+  onReload: () => void
 }
 
-const ArticleList: FC<Props> = ({articles, pagination, onSelectPage}) => {
+const ArticleList: FC<Props> = ({articles, pagination, onSelectPage, onReload}) => {
   const [selectedIDs, select] = useSelectedIDs()
   const [fetching, deleteArticles] = useRequestDeleteArticles()
 
-  const onDelete = () => {
+  const onDelete = () =>
     deleteArticles(selectedIDs)
-      .then(() => window.location.reload())
-  }
+      .then(() => onReload())
 
   return (
     <>

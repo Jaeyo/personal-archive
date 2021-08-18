@@ -3,21 +3,21 @@ import Article from "../../models/Article"
 import { useHistory } from "react-router-dom"
 import { useRequestDeleteArticle, useRequestUpdateTitle } from "../../apis/ArticleApi"
 import ManagedTitle from "../../component/common/ManagedTitle"
-import { reloadAfterTick } from "../../common/Utils"
 
 
 interface Props {
   article: Article
+  onReload: () => void
 }
 
-const ArticleTitle: FC<Props> = ({article}) => {
+const ArticleTitle: FC<Props> = ({article, onReload}) => {
   const [editFetching, updateTitle] = useRequestUpdateTitle()
   const [deleteFetching, deleteArticle] = useRequestDeleteArticle()
   const history = useHistory()
 
   const onEdit = (title: string) => {
     updateTitle(article.id, title)
-      .then(() => window.location.reload())
+      .then(() => onReload())
   }
 
   const onDelete = () => {
@@ -27,7 +27,6 @@ const ArticleTitle: FC<Props> = ({article}) => {
           history.push('/')
         } else {
           history.goBack()
-          reloadAfterTick()
         }
       })
   }

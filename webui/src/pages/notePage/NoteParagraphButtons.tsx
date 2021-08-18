@@ -13,16 +13,17 @@ interface Props {
   paragraph: Paragraph
   onMoveUp: (seq: number) => void
   onMoveDown: (seq: number) => void
+  onReload: () => void
 }
 
-const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown}) => {
+const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onReload}) => {
   const [opened, setOpened] = useState(false)
   const [fetching, deleteParagraph] = useRequestDeleteParagraph()
   const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
   const history = useHistory()
 
   const onDeleteParagraph = () => deleteParagraph(paragraph.noteID, paragraph.id)
-    .then(() => window.location.reload())
+    .then(() => onReload())
 
   return (
     <Wrapper>

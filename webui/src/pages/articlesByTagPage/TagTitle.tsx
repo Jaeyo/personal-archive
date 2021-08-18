@@ -10,9 +10,10 @@ import Confirm from "../../component/common/Confirm"
 
 interface Props {
   tag: string
+  onReload: () => void
 }
 
-const TagTitle: FC<Props> = ({tag: initialTag}) => {
+const TagTitle: FC<Props> = ({tag: initialTag, onReload}) => {
   const [isEditPromptOpened, setEditPromptOpened] = useState(false)
 
   return (
@@ -28,8 +29,12 @@ const TagTitle: FC<Props> = ({tag: initialTag}) => {
       </EditButtonWrapper>
       <EditPrompt
         isOpened={isEditPromptOpened}
-        onClose={() => setEditPromptOpened(false)}
         defaultTitle={initialTag}
+        onClose={() => setEditPromptOpened(false)}
+        onEdit={() => {
+          setEditPromptOpened(false)
+          onReload()
+        }}
       />
     </Wrapper>
   )
@@ -37,9 +42,10 @@ const TagTitle: FC<Props> = ({tag: initialTag}) => {
 
 const EditPrompt: FC<{
   isOpened: boolean,
-  onClose: () => void,
   defaultTitle: string,
-}> = ({isOpened, onClose: close, defaultTitle}) => {
+  onClose: () => void,
+  onEdit: () => void,
+}> = ({isOpened, defaultTitle, onClose: close, onEdit}) => {
   const [title, setTitle] = useState('')
   const [fetching, updateTag] = useRequestUpdateTag()
 
@@ -49,10 +55,7 @@ const EditPrompt: FC<{
 
   const onSubmit = () => {
     updateTag(defaultTitle, title)
-      .then(() => {
-        close()
-        window.location.href = `/tags/${encodeURIComponent(title)}`
-      })
+      .then(() => onEdit())
   }
 
   const onClose = () => {

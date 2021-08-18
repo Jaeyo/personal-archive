@@ -7,16 +7,17 @@ import ManagedTitle from "../../component/common/ManagedTitle"
 
 interface Props {
   note: Note
+  onReload: () => void
 }
 
-const NoteTitle: FC<Props> = ({note}) => {
+const NoteTitle: FC<Props> = ({note, onReload}) => {
   const [editFetching, updateTitle] = useRequestUpdateTitle()
   const [deleteFetching, deleteNote] = useRequestDeleteNote()
   const history = useHistory()
 
   const onEdit = (title: string) =>
     updateTitle(note.id, title)
-      .then(() => window.location.reload())
+      .then(() => onReload())
 
   const onDelete = () =>
     deleteNote(note.id)

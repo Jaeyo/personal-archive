@@ -18,17 +18,23 @@ const ArticlesByTagPage: FC = () => {
     findArticlesByTag(tag, page)
   }, [ tag, page, findArticlesByTag ])
 
+  const onReload = () => findArticlesByTag(tag, page)
+
   return (
     <ArticleTagTreeLayout
       loading={fetching}
       title={tag}
     >
       <AddArticle />
-      <TagTitle tag={tag}/>
+      <TagTitle
+        tag={tag}
+        onReload={onReload}
+      />
       <ArticleList
         articles={articles}
         pagination={pagination}
         onSelectPage={page => history.push(`/tags/${encodeURIComponent(tag)}?page=${page}`)}
+        onReload={onReload}
       />
     </ArticleTagTreeLayout>
   )

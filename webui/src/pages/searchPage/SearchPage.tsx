@@ -24,6 +24,7 @@ const SearchPage: FC = () => {
     searchArticles(keyword, page)
   }, [keyword, page, searchArticles])
 
+  const onReload = () => searchArticles(keyword, page)
 
   return (
     <ArticleTagTreeLayout loading={fetching}>
@@ -32,6 +33,7 @@ const SearchPage: FC = () => {
         articles={articles}
         pagination={pagination}
         onSelectPage={page => history.push(`/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)}
+        onReload={onReload}
       />
     </ArticleTagTreeLayout>
   )

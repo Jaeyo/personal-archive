@@ -13,9 +13,10 @@ import { useRequestFindArticleTags } from "../../apis/ArticleTagApi"
 
 interface Props {
   article: Article
+  onReload: () => void
 }
 
-const ArticleTags: FC<Props> = ({article}) => {
+const ArticleTags: FC<Props> = ({article, onReload}) => {
   const [isEditPromptOpened, setEditPromptOpened] = useState(false)
 
   return (
@@ -38,6 +39,10 @@ const ArticleTags: FC<Props> = ({article}) => {
         articleID={article.id}
         defaultTags={article.tags.map(({ tag }) => tag)}
         onClose={() => setEditPromptOpened(false)}
+        onEdit={() => {
+          setEditPromptOpened(false)
+          onReload()
+        }}
       />
     </Wrapper>
   )
@@ -48,7 +53,8 @@ const EditPrompt: FC<{
   articleID: number,
   defaultTags: string[],
   onClose: () => void,
-}> = ({ isOpened, articleID, defaultTags, onClose: close }) => {
+  onEdit: () => void,
+}> = ({ isOpened, articleID, defaultTags, onClose: close, onEdit }) => {
   const [selectedTags, setSelectedTags] = useState(defaultTags)
   const [tagsFetching, findArticleTags, articleTagCounts] = useRequestFindArticleTags()
   const [submitFetching, updateTags] = useRequestUpdateTags()
@@ -61,10 +67,7 @@ const EditPrompt: FC<{
 
   const onSubmit = () => {
     updateTags(articleID, selectedTags)
-      .then(() => {
-        close()
-        window.location.href = `/articles/${articleID}`
-      })
+      .then(() => onEdit())
   }
 
   const onClose = () => {
