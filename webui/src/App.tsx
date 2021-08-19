@@ -13,11 +13,13 @@ import NotePage from "./pages/notePage/NotePage"
 import EditNoteParagraphPage from "./pages/editNoteParagraphPage/EditNoteParagraphPage"
 import NewNoteParagraphPage from "./pages/newNoteParagraphPage/NewNoteParagraphPage"
 import { Toaster } from "react-hot-toast"
+import ScrollToTop from "./component/etc/ScrollToTop"
 
 
 const App = () => (
   <>
     <BrowserRouter>
+      <ScrollToTop />
       <div>
         <Switch>
           <Route path="/articles/new">
