@@ -23,6 +23,9 @@ const TuiEditor = ({previewStyle = undefined, initialValue, height, onSubmit, ke
     }
 
     onLoad(editor)
+    
+    editor.focus()
+    
     const cm = editor.getCodeMirror()
     const keymapsToAdd = Object.assign({}, keymaps, {
       'Ctrl-Enter': () => onSubmit(),

@@ -6,6 +6,7 @@ import NoteEditor from "../../component/note/editor/NoteEditor"
 import Article from "../../models/Article"
 import { toast } from "react-hot-toast"
 import { InputField } from "@kiwicom/orbit-components"
+import CommandPalette from "./CommandPalette"
 
 
 const NewNoteParagraphPage: FC = () => {
@@ -27,6 +28,7 @@ const NewNoteParagraphPage: FC = () => {
         onSubmit={submit}
         fetching={submitFetching}
       />
+      <CommandPalette />
     </SimpleLayout>
   )
 }

@@ -6,6 +6,7 @@ import { usePage, useQuery } from "../../common/Hooks"
 import { useRequestSearchArticles } from "../../apis/ArticleApi"
 import ArticleList from "../../component/article/ArticleList"
 import { toast } from "react-hot-toast"
+import CommandPalette from "./CommandPalette"
 
 
 const SearchPage: FC = () => {
@@ -34,6 +35,10 @@ const SearchPage: FC = () => {
         pagination={pagination}
         onSelectPage={page => history.push(`/articles/search?q=${encodeURIComponent(keyword)}&page=${page}`)}
         onReload={onReload}
+      />
+      <CommandPalette
+        keyword={keyword}
+        page={page}
       />
     </ArticleTagTreeLayout>
   )

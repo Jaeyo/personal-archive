@@ -1,8 +1,10 @@
 import React, { FC } from "react"
 import { useHistory } from "react-router-dom"
 import Note from "../../models/Note"
-import { useRequestDeleteNote, useRequestUpdateTitle } from "../../apis/NoteApi"
 import ManagedTitle from "../../component/common/ManagedTitle"
+import { useRequestDeleteNote, useRequestUpdateTitle } from "../../apis/NoteApi"
+import { confirm } from "../../component/etc/GlobalConfirm"
+import { prompt } from "../../component/etc/GlobalPrompt"
 
 
 interface Props {
@@ -11,25 +13,34 @@ interface Props {
 }
 
 const NoteTitle: FC<Props> = ({note, onReload}) => {
-  const [editFetching, updateTitle] = useRequestUpdateTitle()
-  const [deleteFetching, deleteNote] = useRequestDeleteNote()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, updateTitle] = useRequestUpdateTitle()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [__, deleteNote] = useRequestDeleteNote()
   const history = useHistory()
 
-  const onEdit = (title: string) =>
-    updateTitle(note.id, title)
-      .then(() => onReload())
+  const onEdit = () =>
+    prompt({
+      message: 'edit note title',
+      initialValue: note.title,
+      onOK: (newTitle: string) =>
+        updateTitle(note.id, newTitle)
+          .then(() => onReload())
+    })
 
   const onDelete = () =>
-    deleteNote(note.id)
-      .then(() => history.push('/notes'))
+    confirm({
+      message: 'delete note?',
+      onOK: () =>
+        deleteNote(note.id)
+          .then(() => history.push('/notes'))
+    })
 
   return (
     <ManagedTitle
-      title={note ? note.title : '...'}
+      title={note.title}
       onEdit={onEdit}
       onDelete={onDelete}
-      editFetching={editFetching}
-      deleteFetching={deleteFetching}
     />
   )
 }

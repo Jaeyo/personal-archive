@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useEffect, useState } from "react"
+import React, { FC, ReactNode, useEffect, useRef, useState } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import { Desktop, Drawer, InputField, Mobile, Stack, ThemeProvider } from "@kiwicom/orbit-components"
@@ -8,6 +8,8 @@ import { MenuHamburger } from "@kiwicom/orbit-components/icons"
 import { FaRegNewspaper, FaRegStickyNote, FaRegSun, FaSearch } from "react-icons/fa"
 import { Helmet } from "react-helmet"
 import DarkModeSwitch from "../etc/DarkModeSwitch"
+import { ShowSearchDrawer } from "../../common/EventBus"
+import { useSubscribe } from "../../common/Hooks"
 
 
 interface Props {
@@ -24,6 +26,8 @@ const MainLayout: FC<Props> = ({ side, title, children}) => {
     // 페이지 이동시 초기화
     history.listen(() => setShowNav(false))
   }, [history])
+
+  useSubscribe(ShowSearchDrawer, (isOpened: boolean) => setShowSearchDrawer(isOpened))
 
   const customTokens = getTokens({})
 
@@ -68,7 +72,10 @@ const MainLayout: FC<Props> = ({ side, title, children}) => {
           </Desktop>
           <Main>
             {children}
-            <SearchDrawer show={showSearchDrawer} onClose={() => setShowSearchDrawer(false)}/>
+            <SearchDrawer
+              show={showSearchDrawer}
+              onClose={() => setShowSearchDrawer(false)}
+            />
           </Main>
         </Body>
         <Drawer
@@ -93,6 +100,13 @@ const Menu: FC<{ onClick?: () => void }> = ({children, onClick}) => (
 const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({show, onClose}) => {
   const [keyword, setKeyword] = useState('')
   const history = useHistory()
+  const ref = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    if (show && ref.current) {
+      setTimeout(() => ref?.current?.focus(), 100)
+    }
+  }, [show])
 
   const onSubmit = () => {
     setKeyword('')
@@ -109,6 +123,7 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({show, onClose
       }}
     >
       <InputField
+        ref={ref}
         size="small"
         value={keyword}
         onChange={e => setKeyword((e.target as any).value)}
@@ -117,6 +132,7 @@ const SearchDrawer: FC<{ show: boolean, onClose: () => void }> = ({show, onClose
             onSubmit()
           }
         }}
+        onBlur={onClose}
         suffix={
           <span role="button" onClick={onSubmit} style={{ marginRight: '10px' }}>
             <FaSearch />

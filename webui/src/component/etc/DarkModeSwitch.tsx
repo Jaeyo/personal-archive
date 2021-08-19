@@ -1,18 +1,22 @@
 import React, { FC, useEffect } from "react"
 import { disable as disableDarkMode, enable as enableDarkMode, setFetchMethod } from "darkreader"
-import { useLocalStorage } from "../../common/Hooks"
+import { useLocalStorage, useSubscribe } from "../../common/Hooks"
 import Toggle from "react-toggle"
 import { Moon } from "@kiwicom/orbit-components/icons"
 import styled from "styled-components"
 import { IoSunny } from "react-icons/all"
+import { ToggleDarkMode } from "../../common/EventBus"
 
 
 const DarkModeSwitch: FC = () => {
   const [isEnabled, setEnabled] = useDarkMode()
 
+  useSubscribe(ToggleDarkMode, () => setEnabled(!isEnabled))
+
   return (
     <Wrapper>
       <Toggle
+        id="dark-mode-switch"
         defaultChecked={isEnabled}
         onChange={() => setEnabled(!isEnabled)}
         icons={{

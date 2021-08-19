@@ -6,6 +6,7 @@ import ArticleTitle from "./ArticleTitle"
 import ArticleTags from "./ArticleTags"
 import ArticleLink from "./ArticleLink"
 import ArticleContent from "./ArticleContent"
+import CommandPalette from "./CommandPalette"
 
 
 const ArticlePage: FC = () => {
@@ -15,7 +16,7 @@ const ArticlePage: FC = () => {
 
   useEffect(() => {
     getArticle(id)
-  }, [ id, getArticle ])
+  }, [id, getArticle])
 
   useEffect(() => {
     if (error && error.response?.status === 404) {
@@ -33,10 +34,11 @@ const ArticlePage: FC = () => {
       {
         article && (
           <>
-            <ArticleTitle article={article} onReload={onReload} />
-            <ArticleTags article={article} onReload={onReload} />
-            <ArticleLink article={article} />
-            <ArticleContent article={article} />
+            <ArticleTitle article={article} onReload={onReload}/>
+            <ArticleTags article={article} onReload={onReload}/>
+            <ArticleLink article={article}/>
+            <ArticleContent article={article}/>
+            <CommandPalette article={article} onReload={onReload}/>
           </>
         )
       }

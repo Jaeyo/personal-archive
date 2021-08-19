@@ -57,6 +57,18 @@ func (t Tags) FilterExcluded(articleTags ArticleTags) Tags {
 	return result
 }
 
+func (t Tags) RemoveDuplicates() Tags {
+	allKeys := make(map[string]bool)
+	var result Tags
+	for _, tag := range t {
+		if _, value := allKeys[tag]; !value {
+			allKeys[tag] = true
+			result = append(result, tag)
+		}
+	}
+	return result
+}
+
 type ArticleTagCountDTO struct {
 	Tag   string `gorm:"column:tag" json:"tag"`
 	Count int    `gorm:"column:cnt" json:"count"`

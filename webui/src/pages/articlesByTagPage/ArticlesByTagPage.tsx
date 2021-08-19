@@ -6,6 +6,7 @@ import TagTitle from "./TagTitle"
 import { usePage } from "../../common/Hooks"
 import ArticleList from "../../component/article/ArticleList"
 import AddArticle from "../../component/article/AddArticle"
+import CommandPalette from "./CommandPalette"
 
 
 const ArticlesByTagPage: FC = () => {
@@ -18,7 +19,8 @@ const ArticlesByTagPage: FC = () => {
     findArticlesByTag(tag, page)
   }, [ tag, page, findArticlesByTag ])
 
-  const onReload = () => findArticlesByTag(tag, page)
+  const onReload = (newTag?: string) =>
+    history.push(`/tags/${encodeURIComponent(newTag || tag)}`)
 
   return (
     <ArticleTagTreeLayout
@@ -34,6 +36,10 @@ const ArticlesByTagPage: FC = () => {
         articles={articles}
         pagination={pagination}
         onSelectPage={page => history.push(`/tags/${encodeURIComponent(tag)}?page=${page}`)}
+        onReload={onReload}
+      />
+      <CommandPalette
+        tag={tag}
         onReload={onReload}
       />
     </ArticleTagTreeLayout>

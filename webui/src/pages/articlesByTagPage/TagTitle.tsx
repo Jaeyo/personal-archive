@@ -1,20 +1,30 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC } from "react"
 import styled from "styled-components"
-import { useRequestUpdateTag } from "../../apis/ArticleTagApi"
 import { VisibleProps } from "../../common/Props"
-import { Button, InputField } from "@kiwicom/orbit-components"
+import { Button } from "@kiwicom/orbit-components"
 import { ChevronDown } from "@kiwicom/orbit-components/icons"
 import Title from "../../component/common/Title"
-import Confirm from "../../component/common/Confirm"
+import { useRequestUpdateTag } from "../../apis/ArticleTagApi"
+import { prompt } from "../../component/etc/GlobalPrompt"
 
 
 interface Props {
   tag: string
-  onReload: () => void
+  onReload: (newTag?: string) => void
 }
 
 const TagTitle: FC<Props> = ({tag: initialTag, onReload}) => {
-  const [isEditPromptOpened, setEditPromptOpened] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, updateTag] = useRequestUpdateTag()
+
+  const onEdit = () =>
+    prompt({
+      message: 'edit title',
+      initialValue: initialTag,
+      onOK: (newTag: string) =>
+        updateTag(initialTag, newTag)
+          .then(() => onReload())
+    })
 
   return (
     <Wrapper>
@@ -24,57 +34,10 @@ const TagTitle: FC<Props> = ({tag: initialTag, onReload}) => {
           iconLeft={<ChevronDown/>}
           type="white"
           size="small"
-          onClick={() => setEditPromptOpened(true)}
+          onClick={() => onEdit()}
         />
       </EditButtonWrapper>
-      <EditPrompt
-        isOpened={isEditPromptOpened}
-        defaultTitle={initialTag}
-        onClose={() => setEditPromptOpened(false)}
-        onEdit={() => {
-          setEditPromptOpened(false)
-          onReload()
-        }}
-      />
     </Wrapper>
-  )
-}
-
-const EditPrompt: FC<{
-  isOpened: boolean,
-  defaultTitle: string,
-  onClose: () => void,
-  onEdit: () => void,
-}> = ({isOpened, defaultTitle, onClose: close, onEdit}) => {
-  const [title, setTitle] = useState('')
-  const [fetching, updateTag] = useRequestUpdateTag()
-
-  useEffect(() => {
-    setTitle(defaultTitle)
-  }, [defaultTitle])
-
-  const onSubmit = () => {
-    updateTag(defaultTitle, title)
-      .then(() => onEdit())
-  }
-
-  const onClose = () => {
-    setTitle(defaultTitle)
-    close()
-  }
-
-  return (
-    <Confirm
-      show={isOpened}
-      onOK={onSubmit}
-      onClose={onClose}
-      loading={fetching}
-    >
-      <InputField
-        value={title}
-        onChange={e => setTitle((e.target as any).value)}
-      />
-    </Confirm>
   )
 }
 

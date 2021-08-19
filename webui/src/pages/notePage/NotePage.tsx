@@ -9,6 +9,7 @@ import NoteParagraph from "./NoteParagraph"
 import Article from "../../models/Article"
 import { Button } from "@kiwicom/orbit-components"
 import { Plus } from "@kiwicom/orbit-components/icons"
+import CommandPalette from "./CommandPalette"
 
 
 const NotePage: FC = () => {
@@ -22,34 +23,41 @@ const NotePage: FC = () => {
       title={note ? note.title : undefined}
     >
       {
-        note &&
-        <NoteTitle
-          note={note}
-          onReload={onReload}
-        />
-      }
-      {
-        note && note.paragraphs
-          .sort((a, b) => a.seq - b.seq)
-          .map(paragraph =>
-            <NoteParagraph
-              key={paragraph.id}
-              paragraph={paragraph}
-              referencedArticles={referencedArticles}
-              onMoveUp={seq => swapParagraphSeq(seq, seq - 1)}
-              onMoveDown={seq => swapParagraphSeq(seq, seq + 1)}
+        note && (
+          <>
+            <NoteTitle
+              note={note}
               onReload={onReload}
             />
-          )
+            {
+              note.paragraphs
+                .sort((a, b) => a.seq - b.seq)
+                .map(paragraph =>
+                  <NoteParagraph
+                    key={paragraph.id}
+                    paragraph={paragraph}
+                    referencedArticles={referencedArticles}
+                    onMoveUp={seq => swapParagraphSeq(seq, seq - 1)}
+                    onMoveDown={seq => swapParagraphSeq(seq, seq + 1)}
+                    onReload={onReload}
+                  />
+                )
+            }
+            <AddButtonWrapper>
+              <Button
+                iconLeft={<Plus />}
+                type="secondary"
+                onClick={() => history.push(`/notes/${id}/paragraphs`)}
+                size="small"
+              />
+            </AddButtonWrapper>
+            <CommandPalette
+              note={note}
+              onReload={onReload}
+            />
+          </>
+        )
       }
-      <AddButtonWrapper>
-        <Button
-          iconLeft={<Plus />}
-          type="secondary"
-          onClick={() => history.push(`/notes/${id}/paragraphs`)}
-          size="small"
-        />
-      </AddButtonWrapper>
     </NoteNavLayout>
   )
 }

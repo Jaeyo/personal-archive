@@ -6,6 +6,7 @@ import ArticleTags from "../articlePage/ArticleTags"
 import ArticleLink from "../articlePage/ArticleLink"
 import SimpleLayout from "../../component/layout/SimpleLayout"
 import EditArticleContentMarkdown from "./EditArticleContentMarkdown"
+import CommandPalette from "./CommandPalette"
 
 
 const EditArticlePage: FC = () => {
@@ -18,10 +19,7 @@ const EditArticlePage: FC = () => {
     getContent(id)
   }, [ id, getArticle, getContent ])
 
-  const onReload = () => {
-    getArticle(id)
-    getContent(id)
-  }
+  const onReload = () => getArticle(id)
 
   return (
     <SimpleLayout
@@ -35,6 +33,10 @@ const EditArticlePage: FC = () => {
             <ArticleTags article={article!} onReload={onReload} />
             <ArticleLink article={article!} />
             <EditArticleContentMarkdown articleID={id} content={content} />
+            <CommandPalette
+              article={article!}
+              onReload={onReload}
+            />
           </>
         )
       }

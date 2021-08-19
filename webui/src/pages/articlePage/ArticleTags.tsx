@@ -1,14 +1,11 @@
-import React, { FC, useEffect, useState } from "react"
+import React, { FC, useState } from "react"
 import styled from "styled-components"
 import Article from "../../models/Article"
-import { useRequestUpdateTags } from "../../apis/ArticleApi"
 import ArticleTag from "../../component/article/ArticleTag"
 import { Button } from "@kiwicom/orbit-components"
-import TagSelector from "../../component/article/TagSelector"
 import { FaTags } from "react-icons/fa"
 import { Edit } from "@kiwicom/orbit-components/icons"
-import Confirm from "../../component/common/Confirm"
-import { useRequestFindArticleTags } from "../../apis/ArticleTagApi"
+import EditTagsPrompt from "../../component/article/EditTagsPrompt"
 
 
 interface Props {
@@ -34,60 +31,16 @@ const ArticleTags: FC<Props> = ({article, onReload}) => {
         size="small"
         onClick={() => setEditPromptOpened(true)}
       />
-      <EditPrompt
+      <EditTagsPrompt
+        article={article}
         isOpened={isEditPromptOpened}
-        articleID={article.id}
-        defaultTags={article.tags.map(({ tag }) => tag)}
-        onClose={() => setEditPromptOpened(false)}
-        onEdit={() => {
+        onAfterEdit={() => {
           setEditPromptOpened(false)
           onReload()
         }}
+        onClose={() => setEditPromptOpened(false)}
       />
     </Wrapper>
-  )
-}
-
-const EditPrompt: FC<{
-  isOpened: boolean,
-  articleID: number,
-  defaultTags: string[],
-  onClose: () => void,
-  onEdit: () => void,
-}> = ({ isOpened, articleID, defaultTags, onClose: close, onEdit }) => {
-  const [selectedTags, setSelectedTags] = useState(defaultTags)
-  const [tagsFetching, findArticleTags, articleTagCounts] = useRequestFindArticleTags()
-  const [submitFetching, updateTags] = useRequestUpdateTags()
-
-  useEffect(() => {
-    if (isOpened) {
-      findArticleTags()
-    }
-  }, [isOpened, findArticleTags])
-
-  const onSubmit = () => {
-    updateTags(articleID, selectedTags)
-      .then(() => onEdit())
-  }
-
-  const onClose = () => {
-    setSelectedTags(defaultTags)
-    close()
-  }
-
-  return (
-    <Confirm
-      show={isOpened}
-      onOK={onSubmit}
-      onClose={onClose}
-      loading={tagsFetching || submitFetching}
-    >
-      <TagSelector
-        tags={articleTagCounts.map(a => a.tag)}
-        selectedTags={selectedTags}
-        onChange={tags => setSelectedTags(tags)}
-      />
-    </Confirm>
   )
 }
 

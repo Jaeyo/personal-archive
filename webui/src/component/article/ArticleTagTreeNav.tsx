@@ -4,14 +4,18 @@ import { useRequestFindArticleTags } from "../../apis/ArticleTagApi"
 import { Treebeard } from "react-treebeard"
 import { Loading } from "@kiwicom/orbit-components"
 import NavItem from "../common/NavItem"
+import { useSubscribe } from "../../common/Hooks"
+import { ReloadTagTree } from "../../common/EventBus"
 
 
 const ArticleTagTreeNav: FC = () => {
   const [fetching, findArticleTags, articleTags, untaggedCount, allCount] = useRequestFindArticleTags()
 
   useEffect(() => {
-      findArticleTags()
+    findArticleTags()
   }, [findArticleTags])
+
+  useSubscribe(ReloadTagTree, () => findArticleTags())
 
   if (fetching) {
     return <Loading type="boxLoader" />

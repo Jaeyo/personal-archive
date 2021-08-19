@@ -56,7 +56,6 @@ const NoteEditor: FC<Props> = (
   }, [prevInitRefArticles, prevInitRefWebURLs, initRefArticles, initRefWebURLs])
 
   const onSubmit = useCallback(() => {
-    // TODO IMME: reference 들이 같이 안들어가는 현상 확인 필요
     const content = editor?.getMarkdown()
     submit(content!, refArticles, refWebURLs)
   }, [refArticles, refWebURLs, submit, editor])

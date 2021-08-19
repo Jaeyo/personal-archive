@@ -5,6 +5,7 @@ import { CardSection, Card } from "@kiwicom/orbit-components"
 import { FaGetPocket } from "react-icons/fa"
 import EditorSetting from "./EditorSetting"
 import { Edit } from "@kiwicom/orbit-components/icons"
+import CommandPalette from "./CommandPalette"
 
 
 const SettingPage: FC = () => (
@@ -25,6 +26,7 @@ const SettingPage: FC = () => (
         <EditorSetting />
       </CardSection>
     </Card>
+    <CommandPalette />
   </SimpleLayout>
 )
 

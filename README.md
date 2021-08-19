@@ -30,6 +30,7 @@ Oh, I thought I needed to organize these things. I had to sort out the important
 - **Lightweight**. Thanks for golang.
 - Support **mobile** with responsive design.
 - Support **Syntax-highlighting** from [react-syntax-highlighter](https://github.com/react-syntax-highlighter/react-syntax-highlighter). (thanks for [@illusionist-osmin](https://github.com/illusionist-osmin))
+- Support **command palette** like sublime text. (command + shift + k)
 
 ## 🖥 Screenshot
 

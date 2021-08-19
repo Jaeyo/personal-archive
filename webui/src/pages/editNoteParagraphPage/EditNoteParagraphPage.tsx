@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast"
 import { InputField } from "@kiwicom/orbit-components"
 import Note from "../../models/Note"
 import Paragraph from "../../models/Paragraph"
+import CommandPalette from "./CommandPalette"
 
 
 const EditNoteParagraphPage: FC = () => {
@@ -32,7 +33,7 @@ const EditNoteParagraphPage: FC = () => {
           />
         )
       }
-
+      <CommandPalette />
     </SimpleLayout>
   )
 }

@@ -3,6 +3,7 @@ import ArticleTagTreeLayout from "../../component/layout/ArticleTagTreeLayout"
 import { useRequestCreateArticleByURL } from "../../apis/ArticleApi"
 import { Button, InputField, Loading } from "@kiwicom/orbit-components"
 import { useHistory } from "react-router-dom"
+import CommandPalette from "./CommandPalette"
 
 
 // TODO IMME: convert to modal
@@ -34,6 +35,7 @@ const CreateArticlePage: FC = () => {
         onClick={onSubmit}>
         Submit
       </Button>
+      <CommandPalette />
     </ArticleTagTreeLayout>
   )
 }

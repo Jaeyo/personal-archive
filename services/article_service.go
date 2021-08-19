@@ -104,7 +104,9 @@ func (s *articleService) UpdateTags(id int64, tags []string) error {
 	}
 
 	toBeDeleted, toBePreserved := article.Tags.FilterExcluded(tags)
-	toBeAdded := models.Tags(tags).FilterExcluded(article.Tags)
+	toBeAdded := models.Tags(tags).
+		FilterExcluded(article.Tags).
+		RemoveDuplicates()
 
 	if len(toBeDeleted) > 0 {
 		if err := s.articleTagRepository.Delete(toBeDeleted); err != nil {

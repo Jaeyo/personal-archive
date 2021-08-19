@@ -1,5 +1,7 @@
 import { useLocation } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
+import { subscribe, unsubscribe } from "./EventBus"
+import Mousetrap from "mousetrap"
 
 
 export const useQuery = () => new URLSearchParams(useLocation().search)
@@ -31,3 +33,15 @@ export const useLocalStorage = (key: string, defaultValue: string): [
 
   return [value, setValue]
 }
+
+export const useSubscribe = (event: string, callback: (data: any) => void) =>
+  useEffect(() => {
+    subscribe(event, callback)
+    return () => unsubscribe(event, callback)
+  }, [event, callback])
+
+export const useHotKeys = (hotKeys: string, callback: () => void) =>
+  useEffect(() => {
+    Mousetrap.bind(hotKeys, callback)
+    return () => { Mousetrap.unbind(hotKeys) }
+  }, [hotKeys, callback])

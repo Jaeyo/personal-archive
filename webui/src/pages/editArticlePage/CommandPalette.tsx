@@ -1,9 +1,10 @@
-import React, { FC } from "react"
+import React, { FC, useState } from "react"
+import BaseCommandPalette from "../../component/etc/BaseCommandPalette"
 import Article from "../../models/Article"
 import { useHistory } from "react-router-dom"
-import ManagedTitle from "../../component/common/ManagedTitle"
-import { confirm } from "../../component/etc/GlobalConfirm"
+import EditTagsPrompt from "../../component/article/EditTagsPrompt"
 import { useRequestDeleteArticle, useRequestUpdateTitle } from "../../apis/ArticleApi"
+import { confirm } from "../../component/etc/GlobalConfirm"
 import { prompt } from "../../component/etc/GlobalPrompt"
 
 
@@ -12,7 +13,8 @@ interface Props {
   onReload: () => void
 }
 
-const ArticleTitle: FC<Props> = ({article, onReload}) => {
+const CommandPalette: FC<Props> = ({article, onReload}) => {
+  const [isEditTagsOpened, setEditTagsOpened] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, updateTitle] = useRequestUpdateTitle()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,7 +30,7 @@ const ArticleTitle: FC<Props> = ({article, onReload}) => {
           .then(() => onReload())
     })
 
-  const onDelete = () =>
+  const onDelete = () => {
     confirm({
       message: 'delete article?',
       onOK: () =>
@@ -41,14 +43,28 @@ const ArticleTitle: FC<Props> = ({article, onReload}) => {
             }
           })
     })
+  }
 
   return (
-    <ManagedTitle
-      title={article.title}
-      onEdit={onEdit}
-      onDelete={onDelete}
-    />
+    <>
+      <BaseCommandPalette
+        commands={[
+          {name: 'edit title', command: () => onEdit()},
+          {name: 'edit tags', command: () => setEditTagsOpened(true)},
+          {name: 'delete', command: () => onDelete()},
+        ]}
+      />
+      <EditTagsPrompt
+        article={article}
+        isOpened={isEditTagsOpened}
+        onAfterEdit={() => {
+          setEditTagsOpened(false)
+          onReload()
+        }}
+        onClose={() => setEditTagsOpened(false)}
+      />
+    </>
   )
 }
 
-export default ArticleTitle
+export default CommandPalette

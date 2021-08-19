@@ -14,6 +14,8 @@ import EditNoteParagraphPage from "./pages/editNoteParagraphPage/EditNoteParagra
 import NewNoteParagraphPage from "./pages/newNoteParagraphPage/NewNoteParagraphPage"
 import { Toaster } from "react-hot-toast"
 import ScrollToTop from "./component/etc/ScrollToTop"
+import GlobalConfirm from "./component/etc/GlobalConfirm"
+import GlobalPrompt from "./component/etc/GlobalPrompt"
 
 
 const App = () => (
@@ -65,6 +67,8 @@ const App = () => (
           </Route>
         </Switch>
       </div>
+      <GlobalConfirm />
+      <GlobalPrompt />
     </BrowserRouter>
     <Toaster position="top-right"/>
   </>

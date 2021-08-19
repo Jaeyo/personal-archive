@@ -2,11 +2,11 @@ import React, { FC, useState } from "react"
 import styled from "styled-components"
 import { useHistory } from "react-router-dom"
 import Paragraph from "../../models/Paragraph"
-import Confirm from "../../component/common/Confirm"
-import { useRequestDeleteParagraph } from "../../apis/NoteApi"
 import { Button, ButtonGroup, Popover } from "@kiwicom/orbit-components"
 import { ChevronDown, ChevronUp, Edit } from "@kiwicom/orbit-components/icons"
 import { FaTrash } from "react-icons/fa"
+import { confirm } from "../../component/etc/GlobalConfirm"
+import { useRequestDeleteParagraph } from "../../apis/NoteApi"
 
 
 interface Props {
@@ -18,12 +18,19 @@ interface Props {
 
 const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onReload}) => {
   const [opened, setOpened] = useState(false)
-  const [fetching, deleteParagraph] = useRequestDeleteParagraph()
-  const [deleteConfirmShow, setDeleteConfirmShow] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, deleteParagraph] = useRequestDeleteParagraph()
   const history = useHistory()
 
-  const onDeleteParagraph = () => deleteParagraph(paragraph.noteID, paragraph.id)
-    .then(() => onReload())
+  const onDelete = () => {
+    setOpened(false)
+    confirm({
+      message: 'delete paragraph?',
+      onOK: () =>
+        deleteParagraph(paragraph.id, paragraph.noteID)
+          .then(() => onReload())
+    })
+  }
 
   return (
     <Wrapper>
@@ -60,11 +67,7 @@ const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onRel
               </Button>
               <Button
                 iconLeft={<FaTrash/>}
-                onClick={() => {
-                  setOpened(false)
-                  setDeleteConfirmShow(true)
-                }}
-                loading={fetching}
+                onClick={onDelete}
                 type="secondary"
                 size="small"
               >
@@ -80,13 +83,6 @@ const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onRel
           onClick={() => setOpened(true)}
         />
       </Popover>
-      <Confirm
-        show={deleteConfirmShow}
-        onOK={onDeleteParagraph}
-        onClose={() => setDeleteConfirmShow(false)}
-      >
-        DELETE?
-      </Confirm>
     </Wrapper>
   )
 }
