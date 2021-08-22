@@ -56,7 +56,7 @@ const CommandPalette: FC<Props> = ({note, onReload}) => {
 const getEditParagraphCommands = (paragraphs: Paragraph[], history: History): Command[] =>
   paragraphs.map((paragraph, i) => ({
     name: `edit paragraph (${i + 1}: ${getParagraphSummary(paragraph.content)})`,
-    command: () => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/id`),
+    command: () => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/edit`),
   }))
 
 const getDeleteParagraphCommands = (paragraphs: Paragraph[], deleteParagraph: (id: number, noteID: number) => Promise<void>): Command[] =>
