@@ -36,18 +36,11 @@ const EditTagsPrompt: FC<Props> = ({article, isOpened, onAfterEdit, onClose: clo
     close()
   }
 
-  useHotKeys('enter', () => {
-    if (isOpened) {
-      onEdit()
-    }
-  })
-
   useHotKeys('esc', () => {
     if (isOpened) {
       onClose()
     }
   })
-
 
   return (
     <Confirm

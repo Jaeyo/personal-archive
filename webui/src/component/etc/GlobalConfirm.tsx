@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useState } from "react"
-import { useHotKeys, useSubscribe } from "../../common/Hooks"
+import { useSubscribe } from "../../common/Hooks"
 import { OpenGlobalConfirm, publish } from "../../common/EventBus"
 import Confirm from "../common/Confirm"
 
@@ -30,12 +30,6 @@ const GlobalConfirm: FC = () => {
       setConfirmEvent(null)
     }
   }
-
-  useHotKeys('enter', () => {
-    if (isOpened) {
-      onOK()
-    }
-  })
 
   const onCancel = () => {
     setOpened(false)
