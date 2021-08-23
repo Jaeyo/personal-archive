@@ -10,6 +10,11 @@ deps:
 	@echo "\n\033[1;33m+ $@\033[0m"
 	@go mod download
 
+.PHONY: deps-webui
+deps-webui:
+	@echo "\n\033[1;33m+ $@\033[0m"
+	@cd webui && yarn install --pure-lockfile
+
 .PHONY: run-local
 run-local:
 	@echo "\n\033[1;33m+ $@\033[0m"
@@ -27,7 +32,7 @@ run-webui:
 	@cd webui && yarn start
 
 .PHONY: build
-build: clean test
+build:
 	@echo "\n\033[1;33m+ $@\033[0m"
 	@env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build --tags "fts5" -v $(GO_LDFLAGS) -o out/$(NAME) ./main.go
 
@@ -37,7 +42,7 @@ build-webui:
 	@cd webui && yarn && yarn build
 
 .PHONY: build-container
-build-container:
+build-container: clean test
 	@echo "\n\033[1;33m+ $@\033[0m"
 	@docker build --build-arg VERSION=$(VERSION) -t lastiverse/$(NAME):$(VERSION) .
 	@docker tag lastiverse/$(NAME):$(VERSION) lastiverse/$(NAME):latest
@@ -67,4 +72,9 @@ clean:
 test:
 	@echo "\n\033[1;33m+ $@\033[0m"
 	@go test ./... --short
+
+.PHONY: yarn-deduplicate
+yarn-deduplicate:
+	@echo "\n\033[1;33m+ $@\033[0m"
+	@cd webui && yarn-deduplicate yarn.lock
 
