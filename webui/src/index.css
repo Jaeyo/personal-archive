@@ -16,3 +16,7 @@ code {
     monospace;
 }
 
+.ReactModalPortal > div {
+  z-index: 999;
+}
+
