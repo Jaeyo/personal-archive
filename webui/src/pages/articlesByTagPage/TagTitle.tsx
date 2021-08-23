@@ -47,7 +47,7 @@ const Wrapper = styled.div`
 
 const EditButtonWrapper = styled.div<VisibleProps>`
   display: ${({$visible}) => $visible ? 'inline' : 'none'};
-  margin-left: 8px;
+  margin-left: 10px;
   
   button {
     display: inline-flex;

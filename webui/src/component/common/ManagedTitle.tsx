@@ -73,6 +73,8 @@ const Options: FC<{
 
 const ButtonWrapper = styled.div`
   display: inline;
+  margin-left: 30px;
+  
   button {
     display: inline-flex;
   }

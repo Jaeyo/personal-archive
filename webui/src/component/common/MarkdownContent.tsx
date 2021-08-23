@@ -33,13 +33,22 @@ const MarkdownDiv = styled.div`
   
   em {
     strong {
-      background-color: #F2E39B;
-      color: #222;
-      font-size: 90%;
-      padding: 2px 5px;
-      font-style: normal;
-      border-radius: 4px;
-      border: 1px solid #cda982;
+      position: relative;
+      font-size: 95%;
+      
+      :after {
+        background-color: #e8d004;
+        content: " ";
+        height: 40%;
+        position: absolute;
+        left: 0;
+        margin-left: -.3em;
+        top: 65%;
+        width: 100%;
+        z-index: -1;
+        opacity: .65;
+        transform: skew(-13deg);
+      }
     }
   }
   
