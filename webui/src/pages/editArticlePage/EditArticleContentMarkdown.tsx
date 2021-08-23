@@ -28,7 +28,7 @@ const EditArticleContentMarkdown: FC<Props> = ({ articleID, content: initialCont
       <TuiEditor
         previewStyle={isDesktop ? 'vertical' : undefined}
         initialValue={initialContent}
-        height="600px"
+        height="800px"
         onSubmit={onEdit}
         onLoad={(editor: any) => setEditor(editor)}
       />
