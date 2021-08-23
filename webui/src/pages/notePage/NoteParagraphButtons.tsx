@@ -39,42 +39,40 @@ const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onRel
         opened={opened}
         onClose={() => setOpened(false)}
         content={
-          <ButtonWrapper>
-            <ButtonGroup>
-              <Button
-                iconLeft={<ChevronUp/>}
-                onClick={() => onMoveUp(paragraph.seq)}
-                type="secondary"
-                size="small"
-              >
-                Up
-              </Button>
-              <Button
-                iconLeft={<ChevronDown/>}
-                onClick={() => onMoveDown(paragraph.seq)}
-                type="secondary"
-                size="small"
-              >
-                Down
-              </Button>
-              <Button
-                iconLeft={<Edit/>}
-                onClick={() => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/edit`)}
-                type="secondary"
-                size="small"
-              >
-                Edit
-              </Button>
-              <Button
-                iconLeft={<FaTrash/>}
-                onClick={onDelete}
-                type="secondary"
-                size="small"
-              >
-                Delete
-              </Button>
-            </ButtonGroup>
-          </ButtonWrapper>
+          <ButtonGroup>
+            <Button
+              iconLeft={<ChevronUp/>}
+              onClick={() => onMoveUp(paragraph.seq)}
+              type="secondary"
+              size="small"
+            >
+              Up
+            </Button>
+            <Button
+              iconLeft={<ChevronDown/>}
+              onClick={() => onMoveDown(paragraph.seq)}
+              type="secondary"
+              size="small"
+            >
+              Down
+            </Button>
+            <Button
+              iconLeft={<Edit/>}
+              onClick={() => history.push(`/notes/${paragraph.noteID}/paragraphs/${paragraph.id}/edit`)}
+              type="secondary"
+              size="small"
+            >
+              Edit
+            </Button>
+            <Button
+              iconLeft={<FaTrash/>}
+              onClick={onDelete}
+              type="secondary"
+              size="small"
+            >
+              Delete
+            </Button>
+          </ButtonGroup>
         }
       >
         <Button
@@ -88,10 +86,10 @@ const NoteParagraphButtons: FC<Props> = ({paragraph, onMoveUp, onMoveDown, onRel
 }
 
 const Wrapper = styled.div`
-  float: right;
-`
-
-const ButtonWrapper = styled.div`
+  text-align: right;
+  div[class*="Popover_"] {
+    display: inline;
+  }
   button {
     display: inline-flex;
   }
