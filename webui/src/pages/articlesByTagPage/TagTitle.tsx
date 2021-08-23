@@ -23,7 +23,7 @@ const TagTitle: FC<Props> = ({tag: initialTag, onReload}) => {
       initialValue: initialTag,
       onOK: (newTag: string) =>
         updateTag(initialTag, newTag)
-          .then(() => onReload())
+          .then(() => onReload(newTag))
     })
 
   return (
