@@ -60,8 +60,8 @@ const NoteParagraph: FC<Props> = ({paragraph, referencedArticles, onMoveUp, onMo
 
 const WrapperPanel = styled.div`
   margin: 10px 0;
-  padding: 10px 0;
-  border-bottom: 1px dashed #ddd;
+  padding: 10px 20px;
+  border: 1px dashed #bbb;
 `
 
 export default NoteParagraph
