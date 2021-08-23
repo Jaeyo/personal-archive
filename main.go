@@ -76,7 +76,9 @@ func routeForFrontend(e *echo.Echo) {
 	pages := []string{
 		"/articles/*",
 		"/tags/*",
+		"/notes",
 		"/notes/*",
+		"/settings",
 		"/settings/*",
 		"/",
 	}
