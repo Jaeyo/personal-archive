@@ -154,28 +154,33 @@ const Parent = styled.div`
   display: flex;
   flex-direction: column;
   
-  padding: 10px;
-  
   // desktop
   @media (min-width: 769px) {
     max-width: 1680px;
-    margin: 20px auto;
+    margin: 0 auto;
   }
   
   // mobile
   @media (max-width: 768px) {
     width: 100%;
-    overflow: auto;
     overflow-wrap: anywhere;
     word-break: break-all;
   }
 `
 
 const Header = styled.header`
+  position: sticky;
+  top: 0px;
+  z-index: 20;
+  background-color: hsla(0, 0%, 100%, .6);
+  backdrop-filter: blur(10px);
+  
   display: grid;
   grid-auto-flow: column;
   grid-template-columns: 1fr;
   padding: 10px;
+  
+  border-bottom: 1px solid #e0e0e0;
 `
 
 const Middle = styled.div`
@@ -184,6 +189,8 @@ const Middle = styled.div`
 `
 
 const Body = styled.main`
+  padding: 0 10px 10px 10px;
+
   /* Take the remaining height */
   flex-grow: 1;
   
@@ -220,6 +227,11 @@ const MenuSpan = styled.span`
   padding: 6px 6px;
   margin: 0 6px;
   cursor: pointer;
+  border-bottom: 3px solid transparent;
+  
+  :hover {
+    border-bottom: 3px solid #333;
+  }
 `
 
 export default MainLayout
