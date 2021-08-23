@@ -31,15 +31,18 @@ const TuiEditor = ({previewStyle = undefined, initialValue, height, onSubmit, ke
       'Ctrl-Enter': () => onSubmit(),
     })
     cm.addKeyMap(keymapsToAdd)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ editorRef, onSubmit ])
 
+  useEffect(() => {
     getKeyboardHandler()
       .then(() => {
         if (keyboardHandler === 'vim') {
-          cm.addKeyMap('vim')
+          const editor = editorRef.current?.getInstance()
+          editor.getCodeMirror().addKeyMap('vim')
         }
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ getKeyboardHandler, keyboardHandler, onSubmit ])
+  }, [getKeyboardHandler, keyboardHandler])
 
   return (
     <Editor
