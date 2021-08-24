@@ -1,4 +1,4 @@
-import React, { FC, useState } from "react"
+import React, { FC, ReactElement, useState } from "react"
 import styled from "styled-components"
 import Article from "../../models/Article"
 import { Pagination as IPagination } from "../../common/Types"
@@ -15,12 +15,7 @@ interface Props {
 }
 
 const ArticleList: FC<Props> = ({articles, pagination, onSelectPage, onReload}) => {
-  const [selectedIDs, select] = useSelectedIDs()
-  const [fetching, deleteArticles] = useRequestDeleteArticles()
-
-  const onDelete = () =>
-    deleteArticles(selectedIDs)
-      .then(() => onReload())
+  const [selectedIDs, select, renderDeleteBtn] = useSelectedIDs(onReload)
 
   return (
     <>
@@ -34,20 +29,7 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage, onReload}) 
           />
         ))
       }
-      {
-        selectedIDs.length <= 0 ?
-          null :
-          <DeleteBtnDiv>
-            <Button
-              type="criticalSubtle"
-              size="small"
-              loading={fetching}
-              onClick={() => onDelete()}
-            >
-              Delete
-            </Button>
-          </DeleteBtnDiv>
-      }
+      {renderDeleteBtn()}
       <PaginationDiv>
         <Pagination
           pageCount={pagination.totalPages}
@@ -59,8 +41,13 @@ const ArticleList: FC<Props> = ({articles, pagination, onSelectPage, onReload}) 
   )
 }
 
-const useSelectedIDs = (): [number[], (id: number, checked: boolean) => void] => {
+const useSelectedIDs = (onReload: () => void): [
+  number[],
+  (id: number, checked: boolean) => void,
+  () => ReactElement | null,
+] => {
   const [selectedIDs, setSelectedIDs] = useState([] as number[])
+  const [fetching, deleteArticles] = useRequestDeleteArticles()
 
   const select = (id: number, checked: boolean) => {
     if (checked) {
@@ -70,7 +57,25 @@ const useSelectedIDs = (): [number[], (id: number, checked: boolean) => void] =>
     }
   }
 
-  return [selectedIDs, select]
+  const onDelete = () =>
+    deleteArticles(selectedIDs)
+      .then(() => onReload())
+
+  const renderDeleteBtn = (): ReactElement | null =>
+    selectedIDs.length > 0 ? (
+      <DeleteBtnDiv>
+        <Button
+          type="criticalSubtle"
+          size="small"
+          loading={fetching}
+          onClick={() => onDelete()}
+        >
+          Delete
+        </Button>
+      </DeleteBtnDiv>
+    ) : null
+
+  return [selectedIDs, select, renderDeleteBtn]
 }
 
 const DeleteBtnDiv = styled.div`
