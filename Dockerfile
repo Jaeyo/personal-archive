@@ -1,5 +1,5 @@
 # BACKEND BUILDER
-FROM golang:1.17-alpine3.14 as backend-builder
+FROM golang:1.17-alpine3.13 as backend-builder
 
 ARG VERSION
 
