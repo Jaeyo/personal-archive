@@ -39,7 +39,7 @@ var GetArticleGenerator = func() func() ArticleGenerator {
 func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Article, error) {
 	title, content, kind, err := g.fetch(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to get title/content/kind from url")
+		title = url
 	}
 
 	title, err = g.getUniqueTitle(title)
