@@ -7,6 +7,22 @@ import (
 	"testing"
 )
 
+func TestCreate(t *testing.T) {
+	svc := &noteService{}
+
+	svc.articleRepository = &mock.ArticleRepositoryMock{
+		OnExistByIDs: func(ids []int64) (bool, error) {
+			return false, nil
+		},
+	}
+
+	notExistIDs := []int64{1, 2}
+
+	_, err := svc.Create("", "", notExistIDs, []string{})
+
+	require.NotNil(t, err)
+}
+
 func TestSwapParagraphs(t *testing.T) {
 	paragraphA := &models.Paragraph{
 		Seq: 100,
