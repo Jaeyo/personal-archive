@@ -31,3 +31,29 @@ func TestUpdateTitle(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, savedArticle.Title, "new title")
 }
+
+func TestUpdateContent(t *testing.T) {
+	svc := &articleService{}
+
+	article := &models.Article{
+		Content: "old_content",
+	}
+
+	var savedArticle *models.Article
+
+	svc.articleRepository = &mock.ArticleRepositoryMock{
+		OnGetByID: func(id int64) (*models.Article, error) {
+			return article, nil
+		},
+		OnSave: func(article *models.Article) error {
+			savedArticle = article
+			return nil
+		},
+	}
+
+	err := svc.UpdateContent(0, "new_content")
+	require.NoError(t, err)
+
+	require.NotNil(t, savedArticle)
+	require.Equal(t, "new_content", savedArticle.Content)
+}
