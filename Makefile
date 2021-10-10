@@ -18,7 +18,7 @@ deps-webui:
 .PHONY: run-local
 run-local:
 	@echo "\n\033[1;33m+ $@\033[0m"
-	@ENV=local go run --tags "fts5" ./main.go
+	@ENV=local go run --tags "fts5" ./cmd/main.go
 
 .PHONY: run-prod
 run-prod:
@@ -34,7 +34,7 @@ run-webui:
 .PHONY: build
 build:
 	@echo "\n\033[1;33m+ $@\033[0m"
-	@env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build --tags "fts5" -v $(GO_LDFLAGS) -o out/$(NAME) ./main.go
+	@env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build --tags "fts5" -v $(GO_LDFLAGS) -o out/$(NAME) ./cmd/main.go
 
 .PHONY: build-webui
 build-webui:

@@ -1,59 +1,35 @@
-package repositories
+package datastore
 
-import (
-	"github.com/jaeyo/personal-archive/internal"
-	"github.com/jaeyo/personal-archive/models"
-	"sync"
-)
+import "github.com/jaeyo/personal-archive/models"
 
-type NoteRepository interface {
-	Save(note *models.Note) error
-	FindAllWithPage(offset, limit int) (models.Notes, int64, error)
-	FindByIDsWithPage(ids []int64, offset, limit int) (models.Notes, int64, error)
-	FindByIDs(ids []int64) (models.Notes, error)
-	FindTitles() (models.Notes, error)
-	GetByID(id int64) (*models.Note, error)
-	ExistByTitle(title string) (bool, error)
-	DeleteByIDs(ids []int64) error
+type NoteDatastore interface {
+	SaveNote(note *models.Note) error
+	FindNoteWithPage(offset, limit int) (models.Notes, int64, error)
+	FindNoteByIDsWithPage(ids []int64, offset, limit int) (models.Notes, int64, error)
+	FindNoteByIDs(ids []int64) (models.Notes, error)
+	FindNoteTitles() (models.Notes, error)
+	GetNoteByID(id int64) (*models.Note, error)
+	ExistNoteByTitle(title string) (bool, error)
+	DeleteNoteByIDs(ids []int64) error
 }
 
-type noteRepository struct {
-	database             *internal.DB
-	noteSearchRepository NoteSearchRepository
-}
-
-var GetNoteRepository = func() func() NoteRepository {
-	var instance NoteRepository
-	var once sync.Once
-
-	return func() NoteRepository {
-		once.Do(func() {
-			instance = &noteRepository{
-				database:             internal.GetDatabase(),
-				noteSearchRepository: GetNoteSearchRepository(),
-			}
-		})
-		return instance
-	}
-}()
-
-func (r *noteRepository) Save(note *models.Note) error {
+func (d *Datastore) SaveNote(note *models.Note) error {
 	isInsert := note.ID == 0
 
-	if err := r.database.Save(note).Error; err != nil {
+	if err := d.database.Save(note).Error; err != nil {
 		return err
 	}
 
 	if isInsert {
-		return r.noteSearchRepository.Insert(note)
+		return d.InsertNoteSearch(note)
 	} else {
-		return r.noteSearchRepository.Update(note)
+		return d.UpdateNoteSearch(note)
 	}
 }
 
-func (r *noteRepository) FindAllWithPage(offset, limit int) (models.Notes, int64, error) {
+func (d *Datastore) FindNoteWithPage(offset, limit int) (models.Notes, int64, error) {
 	var notes []*models.Note
-	if err := r.database.
+	if err := d.database.
 		Preload("Paragraphs").
 		Preload("Paragraphs.ReferenceArticles").
 		Preload("Paragraphs.ReferenceWebs").
@@ -65,7 +41,7 @@ func (r *noteRepository) FindAllWithPage(offset, limit int) (models.Notes, int64
 	}
 
 	var cnt int64
-	if err := r.database.
+	if err := d.database.
 		Model(&models.Note{}).
 		Count(&cnt).Error; err != nil {
 		return nil, -1, err
@@ -75,9 +51,9 @@ func (r *noteRepository) FindAllWithPage(offset, limit int) (models.Notes, int64
 	return notes, cnt, nil
 }
 
-func (r *noteRepository) FindByIDsWithPage(ids []int64, offset, limit int) (models.Notes, int64, error) {
+func (d *Datastore) FindNoteByIDsWithPage(ids []int64, offset, limit int) (models.Notes, int64, error) {
 	var notes []*models.Note
-	if err := r.database.
+	if err := d.database.
 		Preload("Paragraphs").
 		Preload("Paragraphs.ReferenceArticles").
 		Preload("Paragraphs.ReferenceWebs").
@@ -92,9 +68,9 @@ func (r *noteRepository) FindByIDsWithPage(ids []int64, offset, limit int) (mode
 	return notes, int64(len(ids)), nil
 }
 
-func (r *noteRepository) FindByIDs(ids []int64) (models.Notes, error) {
+func (d *Datastore) FindNoteByIDs(ids []int64) (models.Notes, error) {
 	var notes []*models.Note
-	if err := r.database.
+	if err := d.database.
 		Preload("Paragraphs").
 		Preload("Paragraphs.ReferenceArticles").
 		Preload("Paragraphs.ReferenceWebs").
@@ -107,9 +83,9 @@ func (r *noteRepository) FindByIDs(ids []int64) (models.Notes, error) {
 	return notes, nil
 }
 
-func (r *noteRepository) FindTitles() (models.Notes, error) {
+func (d *Datastore) FindNoteTitles() (models.Notes, error) {
 	var notes []*models.Note
-	if err := r.database.
+	if err := d.database.
 		Select("id", "title").
 		Find(&notes).Error; err != nil {
 		return nil, err
@@ -119,9 +95,9 @@ func (r *noteRepository) FindTitles() (models.Notes, error) {
 	return notes, nil
 }
 
-func (r *noteRepository) GetByID(id int64) (*models.Note, error) {
+func (d *Datastore) GetNoteByID(id int64) (*models.Note, error) {
 	var note models.Note
-	err := r.database.
+	err := d.database.
 		Preload("Paragraphs").
 		Preload("Paragraphs.ReferenceArticles").
 		Preload("Paragraphs.ReferenceWebs").
@@ -131,21 +107,21 @@ func (r *noteRepository) GetByID(id int64) (*models.Note, error) {
 	return &note, err
 }
 
-func (r *noteRepository) ExistByTitle(title string) (bool, error) {
+func (d *Datastore) ExistNoteByTitle(title string) (bool, error) {
 	var cnt int64
-	err := r.database.
+	err := d.database.
 		Model(&models.Note{}).
 		Where("title = ?", title).
 		Count(&cnt).Error
 	return cnt > 0, err
 }
 
-func (r *noteRepository) DeleteByIDs(ids []int64) error {
-	if err := r.database.Where("id IN ?", ids).Delete(&models.Note{}).Error; err != nil {
+func (d *Datastore) DeleteNoteByIDs(ids []int64) error {
+	if err := d.database.Where("id IN ?", ids).Delete(&models.Note{}).Error; err != nil {
 		return err
 	}
 
-	return r.noteSearchRepository.Deletes(ids)
+	return d.DeleteNoteSearches(ids)
 }
 
 func ensureNoteAssociationNotNil(notes models.Notes) {
@@ -163,3 +139,4 @@ func ensureNoteAssociationNotNil(notes models.Notes) {
 		}
 	}
 }
+

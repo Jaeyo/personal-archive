@@ -4,7 +4,7 @@ import (
 	"github.com/jaeyo/personal-archive/common/http"
 	"github.com/jaeyo/personal-archive/controllers/reqres"
 	"github.com/jaeyo/personal-archive/dtos"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/jaeyo/personal-archive/services"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -12,14 +12,17 @@ import (
 )
 
 type ArticleController struct {
-	articleService    services.ArticleService
-	articleRepository repositories.ArticleRepository
+	articleService   services.ArticleService
+	articleDatastore datastore.ArticleDatastore
 }
 
-func NewArticleController() *ArticleController {
+func NewArticleController(
+	articleService services.ArticleService,
+	articleDatastore datastore.ArticleDatastore,
+) *ArticleController {
 	return &ArticleController{
-		articleService:    services.GetArticleService(),
-		articleRepository: repositories.GetArticleRepository(),
+		articleService:   articleService,
+		articleDatastore: articleDatastore,
 	}
 }
 
@@ -61,7 +64,7 @@ func (c *ArticleController) GetArticle(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	article, err := c.articleRepository.GetMetaByID(id)
+	article, err := c.articleDatastore.GetArticleMetaByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.NotFoundf("failed to get article: %s", err.Error())
@@ -81,7 +84,7 @@ func (c *ArticleController) GetArticleContent(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	content, err := c.articleRepository.GetContentByID(id)
+	content, err := c.articleDatastore.GetArticleContentByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.NotFoundf("failed to get article: %s", err.Error())
@@ -162,17 +165,17 @@ func (c *ArticleController) FindArticlesByTag(ctx http.ContextExtended) error {
 	)
 
 	if tag == "untagged" {
-		articles, cnt, err = c.articleRepository.FindMetaUntaggedWithPage(offset, limit)
+		articles, cnt, err = c.articleDatastore.FindArticleMetaUntaggedWithPage(offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find untagged articles")
 		}
 	} else if tag == "all" {
-		articles, cnt, err = c.articleRepository.FindMetaWithPage(offset, limit)
+		articles, cnt, err = c.articleDatastore.FindArticleMetaWithPage(offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find all articles")
 		}
 	} else {
-		articles, cnt, err = c.articleRepository.FindMetaByTagWithPage(tag, offset, limit)
+		articles, cnt, err = c.articleDatastore.FindArticleMetaByTagWithPage(tag, offset, limit)
 		if err != nil {
 			return ctx.InternalServerError(err, "failed to find articles by tag")
 		}

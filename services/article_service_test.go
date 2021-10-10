@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories/mock"
+	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -11,18 +11,18 @@ func TestUpdateTitle(t *testing.T) {
 	svc := &articleService{}
 
 	// case 1: title duplicated
-	svc.articleRepository = &mock.ArticleRepositoryMock{
-		OnExistByTitle: func(title string) (bool, error) { return true, nil },
+	svc.articleDatastore = &mock.ArticleDatastoreMock{
+		OnExistArticleByTitle: func(title string) (bool, error) { return true, nil },
 	}
 	err := svc.UpdateTitle(-1, "new title")
 	require.EqualError(t, err, "title new title already exists")
 
 	// case 2: title not duplicated
 	var savedArticle *models.Article
-	svc.articleRepository = &mock.ArticleRepositoryMock{
-		OnExistByTitle: func(title string) (bool, error) { return false, nil },
-		OnGetByID: func(id int64) (*models.Article, error) { return &models.Article{}, nil },
-		OnSave: func(article *models.Article) error {
+	svc.articleDatastore = &mock.ArticleDatastoreMock{
+		OnExistArticleByTitle: func(title string) (bool, error) { return false, nil },
+		OnGetArticleByID:      func(id int64) (*models.Article, error) { return &models.Article{}, nil },
+		OnSaveArticle: func(article *models.Article) error {
 			savedArticle = article
 			return nil
 		},
@@ -41,11 +41,11 @@ func TestUpdateContent(t *testing.T) {
 
 	var savedArticle *models.Article
 
-	svc.articleRepository = &mock.ArticleRepositoryMock{
-		OnGetByID: func(id int64) (*models.Article, error) {
+	svc.articleDatastore = &mock.ArticleDatastoreMock{
+		OnGetArticleByID: func(id int64) (*models.Article, error) {
 			return article, nil
 		},
-		OnSave: func(article *models.Article) error {
+		OnSaveArticle: func(article *models.Article) error {
 			savedArticle = article
 			return nil
 		},

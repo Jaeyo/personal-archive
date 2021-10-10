@@ -1,10 +1,9 @@
 package services
 
 import (
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
-	"sync"
 )
 
 const (
@@ -21,24 +20,17 @@ type SettingService interface {
 }
 
 type settingService struct {
-	miscRepository repositories.MiscRepository
+	miscDatastore datastore.MiscDatastore
 }
 
-var GetSettingService = func() func() SettingService {
-	var once sync.Once
-	var instance SettingService
-	return func() SettingService {
-		once.Do(func() {
-			instance = &settingService{
-				miscRepository: repositories.GetMiscRepository(),
-			}
-		})
-		return instance
+func NewSettingService(miscDatastore datastore.MiscDatastore) SettingService {
+	return &settingService{
+		miscDatastore: miscDatastore,
 	}
-}()
+}
 
 func (s *settingService) GetEditorKeyboardHandler() (string, error) {
-	value, err := s.miscRepository.GetValue(EditorKeyboardHandler)
+	value, err := s.miscDatastore.GetValue(EditorKeyboardHandler)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return EditorDefaultKeyboardHandler, nil
@@ -50,7 +42,7 @@ func (s *settingService) GetEditorKeyboardHandler() (string, error) {
 }
 
 func (s *settingService) SetEditorKeyboardHandler(keyboardHandler string) error {
-	if err := s.miscRepository.CreateOrUpdate(EditorKeyboardHandler, keyboardHandler); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(EditorKeyboardHandler, keyboardHandler); err != nil {
 		return errors.Wrap(err, "failed to create/update editor keyboard handler")
 	}
 	return nil

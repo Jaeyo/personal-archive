@@ -1,4 +1,4 @@
-package internal
+package database
 
 import (
 	"fmt"
@@ -12,36 +12,27 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type DB struct {
 	*gorm.DB
 }
 
-var GetDatabase = func() func() *DB {
-	var instance *DB
-	var once sync.Once
-
-	return func() *DB {
-		once.Do(func() {
-			dbDir := "/data"
-			if common.IsLocal() {
-				dbDir = "./test_data"
-			}
-			ensureDirExist(dbDir)
-			dbPath := fmt.Sprintf("%s/personal-archive.db", dbDir)
-
-			db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{Logger: logger.Discard})
-			if err != nil {
-				panic(err)
-			}
-
-			instance = &DB{db}
-		})
-		return instance
+func New() *DB {
+	dbDir := "/data"
+	if common.IsLocal() {
+		dbDir = "./test_data"
 	}
-}()
+	ensureDirExist(dbDir)
+	dbPath := fmt.Sprintf("%s/personal-archive.db", dbDir)
+
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{Logger: logger.Discard})
+	if err != nil {
+		panic(err)
+	}
+
+	return &DB{db}
+}
 
 func (d *DB) Init() error {
 	if err := d.AutoMigrate(

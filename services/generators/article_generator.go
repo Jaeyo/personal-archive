@@ -2,13 +2,13 @@ package generators
 
 import (
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 type ArticleGenerator interface {
 	NewArticle(url string, tags []string) (*models.Article, error)
+	GetUniqueTitle(title string) (string, error)
 }
 
 type articleGenerator struct {
@@ -16,25 +16,18 @@ type articleGenerator struct {
 	tweetFetcher      ArticleFetcher
 	slideShareFetcher ArticleFetcher
 	youtubeFetcher    ArticleFetcher
-	articleRepository repositories.ArticleRepository
+	articleDatastore  datastore.ArticleDatastore
 }
 
-var GetArticleGenerator = func() func() ArticleGenerator {
-	var once sync.Once
-	var instance ArticleGenerator
-	return func() ArticleGenerator {
-		once.Do(func() {
-			instance = &articleGenerator{
-				markdownFetcher:   &articleMarkdownFetcher{},
-				tweetFetcher:      &articleTweetFetcher{},
-				slideShareFetcher: &articleSlideShareFetcher{},
-				youtubeFetcher:    &articleYoutubeFetcher{},
-				articleRepository: repositories.GetArticleRepository(),
-			}
-		})
-		return instance
+func NewArticleGenerator(articleDatastore datastore.ArticleDatastore) ArticleGenerator {
+	return &articleGenerator{
+		markdownFetcher:   &articleMarkdownFetcher{},
+		tweetFetcher:      &articleTweetFetcher{},
+		slideShareFetcher: &articleSlideShareFetcher{},
+		youtubeFetcher:    &articleYoutubeFetcher{},
+		articleDatastore:  articleDatastore,
 	}
-}()
+}
 
 func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Article, error) {
 	title, content, kind, err := g.fetch(url)
@@ -42,7 +35,7 @@ func (g *articleGenerator) NewArticle(url string, tags []string) (*models.Articl
 		title = url
 	}
 
-	title, err = g.getUniqueTitle(title)
+	title, err = g.GetUniqueTitle(title)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get unique title")
 	}
@@ -72,15 +65,15 @@ func (g *articleGenerator) fetch(url string) (string, string, string, error) {
 	return title, content, kind, nil
 }
 
-func (g *articleGenerator) getUniqueTitle(title string) (string, error) {
-	isTitleExist, err := g.articleRepository.ExistByTitle(title)
+func (g *articleGenerator) GetUniqueTitle(title string) (string, error) {
+	isTitleExist, err := g.articleDatastore.ExistArticleByTitle(title)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to check title duplication")
 	}
 
 	for isTitleExist {
 		title += "(1)"
-		isTitleExist, err = g.articleRepository.ExistByTitle(title)
+		isTitleExist, err = g.articleDatastore.ExistArticleByTitle(title)
 		if err != nil {
 			return "", errors.Wrap(err, "failed to check title duplication")
 		}

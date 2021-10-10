@@ -5,7 +5,6 @@ import (
 	"github.com/jaeyo/personal-archive/common/pocket"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"sync"
 	"time"
 )
 
@@ -18,19 +17,15 @@ type pocketSyncService struct {
 	articleService ArticleService
 }
 
-var GetPocketSyncService = func() func() PocketSyncService {
-	var once sync.Once
-	var instance PocketSyncService
-	return func() PocketSyncService {
-		once.Do(func() {
-			instance = &pocketSyncService{
-				pocketService:  GetPocketService(),
-				articleService: GetArticleService(),
-			}
-		})
-		return instance
+func NewPocketSyncService(
+	pocketService PocketService,
+	articleService ArticleService,
+) PocketSyncService {
+	return &pocketSyncService{
+		pocketService,
+		articleService,
 	}
-}()
+}
 
 func (s *pocketSyncService) Start() {
 	// pocket api rate limit: 320 calls per hour

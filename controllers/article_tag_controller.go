@@ -3,19 +3,22 @@ package controllers
 import (
 	"github.com/jaeyo/personal-archive/common/http"
 	"github.com/jaeyo/personal-archive/controllers/reqres"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/labstack/echo/v4"
 )
 
 type ArticleTagController struct {
-	articleTagRepository repositories.ArticleTagRepository
-	articleRepository    repositories.ArticleRepository
+	articleTagDatastore datastore.ArticleTagDatastore
+	articleDatastore    datastore.ArticleDatastore
 }
 
-func NewArticleTagController() *ArticleTagController {
+func NewArticleTagController(
+	articleTagDatastore datastore.ArticleTagDatastore,
+	articleDatastore datastore.ArticleDatastore,
+) *ArticleTagController {
 	return &ArticleTagController{
-		articleTagRepository: repositories.GetArticleTagRepository(),
-		articleRepository:    repositories.GetArticleRepository(),
+		articleTagDatastore: articleTagDatastore,
+		articleDatastore:    articleDatastore,
 	}
 }
 
@@ -25,17 +28,17 @@ func (c *ArticleTagController) Route(e *echo.Echo) {
 }
 
 func (c *ArticleTagController) FindArticleTagCounts(ctx http.ContextExtended) error {
-	articleTagCounts, err := c.articleTagRepository.FindCounts()
+	articleTagCounts, err := c.articleTagDatastore.FindArticleTagCounts()
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to find article tag counts")
 	}
 
-	untaggedCount, err := c.articleRepository.GetUntaggedCount()
+	untaggedCount, err := c.articleDatastore.GetArticleUntaggedCount()
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to get untagged count")
 	}
 
-	allCount, err := c.articleRepository.GetAllCount()
+	allCount, err := c.articleDatastore.GetArticleAllCount()
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to get all count")
 	}
@@ -56,7 +59,7 @@ func (c *ArticleTagController) UpdateTag(ctx http.ContextExtended) error {
 		return ctx.BadRequestf("invalid request body: %s", err.Error())
 	}
 
-	if err := c.articleTagRepository.UpdateTag(tag, req.Tag); err != nil {
+	if err := c.articleTagDatastore.UpdateArticleTag(tag, req.Tag); err != nil {
 		return ctx.InternalServerError(err, "failed to update tag")
 	}
 

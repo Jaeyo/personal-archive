@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories/mock"
+	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -10,8 +10,8 @@ import (
 func TestCreate(t *testing.T) {
 	svc := &noteService{}
 
-	svc.articleRepository = &mock.ArticleRepositoryMock{
-		OnExistByIDs: func(ids []int64) (bool, error) {
+	svc.articleDatastore = &mock.ArticleDatastoreMock{
+		OnExistArticleByIDs: func(ids []int64) (bool, error) {
 			return false, nil
 		},
 	}
@@ -31,15 +31,15 @@ func TestSwapParagraphs(t *testing.T) {
 		Seq: 101,
 	}
 
-	paragraphRepo := &mock.ParagraphRepositoryMock{
-		OnFindByIDsAndNoteID: func(ids []int64, noteID int64) (models.Paragraphs, error) {
+	paragraphDatastore := &mock.ParagraphDatastoreMock{
+		OnFindParagraphByIDsAndNoteID: func(ids []int64, noteID int64) (models.Paragraphs, error) {
 			return models.Paragraphs{paragraphA, paragraphB}, nil
 		},
-		OnSave: func(paragraph *models.Paragraph) error {
+		OnSaveParagraph: func(paragraph *models.Paragraph) error {
 			return nil
 		},
 	}
-	svc := &noteService{ paragraphRepository: paragraphRepo }
+	svc := NewNoteService(nil, nil, nil, paragraphDatastore, nil, nil)
 	err := svc.SwapParagraphs(-1, -1, -1)
 	require.NoError(t, err)
 	require.Equal(t, 101, paragraphA.Seq)
