@@ -2,11 +2,10 @@ package services
 
 import (
 	"github.com/jaeyo/personal-archive/common/pocket"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"strconv"
-	"sync"
 	"time"
 )
 
@@ -37,21 +36,14 @@ type PocketService interface {
 }
 
 type pocketService struct {
-	miscRepository repositories.MiscRepository
+	miscDatastore datastore.MiscDatastore
 }
 
-var GetPocketService = func() func() PocketService {
-	var once sync.Once
-	var instance PocketService
-	return func() PocketService {
-		once.Do(func() {
-			instance = &pocketService{
-				miscRepository: repositories.GetMiscRepository(),
-			}
-		})
-		return instance
+func NewPocketService(miscDatastore datastore.MiscDatastore) PocketService {
+	return &pocketService{
+		miscDatastore: miscDatastore,
 	}
-}()
+}
 
 func (s *pocketService) ObtainRequestToken(consumerKey, redirectURI string) (string, error) {
 	requestToken, err := pocket.ObtainRequestToken(consumerKey, redirectURI)
@@ -59,10 +51,10 @@ func (s *pocketService) ObtainRequestToken(consumerKey, redirectURI string) (str
 		return "", errors.Wrap(err, "failed to obtain request token")
 	}
 
-	if err := s.miscRepository.CreateOrUpdate(PocketConsumerKey, consumerKey); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketConsumerKey, consumerKey); err != nil {
 		return "", errors.Wrap(err, "failed to create/update pocket consumer key")
 	}
-	if err := s.miscRepository.CreateOrUpdate(PocketRequestToken, requestToken); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketRequestToken, requestToken); err != nil {
 		return "", errors.Wrap(err, "failed to create/update pocket request token")
 	}
 
@@ -74,7 +66,7 @@ func (s *pocketService) Auth() (bool, error) {
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get pocket consumer key")
 	}
-	requestToken, err := s.miscRepository.GetValue(PocketRequestToken)
+	requestToken, err := s.miscDatastore.GetValue(PocketRequestToken)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get pocket request token")
 	}
@@ -86,13 +78,13 @@ func (s *pocketService) Auth() (bool, error) {
 		return false, nil
 	}
 
-	if err := s.miscRepository.CreateOrUpdate(PocketUsername, username); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketUsername, username); err != nil {
 		return false, errors.Wrap(err, "failed to create/update pocket username")
 	}
-	if err := s.miscRepository.CreateOrUpdate(PocketAccessToken, accessToken); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketAccessToken, accessToken); err != nil {
 		return false, errors.Wrap(err, "failed to create/update pocket access token")
 	}
-	if err := s.miscRepository.CreateOrUpdate(PocketSync, "1"); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketSync, "1"); err != nil {
 		return false, errors.Wrap(err, "failed to create/update pocket sync")
 	}
 
@@ -100,7 +92,7 @@ func (s *pocketService) Auth() (bool, error) {
 }
 
 func (s *pocketService) Unauth() error {
-	if err := s.miscRepository.DeleteByKeys([]string{
+	if err := s.miscDatastore.DeleteValueByKeys([]string{
 		PocketConsumerKey,
 		PocketRequestToken,
 		PocketAccessToken,
@@ -115,7 +107,7 @@ func (s *pocketService) Unauth() error {
 }
 
 func (s *pocketService) GetAuth() (bool, string, bool, error) {
-	username, err := s.miscRepository.GetValue(PocketUsername)
+	username, err := s.miscDatastore.GetValue(PocketUsername)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, "", false, nil
@@ -123,7 +115,7 @@ func (s *pocketService) GetAuth() (bool, string, bool, error) {
 		return false, "", false, errors.Wrap(err, "failed to get pocket username")
 	}
 
-	pocketSync, err := s.miscRepository.GetValue(PocketSync)
+	pocketSync, err := s.miscDatastore.GetValue(PocketSync)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, "", false, nil
@@ -146,7 +138,7 @@ func (s *pocketService) ToggleSync(isSyncOn bool) error {
 }
 
 func (s *pocketService) GetLastSyncTime() (*time.Time, error) {
-	value, err := s.miscRepository.GetValue(PocketLastSyncTime)
+	value, err := s.miscDatastore.GetValue(PocketLastSyncTime)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -164,14 +156,14 @@ func (s *pocketService) GetLastSyncTime() (*time.Time, error) {
 
 func (s *pocketService) SetLastSyncTime(tm time.Time) error {
 	lastSyncTime := strconv.FormatInt(tm.Unix(), 10)
-	if err := s.miscRepository.CreateOrUpdate(PocketLastSyncTime, lastSyncTime); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketLastSyncTime, lastSyncTime); err != nil {
 		return errors.Wrap(err, "failed to create / update last sync time")
 	}
 	return nil
 }
 
 func (s *pocketService) GetLastOffset() (int, error) {
-	value, err := s.miscRepository.GetValue(PocketLastOffset)
+	value, err := s.miscDatastore.GetValue(PocketLastOffset)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return 0, nil
@@ -191,14 +183,14 @@ func (s *pocketService) SetSyncable(isSyncable bool) error {
 		pocketSync = "1"
 	}
 
-	if err := s.miscRepository.CreateOrUpdate(PocketSync, pocketSync); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(PocketSync, pocketSync); err != nil {
 		return errors.Wrap(err, "failed to create/update pocket sync")
 	}
 	return nil
 }
 
 func (s *pocketService) GetSyncable() (bool, error) {
-	if pocketSync, err := s.miscRepository.GetValue(PocketSync); err != nil {
+	if pocketSync, err := s.miscDatastore.GetValue(PocketSync); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil
 		}
@@ -209,13 +201,13 @@ func (s *pocketService) GetSyncable() (bool, error) {
 }
 
 func (s *pocketService) SetLastOffset(offset int) error {
-	return s.miscRepository.CreateOrUpdate(PocketLastOffset, strconv.Itoa(offset))
+	return s.miscDatastore.CreateOrUpdateKeyValue(PocketLastOffset, strconv.Itoa(offset))
 }
 
 func (s *pocketService) GetConsumerKey() (string, error) {
-	return s.miscRepository.GetValue(PocketConsumerKey)
+	return s.miscDatastore.GetValue(PocketConsumerKey)
 }
 
 func (s *pocketService) GetAccessToken() (string, error) {
-	return s.miscRepository.GetValue(PocketAccessToken)
+	return s.miscDatastore.GetValue(PocketAccessToken)
 }

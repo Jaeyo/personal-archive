@@ -3,7 +3,7 @@ package controllers
 import (
 	"github.com/jaeyo/personal-archive/common/http"
 	"github.com/jaeyo/personal-archive/controllers/reqres"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/jaeyo/personal-archive/services"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -11,18 +11,23 @@ import (
 )
 
 type NoteController struct {
-	noteService         services.NoteService
-	noteRepository      repositories.NoteRepository
-	articleRepository   repositories.ArticleRepository
-	paragraphRepository repositories.ParagraphRepository
+	noteService        services.NoteService
+	noteDatastore      datastore.NoteDatastore
+	articleDatastore   datastore.ArticleDatastore
+	paragraphDatastore datastore.ParagraphDatastore
 }
 
-func NewNoteController() *NoteController {
+func NewNoteController(
+	noteService services.NoteService,
+	noteDatastore datastore.NoteDatastore,
+	articleDatastore datastore.ArticleDatastore,
+	paragraphDatastore datastore.ParagraphDatastore,
+) *NoteController {
 	return &NoteController{
-		noteService:         services.GetNoteService(),
-		noteRepository:      repositories.GetNoteRepository(),
-		articleRepository:   repositories.GetArticleRepository(),
-		paragraphRepository: repositories.GetParagraphRepository(),
+		noteService:        noteService,
+		noteDatastore:      noteDatastore,
+		articleDatastore:   articleDatastore,
+		paragraphDatastore: paragraphDatastore,
 	}
 }
 
@@ -44,7 +49,7 @@ func (c *NoteController) Route(e *echo.Echo) {
 func (c *NoteController) FindNotes(ctx http.ContextExtended) error {
 	page, offset, limit := ctx.PageOffsetLimit()
 
-	notes, cnt, err := c.noteRepository.FindAllWithPage(offset, limit)
+	notes, cnt, err := c.noteDatastore.FindNoteWithPage(offset, limit)
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to find notes")
 	}
@@ -62,7 +67,7 @@ func (c *NoteController) GetNote(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid id")
 	}
 
-	note, err := c.noteRepository.GetByID(id)
+	note, err := c.noteDatastore.GetNoteByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return ctx.NotFoundf("failed to get note: %s", err.Error())
@@ -70,7 +75,7 @@ func (c *NoteController) GetNote(ctx http.ContextExtended) error {
 		return ctx.InternalServerError(err, "failed to get note")
 	}
 
-	articleMetas, err := c.articleRepository.FindMetaByIDs(note.Paragraphs.ExtractReferenceArticleArticleIDs())
+	articleMetas, err := c.articleDatastore.FindArticleMetaByIDs(note.Paragraphs.ExtractReferenceArticleArticleIDs())
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to find articles")
 	}
@@ -180,7 +185,7 @@ func (c *NoteController) CreateParagraph(ctx http.ContextExtended) error {
 }
 
 func (c *NoteController) FindNoteTitles(ctx http.ContextExtended) error {
-	notes, err := c.noteRepository.FindTitles()
+	notes, err := c.noteDatastore.FindNoteTitles()
 	if err != nil {
 		return ctx.InternalServerError(err, "failed to find note titles")
 	}
@@ -247,7 +252,7 @@ func (c *NoteController) DeleteParagraph(ctx http.ContextExtended) error {
 		return ctx.BadRequest("invalid paragraph id")
 	}
 
-	if err := c.paragraphRepository.DeleteByIDAndNoteID(id, paragraphID); err != nil {
+	if err := c.paragraphDatastore.DeleteParagraphByIDAndNoteID(id, paragraphID); err != nil {
 		return ctx.InternalServerError(err, "failed to delete paragraph")
 	}
 

@@ -3,7 +3,7 @@ package generators
 import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories/mock"
+	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -50,15 +50,15 @@ func TestGetUniqueTitle(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		cnt := i
 		t.Run(fmt.Sprintf("retry-%d", cnt), func(t *testing.T) {
-			articleRepo := &mock.ArticleRepositoryMock{
-				OnExistByTitle: func(title string) (bool, error) {
+			articleDatastore := &mock.ArticleDatastoreMock{
+				OnExistArticleByTitle: func(title string) (bool, error) {
 					cnt--
 					return cnt >= 0, nil
 				},
 			}
 
-			gen := &articleGenerator{ articleRepository: articleRepo }
-			title, err := gen.getUniqueTitle("")
+			gen := NewArticleGenerator(articleDatastore)
+			title, err := gen.GetUniqueTitle("")
 
 			require.NoError(t, err)
 			require.Equal(t, 3 * i, len(title))

@@ -1,10 +1,8 @@
 package main
 
 import (
+	"github.com/jaeyo/personal-archive/cmd/app"
 	"github.com/jaeyo/personal-archive/common"
-	"github.com/jaeyo/personal-archive/controllers"
-	"github.com/jaeyo/personal-archive/internal"
-	"github.com/jaeyo/personal-archive/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sirupsen/logrus"
@@ -14,30 +12,39 @@ import (
 )
 
 func main() {
-	initialize()
+	mainApp := initApp()
+	mainApp.PocketSyncService.Start()
 
-	services.GetPocketSyncService().Start()
-
-	startHttpServer()
+	startHttpServer(mainApp)
 }
 
-func initialize() {
+func initApp() *app.App {
 	logrus.SetOutput(os.Stdout)
 	logrus.SetLevel(logrus.DebugLevel)
 
-	if err := internal.GetDatabase().Init(); err != nil {
+	mainApp := app.NewApp()
+
+	if err := mainApp.AppService.PreserveVerInfo(); err != nil {
 		panic(err)
 	}
 
-	if err := services.GetAppService().PreserveVerInfo(); err != nil {
-		panic(err)
-	}
+	mainApp.ArticleService.Initialize()
+	mainApp.NoteService.Initialize()
 
-	services.GetArticleService().Initialize()
-	services.GetNoteService().Initialize()
+	return mainApp
 }
 
-func startHttpServer() {
+var staticPages = []string{
+	"/articles/*",
+	"/tags/*",
+	"/notes",
+	"/notes/*",
+	"/settings",
+	"/settings/*",
+	"/",
+}
+
+func startHttpServer(mainApp *app.App) {
 	e := echo.New()
 	e.HTTPErrorHandler = errorHandler
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -45,24 +52,17 @@ func startHttpServer() {
 	}))
 	e.Use(middleware.CORS())
 	e.Use(middleware.Recover())
-	routeForControllers(e)
+
+	for _, controller := range mainApp.Controllers() {
+		controller.Route(e)
+	}
+
 	routeForFrontend(e)
 
 	if err := e.Start(":1113"); err != nil {
 		if !strings.Contains(err.Error(), "Server closed") {
 			panic(err)
 		}
-	}
-}
-
-func routeForControllers(e *echo.Echo) {
-	for _, controller := range []Controller{
-		controllers.NewArticleController(),
-		controllers.NewArticleTagController(),
-		controllers.NewSettingController(),
-		controllers.NewNoteController(),
-	} {
-		controller.Route(e)
 	}
 }
 
@@ -73,16 +73,7 @@ func routeForFrontend(e *echo.Echo) {
 
 	e.Static("", "/app/static")
 
-	pages := []string{
-		"/articles/*",
-		"/tags/*",
-		"/notes",
-		"/notes/*",
-		"/settings",
-		"/settings/*",
-		"/",
-	}
-	for _, path := range pages {
+	for _, path := range staticPages {
 		e.File(path, "/app/static/index.html")
 	}
 }
@@ -97,8 +88,4 @@ func errorHandler(err error, ctx echo.Context) {
 		"ok":      false,
 		"message": err.Error(),
 	})
-}
-
-type Controller interface {
-	Route(e *echo.Echo)
 }

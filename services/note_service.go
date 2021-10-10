@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/common"
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 type NoteService interface {
@@ -21,41 +20,40 @@ type NoteService interface {
 }
 
 type noteService struct {
-	noteRepository             repositories.NoteRepository
-	noteSearchRepository       repositories.NoteSearchRepository
-	articleRepository          repositories.ArticleRepository
-	paragraphRepository        repositories.ParagraphRepository
-	referenceArticleRepository repositories.ReferenceArticleRepository
-	referenceWebRepository     repositories.ReferenceWebRepository
+	noteDatastore             datastore.NoteDatastore
+	noteSearchDatastore       datastore.NoteSearchDatastore
+	articleDatastore          datastore.ArticleDatastore
+	paragraphDatastore        datastore.ParagraphDatastore
+	referenceArticleDatastore datastore.ReferenceArticleDatastore
+	referenceWebDatastore     datastore.ReferenceWebDatastore
 }
 
-var GetNoteService = func() func() NoteService {
-	var instance NoteService
-	var once sync.Once
-
-	return func() NoteService {
-		once.Do(func() {
-			instance = &noteService{
-				noteRepository:             repositories.GetNoteRepository(),
-				noteSearchRepository:       repositories.GetNoteSearchRepository(),
-				articleRepository:          repositories.GetArticleRepository(),
-				paragraphRepository:        repositories.GetParagraphRepository(),
-				referenceArticleRepository: repositories.GetReferenceArticleRepository(),
-				referenceWebRepository:     repositories.GetReferenceWebRepository(),
-			}
-		})
-		return instance
+func NewNoteService(
+	noteDatastore datastore.NoteDatastore,
+	noteSearchDatastore datastore.NoteSearchDatastore,
+	articleDatastore datastore.ArticleDatastore,
+	paragraphDatastore datastore.ParagraphDatastore,
+	referenceArticleDatastore datastore.ReferenceArticleDatastore,
+	referenceWebDatastore datastore.ReferenceWebDatastore,
+) NoteService {
+	return &noteService{
+		noteDatastore:             noteDatastore,
+		noteSearchDatastore:       noteSearchDatastore,
+		articleDatastore:          articleDatastore,
+		paragraphDatastore:        paragraphDatastore,
+		referenceArticleDatastore: referenceArticleDatastore,
+		referenceWebDatastore:     referenceWebDatastore,
 	}
-}()
+}
 
 func (s *noteService) Initialize() {
-	if err := s.noteSearchRepository.Initialize(); err != nil {
+	if err := s.noteSearchDatastore.InitializeNoteSearch(); err != nil {
 		panic(err)
 	}
 }
 
 func (s *noteService) Create(title, content string, refArticleIDs []int64, refWebURLs []string) (*models.Note, error) {
-	exists, err := s.articleRepository.ExistByIDs(refArticleIDs)
+	exists, err := s.articleDatastore.ExistArticleByIDs(refArticleIDs)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to check reference article ids exist")
 	} else if !exists {
@@ -84,14 +82,14 @@ func (s *noteService) Create(title, content string, refArticleIDs []int64, refWe
 		},
 	}
 
-	if err := s.noteRepository.Save(note); err != nil {
+	if err := s.noteDatastore.SaveNote(note); err != nil {
 		return nil, errors.Wrap(err, "failed to save note")
 	}
 	return note, nil
 }
 
 func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []int64, refWebURLs []string) (*models.Note, error) {
-	exists, err := s.articleRepository.ExistByIDs(refArticleIDs)
+	exists, err := s.articleDatastore.ExistArticleByIDs(refArticleIDs)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to check reference article ids exist")
 	} else if !exists {
@@ -108,7 +106,7 @@ func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []
 		refWebs = append(refWebs, &models.ReferenceWeb{URL: refWebURL})
 	}
 
-	note, err := s.noteRepository.GetByID(id)
+	note, err := s.noteDatastore.GetNoteByID(id)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get note")
 	}
@@ -120,7 +118,7 @@ func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []
 		ReferenceWebs:     refWebs,
 	})
 
-	if err := s.noteRepository.Save(note); err != nil {
+	if err := s.noteDatastore.SaveNote(note); err != nil {
 		return nil, errors.Wrap(err, "failed to save note")
 	}
 
@@ -128,12 +126,12 @@ func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []
 }
 
 func (s *noteService) Search(keyword string, offset, limit int) ([]*models.Note, int64, error) {
-	ids, err := s.noteSearchRepository.Search(keyword)
+	ids, err := s.noteSearchDatastore.SearchNote(keyword)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to search")
 	}
 
-	notes, cnt, err := s.noteRepository.FindByIDsWithPage(ids, offset, limit)
+	notes, cnt, err := s.noteDatastore.FindNoteByIDsWithPage(ids, offset, limit)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to find notes by ids")
 	}
@@ -142,35 +140,35 @@ func (s *noteService) Search(keyword string, offset, limit int) ([]*models.Note,
 }
 
 func (s *noteService) UpdateTitle(id int64, newTitle string) error {
-	exist, err := s.noteRepository.ExistByTitle(newTitle)
+	exist, err := s.noteDatastore.ExistNoteByTitle(newTitle)
 	if err != nil {
 		return errors.Wrap(err, "failed to check exist by title")
 	} else if exist {
 		return fmt.Errorf("title %s already exists", newTitle)
 	}
 
-	note, err := s.noteRepository.GetByID(id)
+	note, err := s.noteDatastore.GetNoteByID(id)
 	if err != nil {
 		return errors.Wrap(err, "failed to get note")
 	}
 
 	note.Title = newTitle
 
-	if err := s.noteRepository.Save(note); err != nil {
+	if err := s.noteDatastore.SaveNote(note); err != nil {
 		return errors.Wrap(err, "failed to save note")
 	}
 	return nil
 }
 
 func (s *noteService) UpdateParagraph(id, paragraphID int64, content string, refArticleIDs common.Int64s, refWebURLs common.Strings) error {
-	exists, err := s.articleRepository.ExistByIDs(refArticleIDs)
+	exists, err := s.articleDatastore.ExistArticleByIDs(refArticleIDs)
 	if err != nil {
 		return errors.Wrap(err, "failed to check reference article ids exist")
 	} else if !exists {
 		return fmt.Errorf("invalid reference article ids: %v", refArticleIDs)
 	}
 
-	paragraph, err := s.paragraphRepository.GetByIDAndNoteID(paragraphID, id)
+	paragraph, err := s.paragraphDatastore.GetParagraphByIDAndNoteID(paragraphID, id)
 	if err != nil {
 		return errors.Wrap(err, "failed to get paragraph")
 	}
@@ -205,10 +203,10 @@ func (s *noteService) UpdateParagraph(id, paragraphID int64, content string, ref
 		}
 	}
 
-	if err := s.referenceArticleRepository.DeleteByIDs(toBeRemovedRefArticles.ExtractIDs()); err != nil {
+	if err := s.referenceArticleDatastore.DeleteReferenceArticleByIDs(toBeRemovedRefArticles.ExtractIDs()); err != nil {
 		return errors.Wrap(err, "failed to delete reference articles by ids")
 	}
-	if err := s.referenceWebRepository.DeleteByIDs(toBeRemovedRefWebs.ExtractIDs()); err != nil {
+	if err := s.referenceWebDatastore.DeleteReferenceWebByIDs(toBeRemovedRefWebs.ExtractIDs()); err != nil {
 		return errors.Wrap(err, "failed to delete reference webs by ids")
 	}
 
@@ -216,14 +214,14 @@ func (s *noteService) UpdateParagraph(id, paragraphID int64, content string, ref
 	paragraph.ReferenceArticles = toBeAddedRefArticles
 	paragraph.ReferenceWebs = toBeAddedRefWebs
 
-	if err := s.paragraphRepository.Save(paragraph); err != nil {
+	if err := s.paragraphDatastore.SaveParagraph(paragraph); err != nil {
 		return errors.Wrap(err, "failed to save paragraph")
 	}
 	return nil
 }
 
 func (s *noteService) DeleteByIDs(ids []int64) error {
-	notes, err := s.noteRepository.FindByIDs(ids)
+	notes, err := s.noteDatastore.FindNoteByIDs(ids)
 	if err != nil {
 		return errors.Wrap(err, "failed to find notes")
 	} else if len(ids) != len(notes) {
@@ -235,24 +233,24 @@ func (s *noteService) DeleteByIDs(ids []int64) error {
 	refArticleIDs := paragraphs.ExtractReferenceArticleIDs()
 	refWebIDs := paragraphs.ExtractReferenceWebIDs()
 
-	if err := s.referenceArticleRepository.DeleteByIDs(refArticleIDs); err != nil {
+	if err := s.referenceArticleDatastore.DeleteReferenceArticleByIDs(refArticleIDs); err != nil {
 		return errors.Wrap(err, "failed to delete reference article by ids")
 	}
-	if err := s.referenceWebRepository.DeleteByIDs(refWebIDs); err != nil {
+	if err := s.referenceWebDatastore.DeleteReferenceWebByIDs(refWebIDs); err != nil {
 		return errors.Wrap(err, "failed to delete reference web by ids")
 	}
-	if err := s.paragraphRepository.DeleteByIDs(paragraphIDs); err != nil {
+	if err := s.paragraphDatastore.DeleteParagraphByIDs(paragraphIDs); err != nil {
 		return errors.Wrap(err, "failed to delete paragraph by ids")
 	}
 
-	if err := s.noteRepository.DeleteByIDs(ids); err != nil {
+	if err := s.noteDatastore.DeleteNoteByIDs(ids); err != nil {
 		return errors.Wrap(err, "failed to delete note by ids")
 	}
 	return nil
 }
 
 func (s *noteService) SwapParagraphs(id, paragraphAID, paragraphBID int64) error {
-	paragraphs, err := s.paragraphRepository.FindByIDsAndNoteID([]int64{paragraphAID, paragraphBID}, id)
+	paragraphs, err := s.paragraphDatastore.FindParagraphByIDsAndNoteID([]int64{paragraphAID, paragraphBID}, id)
 	if err != nil {
 		return errors.Wrap(err, "failed to find paragraphs")
 	} else if len(paragraphs) != 2 {
@@ -264,7 +262,7 @@ func (s *noteService) SwapParagraphs(id, paragraphAID, paragraphBID int64) error
 	paragraphs[1].Seq = tmp
 
 	for _, p := range paragraphs {
-		if err := s.paragraphRepository.Save(p); err != nil {
+		if err := s.paragraphDatastore.SaveParagraph(p); err != nil {
 			return errors.Wrap(err, "failed to save paragraph")
 		}
 	}

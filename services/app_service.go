@@ -2,9 +2,8 @@ package services
 
 import (
 	"github.com/jaeyo/personal-archive/common"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 const (
@@ -16,24 +15,16 @@ type AppService interface {
 }
 
 type appService struct {
-	miscRepository repositories.MiscRepository
-	versionReader  common.VersionReader
+	miscDatastore datastore.MiscDatastore
+	versionReader common.VersionReader
 }
 
-var GetAppService = func() func() AppService {
-	var instance AppService
-	var once sync.Once
-
-	return func() AppService {
-		once.Do(func() {
-			instance = &appService{
-				miscRepository: repositories.GetMiscRepository(),
-				versionReader:  common.NewVersionReader(),
-			}
-		})
-		return instance
+func NewAppService(miscDatastore datastore.MiscDatastore) AppService {
+	return &appService{
+		miscDatastore: miscDatastore,
+		versionReader: common.NewVersionReader(),
 	}
-}()
+}
 
 func (s *appService) PreserveVerInfo() error {
 	ver, err := s.versionReader.Read()
@@ -41,7 +32,7 @@ func (s *appService) PreserveVerInfo() error {
 		return errors.Wrap(err, "failed to read version")
 	}
 
-	if err := s.miscRepository.CreateOrUpdate(AppVer, ver); err != nil {
+	if err := s.miscDatastore.CreateOrUpdateKeyValue(AppVer, ver); err != nil {
 		return errors.Wrap(err, "failed to create / update")
 	}
 	return nil

@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"github.com/jaeyo/personal-archive/dtos"
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/repositories"
+	"github.com/jaeyo/personal-archive/pkg/datastore"
 	"github.com/jaeyo/personal-archive/services/generators"
 	"github.com/pkg/errors"
-	"sync"
 )
 
 type ArticleService interface {
@@ -21,30 +20,28 @@ type ArticleService interface {
 }
 
 type articleService struct {
-	articleGenerator        generators.ArticleGenerator
-	articleRepository       repositories.ArticleRepository
-	articleTagRepository    repositories.ArticleTagRepository
-	articleSearchRepository repositories.ArticleSearchRepository
+	articleGenerator       generators.ArticleGenerator
+	articleDatastore       datastore.ArticleDatastore
+	articleTagDatastore    datastore.ArticleTagDatastore
+	articleSearchDatastore datastore.ArticleSearchDatastore
 }
 
-var GetArticleService = func() func() ArticleService {
-	var once sync.Once
-	var instance ArticleService
-	return func() ArticleService {
-		once.Do(func() {
-			instance = &articleService{
-				articleGenerator:        generators.GetArticleGenerator(),
-				articleRepository:       repositories.GetArticleRepository(),
-				articleTagRepository:    repositories.GetArticleTagRepository(),
-				articleSearchRepository: repositories.GetArticleSearchRepository(),
-			}
-		})
-		return instance
+func NewArticleService(
+	articleGenerator generators.ArticleGenerator,
+	articleDatastore datastore.ArticleDatastore,
+	articleTagDatastore datastore.ArticleTagDatastore,
+	articleSearchDatastore datastore.ArticleSearchDatastore,
+) ArticleService {
+	return &articleService{
+		articleGenerator:       articleGenerator,
+		articleDatastore:       articleDatastore,
+		articleTagDatastore:    articleTagDatastore,
+		articleSearchDatastore: articleSearchDatastore,
 	}
-}()
+}
 
 func (s *articleService) Initialize() {
-	if err := s.articleSearchRepository.Initialize(); err != nil {
+	if err := s.articleSearchDatastore.InitializeArticleSearch(); err != nil {
 		panic(err)
 	}
 }
@@ -55,7 +52,7 @@ func (s *articleService) CreateByURL(url string, tags []string) (*dtos.ArticleMe
 		return nil, errors.Wrap(err, "failed to generate new article")
 	}
 
-	if err = s.articleRepository.Save(article); err != nil {
+	if err = s.articleDatastore.SaveArticle(article); err != nil {
 		return nil, errors.Wrap(err, "failed to save article")
 	}
 
@@ -63,12 +60,12 @@ func (s *articleService) CreateByURL(url string, tags []string) (*dtos.ArticleMe
 }
 
 func (s *articleService) Search(keyword string, offset, limit int) ([]*dtos.ArticleMeta, int64, error) {
-	ids, err := s.articleSearchRepository.Search(keyword)
+	ids, err := s.articleSearchDatastore.SearchArticle(keyword)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to search")
 	}
 
-	articleMetas, cnt, err := s.articleRepository.FindMetaByIDsWithPage(ids, offset, limit)
+	articleMetas, cnt, err := s.articleDatastore.FindArticleMetaByIDsWithPage(ids, offset, limit)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "failed to find article by ids")
 	}
@@ -77,28 +74,28 @@ func (s *articleService) Search(keyword string, offset, limit int) ([]*dtos.Arti
 }
 
 func (s *articleService) UpdateTitle(id int64, newTitle string) error {
-	exist, err := s.articleRepository.ExistByTitle(newTitle)
+	exist, err := s.articleDatastore.ExistArticleByTitle(newTitle)
 	if err != nil {
 		return errors.Wrap(err, "failed to check exist by title")
 	} else if exist {
 		return fmt.Errorf("title %s already exists", newTitle)
 	}
 
-	article, err := s.articleRepository.GetByID(id)
+	article, err := s.articleDatastore.GetArticleByID(id)
 	if err != nil {
 		return errors.Wrap(err, "failed to get article")
 	}
 
 	article.Title = newTitle
 
-	if err := s.articleRepository.Save(article); err != nil {
+	if err := s.articleDatastore.SaveArticle(article); err != nil {
 		return errors.Wrap(err, "failed to save article")
 	}
 	return nil
 }
 
 func (s *articleService) UpdateTags(id int64, tags []string) error {
-	article, err := s.articleRepository.GetByID(id)
+	article, err := s.articleDatastore.GetArticleByID(id)
 	if err != nil {
 		return errors.Wrap(err, "failed to get article")
 	}
@@ -109,7 +106,7 @@ func (s *articleService) UpdateTags(id int64, tags []string) error {
 		RemoveDuplicates()
 
 	if len(toBeDeleted) > 0 {
-		if err := s.articleTagRepository.Delete(toBeDeleted); err != nil {
+		if err := s.articleTagDatastore.DeleteArticleTag(toBeDeleted); err != nil {
 			return errors.Wrap(err, "failed to delete unused article tags")
 		}
 	}
@@ -120,7 +117,7 @@ func (s *articleService) UpdateTags(id int64, tags []string) error {
 		for _, tag := range toBeAdded {
 			article.Tags = append(article.Tags, &models.ArticleTag{Tag: tag})
 		}
-		if err := s.articleRepository.Save(article); err != nil {
+		if err := s.articleDatastore.SaveArticle(article); err != nil {
 			return errors.Wrap(err, "failed to save article")
 		}
 	}
@@ -129,32 +126,32 @@ func (s *articleService) UpdateTags(id int64, tags []string) error {
 }
 
 func (s *articleService) UpdateContent(id int64, content string) error {
-	article, err := s.articleRepository.GetByID(id)
+	article, err := s.articleDatastore.GetArticleByID(id)
 	if err != nil {
 		return errors.Wrap(err, "failed to get article)")
 	}
 
 	article.Content = content
 
-	if err := s.articleRepository.Save(article); err != nil {
+	if err := s.articleDatastore.SaveArticle(article); err != nil {
 		return errors.Wrap(err, "failed to save article")
 	}
 	return nil
 }
 
 func (s *articleService) DeleteByIDs(ids []int64) error {
-	articles, err := s.articleRepository.FindMetaByIDs(ids)
+	articles, err := s.articleDatastore.FindArticleMetaByIDs(ids)
 	if err != nil {
 		return errors.Wrap(err, "failed to find articles")
 	} else if len(ids) != len(articles) {
 		return fmt.Errorf("invalid ids: %v", ids)
 	}
 
-	if err := s.articleTagRepository.DeleteByIDs(articles.ExtractTagIDs()); err != nil {
+	if err := s.articleTagDatastore.DeleteArticleTagsByIDs(articles.ExtractTagIDs()); err != nil {
 		return errors.Wrap(err, "failed to delete article tag by ids")
 	}
 
-	if err := s.articleRepository.DeleteByIDs(ids); err != nil {
+	if err := s.articleDatastore.DeleteArticleByIDs(ids); err != nil {
 		return errors.Wrap(err, "failed to delete article by ids")
 	}
 	return nil

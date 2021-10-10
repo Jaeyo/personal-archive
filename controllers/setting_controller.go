@@ -12,10 +12,13 @@ type SettingController struct {
 	settingService services.SettingService
 }
 
-func NewSettingController() *SettingController {
+func NewSettingController(
+	pocketService services.PocketService,
+	settingService services.SettingService,
+) *SettingController {
 	return &SettingController{
-		pocketService:  services.GetPocketService(),
-		settingService: services.GetSettingService(),
+		pocketService:  pocketService,
+		settingService: settingService,
 	}
 }
 

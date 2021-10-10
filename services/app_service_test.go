@@ -2,7 +2,7 @@ package services
 
 import (
 	"github.com/jaeyo/personal-archive/common"
-	"github.com/jaeyo/personal-archive/repositories/mock"
+	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -12,8 +12,8 @@ func TestPreserveVerInfo(t *testing.T) {
 	var outKey, outVer string
 
 	svc := appService{
-		miscRepository: &mock.MiscRepositoryMock{
-			OnCreateOrUpdate: func(key, value string) error {
+		miscDatastore: &mock.MiscDatastoreMock{
+			OnCreateOrUpdateKeyValue: func(key, value string) error {
 				outKey = key
 				outVer = value
 				return nil
