@@ -1,3 +1,4 @@
+//go:generate mockgen -source=misc.go -destination=./mock/mock_misc.go -package=mock MiscDatastore
 package datastore
 
 import (

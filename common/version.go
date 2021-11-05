@@ -1,3 +1,4 @@
+//go:generate mockgen -source=version.go -destination=./mock/mock_version.go -package=mock VersionReader
 package common
 
 import (

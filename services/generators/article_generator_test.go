@@ -2,13 +2,18 @@ package generators
 
 import (
 	"fmt"
+	"github.com/golang/mock/gomock"
 	"github.com/jaeyo/personal-archive/models"
-	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
+	datastoreMock "github.com/jaeyo/personal-archive/pkg/datastore/mock"
+	generatorMock "github.com/jaeyo/personal-archive/services/generators/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
 
 func TestFetch(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	tests := []struct {
 		name string
 		kind string
@@ -22,10 +27,10 @@ func TestFetch(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			gen := &articleGenerator{
-				markdownFetcher:   getFetcherByKind(models.KindMarkdown, tc.kind == models.KindMarkdown),
-				tweetFetcher:      getFetcherByKind(models.KindTweet, tc.kind == models.KindTweet),
-				slideShareFetcher: getFetcherByKind(models.KindSlideShare, tc.kind == models.KindSlideShare),
-				youtubeFetcher:    getFetcherByKind(models.KindYoutube, tc.kind == models.KindYoutube),
+				markdownFetcher:   getFetcherByKind(ctrl, models.KindMarkdown, tc.kind == models.KindMarkdown),
+				tweetFetcher:      getFetcherByKind(ctrl, models.KindTweet, tc.kind == models.KindTweet),
+				slideShareFetcher: getFetcherByKind(ctrl, models.KindSlideShare, tc.kind == models.KindSlideShare),
+				youtubeFetcher:    getFetcherByKind(ctrl, models.KindYoutube, tc.kind == models.KindYoutube),
 			}
 			title, _, kind, err := gen.fetch("")
 			require.NoError(t, err)
@@ -35,33 +40,46 @@ func TestFetch(t *testing.T) {
 	}
 }
 
-func getFetcherByKind(kind string, fetchable bool) ArticleFetcher {
-	return &ArticleFetcherMock{
-		OnFetch: func(url string) (string, string, error) {
+func getFetcherByKind(ctrl *gomock.Controller, kind string, fetchable bool) ArticleFetcher {
+	fetcher := generatorMock.NewMockArticleFetcher(ctrl)
+
+	fetcher.
+		EXPECT().
+		Fetch(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(url string) (string, string, error) {
 			return fmt.Sprintf("fetched by %s", kind), "", nil
-		},
-		OnIsFetchable: func(url string) bool {
+		})
+
+	fetcher.
+		EXPECT().
+		IsFetchable(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(url string) bool {
 			return fetchable
-		},
-	}
+		})
+
+	return fetcher
 }
 
 func TestGetUniqueTitle(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		cnt := i
-		t.Run(fmt.Sprintf("retry-%d", cnt), func(t *testing.T) {
-			articleDatastore := &mock.ArticleDatastoreMock{
-				OnExistArticleByTitle: func(title string) (bool, error) {
-					cnt--
-					return cnt >= 0, nil
-				},
-			}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-			gen := NewArticleGenerator(articleDatastore)
-			title, err := gen.GetUniqueTitle("")
-
-			require.NoError(t, err)
-			require.Equal(t, 3 * i, len(title))
+	articleDatastore := datastoreMock.NewMockArticleDatastore(ctrl)
+	denyCnt := 5
+	articleDatastore.
+		EXPECT().
+		ExistArticleByTitle(gomock.Any()).
+		AnyTimes().
+		DoAndReturn(func(title string) (bool, error) {
+			denyCnt--
+			return denyCnt >= 0, nil
 		})
-	}
+
+	gen := NewArticleGenerator(articleDatastore)
+	title, err := gen.GetUniqueTitle("")
+
+	require.NoError(t, err)
+	require.Equal(t, "(1)(1)(1)(1)(1)", title)
 }

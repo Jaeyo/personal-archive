@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/golang/mock/gomock"
 	"github.com/jaeyo/personal-archive/models"
 	"github.com/jaeyo/personal-archive/pkg/datastore/mock"
 	"github.com/stretchr/testify/require"
@@ -8,32 +9,55 @@ import (
 )
 
 func TestUpdateTitle(t *testing.T) {
-	svc := &articleService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	articleDatastore := mock.NewMockArticleDatastore(ctrl)
+	articleDatastore.
+		EXPECT().
+		ExistArticleByTitle(gomock.Any()).
+		Return(true, nil)
+
+	svc := &articleService{
+		articleDatastore: articleDatastore,
+	}
 
 	// case 1: title duplicated
-	svc.articleDatastore = &mock.ArticleDatastoreMock{
-		OnExistArticleByTitle: func(title string) (bool, error) { return true, nil },
-	}
 	err := svc.UpdateTitle(-1, "new title")
+
 	require.EqualError(t, err, "title new title already exists")
 
 	// case 2: title not duplicated
 	var savedArticle *models.Article
-	svc.articleDatastore = &mock.ArticleDatastoreMock{
-		OnExistArticleByTitle: func(title string) (bool, error) { return false, nil },
-		OnGetArticleByID:      func(id int64) (*models.Article, error) { return &models.Article{}, nil },
-		OnSaveArticle: func(article *models.Article) error {
+	articleDatastore.
+		EXPECT().
+		ExistArticleByTitle(gomock.Any()).
+		Return(false, nil)
+
+	articleDatastore.
+		EXPECT().
+		GetArticleByID(gomock.Any()).
+		Return(&models.Article{}, nil)
+
+	articleDatastore.
+		EXPECT().
+		SaveArticle(gomock.Any()).
+		DoAndReturn(func(article *models.Article) error {
 			savedArticle = article
 			return nil
-		},
-	}
+		})
+
 	err = svc.UpdateTitle(-1, "new title")
+
 	require.NoError(t, err)
 	require.Equal(t, savedArticle.Title, "new title")
 }
 
 func TestUpdateContent(t *testing.T) {
-	svc := &articleService{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	articleDatastore := mock.NewMockArticleDatastore(ctrl)
 
 	article := &models.Article{
 		Content: "old_content",
@@ -41,14 +65,21 @@ func TestUpdateContent(t *testing.T) {
 
 	var savedArticle *models.Article
 
-	svc.articleDatastore = &mock.ArticleDatastoreMock{
-		OnGetArticleByID: func(id int64) (*models.Article, error) {
-			return article, nil
-		},
-		OnSaveArticle: func(article *models.Article) error {
+	articleDatastore.
+		EXPECT().
+		GetArticleByID(gomock.Any()).
+		Return(article, nil)
+
+	articleDatastore.
+		EXPECT().
+		SaveArticle(gomock.Any()).
+		DoAndReturn(func(article *models.Article) error {
 			savedArticle = article
 			return nil
-		},
+		})
+
+	svc := &articleService{
+		articleDatastore: articleDatastore,
 	}
 
 	err := svc.UpdateContent(0, "new_content")

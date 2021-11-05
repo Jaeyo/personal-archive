@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.6.1
 	github.com/gammazero/workerpool v1.1.1
 	github.com/go-shiori/go-readability v0.0.0-20201011032228-bdc871772408
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/labstack/echo/v4 v4.6.0
 	github.com/mattn/go-colorable v0.1.10 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6

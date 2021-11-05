@@ -1,3 +1,4 @@
+//go:generate mockgen -source=paragraph.go -destination=./mock/mock_paragraph.go -package=mock ParagraphDatastore
 package datastore
 
 import "github.com/jaeyo/personal-archive/models"

@@ -78,3 +78,11 @@ yarn-deduplicate:
 	@echo "\n\033[1;33m+ $@\033[0m"
 	@cd webui && yarn-deduplicate yarn.lock
 
+.PHONY: gen
+gen:
+	@echo "\n\033[1;33m+ $@\033[0m"
+	@if ! which mockgen >/dev/null; then \
+  		echo "installing mockgen ..."; \
+  		go install github.com/golang/mock/mockgen; \
+	fi
+	@go generate ./...

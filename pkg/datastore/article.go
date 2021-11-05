@@ -1,3 +1,4 @@
+//go:generate mockgen -source=article.go -destination=./mock/mock_article.go -package=mock ArticleDatastore
 package datastore
 
 import (
