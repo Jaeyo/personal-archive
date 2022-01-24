@@ -7,6 +7,7 @@ import (
 	"github.com/pasztorpisti/qs"
 	"github.com/pkg/errors"
 	"github.com/tidwall/gjson"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -14,21 +15,11 @@ import (
 
 func ObtainRequestToken(consumerKey, redirectURI string) (string, error) {
 	params := fmt.Sprintf("consumer_key=%s&redirect_uri=%s", consumerKey, redirectURI)
-	reqBody := bytes.NewBufferString(params)
 	url := "https://getpocket.com/v3/oauth/request"
-	resp, err := http.Post(url, "application/x-www-form-urlencoded; charset=UTF-8", reqBody)
-	if err != nil {
-		return "", errors.Wrap(err, "failed to request http post")
-	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("invalid status: %d", resp.StatusCode)
-	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := requestPost(url, "application/x-www-form-urlencoded; charset=UTF-8", bytes.NewBufferString(params))
 	if err != nil {
-		return "", errors.Wrap(err, "failed to read body")
+		return "", err
 	}
 
 	var m map[string]string
@@ -41,21 +32,10 @@ func ObtainRequestToken(consumerKey, redirectURI string) (string, error) {
 func ObtainAccessTokenAndUsername(consumerKey, requestToken string) (bool, string, string, error) {
 	reqBody := bytes.NewBufferString(fmt.Sprintf("consumer_key=%s&code=%s", consumerKey, requestToken))
 	url := "https://getpocket.com/v3/oauth/authorize"
-	resp, err := http.Post(url, "application/x-www-form-urlencoded; charset=UTF-8", reqBody)
-	if err != nil {
-		return false, "", "", errors.Wrap(err, "failed to request http post")
-	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusForbidden {
-		return false, "", "", nil
-	} else if resp.StatusCode != http.StatusOK {
-		return false, "", "", fmt.Errorf("invalid status: %d", resp.StatusCode)
-	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
+	respBody, err := requestPost(url, "application/x-www-form-urlencoded; charset=UTF-8", reqBody)
 	if err != nil {
-		return false, "", "", errors.Wrap(err, "failed to read body")
+		return false, "", "", err
 	}
 
 	var m map[string]string
@@ -66,15 +46,15 @@ func ObtainAccessTokenAndUsername(consumerKey, requestToken string) (bool, strin
 	return true, m["access_token"], m["username"], nil
 }
 
-func Retrieve(consumerKey, accessToken string, offset, count int) ([]string, error){
+func Retrieve(consumerKey, accessToken string, offset, count int) ([]string, error) {
 	params := map[string]string{
 		"consumer_key": consumerKey,
 		"access_token": accessToken,
-		"state": "all",
-		"detailType": "simple",
-		"sort": "oldest",
-		"offset": strconv.Itoa(offset),
-		"count": strconv.Itoa(count),
+		"state":        "all",
+		"detailType":   "simple",
+		"sort":         "oldest",
+		"offset":       strconv.Itoa(offset),
+		"count":        strconv.Itoa(count),
 	}
 	paramsBytes, err := json.Marshal(params)
 	if err != nil {
@@ -82,7 +62,20 @@ func Retrieve(consumerKey, accessToken string, offset, count int) ([]string, err
 	}
 
 	url := "https://getpocket.com/v3/get"
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(paramsBytes))
+	respBody, err := requestPost(url, "application/json", bytes.NewBuffer(paramsBytes))
+
+	items := gjson.Get(string(respBody), "list")
+	urls := []string{}
+	items.ForEach(func(_, value gjson.Result) bool {
+		urls = append(urls, value.Get("resolved_url").String())
+		return true
+	})
+
+	return urls, nil
+}
+
+func requestPost(url, contentType string, body io.Reader) ([]byte, error) {
+	resp, err := http.Post(url, contentType, body)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to request http post")
 	}
@@ -97,12 +90,5 @@ func Retrieve(consumerKey, accessToken string, offset, count int) ([]string, err
 		return nil, errors.Wrap(err, "failed to read body")
 	}
 
-	items := gjson.Get(string(respBody), "list")
-	urls := []string{}
-	items.ForEach(func(_, value gjson.Result) bool {
-		urls = append(urls, value.Get("resolved_url").String())
-		return true
-	})
-
-	return urls, nil
+	return respBody, nil
 }
