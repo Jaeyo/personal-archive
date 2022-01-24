@@ -1,6 +1,6 @@
 module github.com/jaeyo/personal-archive
 
-go 1.15
+go 1.18
 
 require (
 	github.com/JohannesKaufmann/html-to-markdown v1.2.0
