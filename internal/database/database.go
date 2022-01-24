@@ -85,15 +85,9 @@ func (d *DB) SearchIDs(table, keyword string) ([]int64, error) {
 		return nil, err
 	}
 
-	ids := []int64{}
-	for _, result := range results {
-		id, err := strconv.ParseInt(result.ID, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, nil
+	return common.MapWithErr(results, func(result *searchedID) (int64, error) {
+		return strconv.ParseInt(result.ID, 10, 64)
+	})
 }
 
 func ensureDirExist(dirPath string) {

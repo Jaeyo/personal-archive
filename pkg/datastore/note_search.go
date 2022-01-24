@@ -21,7 +21,7 @@ func (d *Datastore) InitializeNoteSearch() error {
 		return errors.Wrap(err, "failed to find tables")
 	}
 
-	if common.Strings(tables).Contain("note_search") {
+	if common.Strings(tables).Contains("note_search") {
 		return nil
 	}
 

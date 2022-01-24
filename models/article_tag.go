@@ -17,56 +17,29 @@ func (t *ArticleTag) TableName() string {
 type ArticleTags []*ArticleTag
 
 func (t ArticleTags) FilterExcluded(tags common.Strings) (ArticleTags, ArticleTags) {
-	var excluded, notExcluded ArticleTags
-	for _, articleTag := range t {
-		if tags.Contain(articleTag.Tag) {
-			notExcluded = append(notExcluded, articleTag)
-		} else {
-			excluded = append(excluded, articleTag)
-		}
-	}
+	var excluded, notExcluded = common.SplitBy(t, func(item *ArticleTag) bool {
+		return tags.Contains(item.Tag)
+	})
 	return excluded, notExcluded
 }
 
-func (t ArticleTags) ContainTag(tag string) bool {
-	for _, articleTag := range t {
-		if articleTag.Tag == tag {
-			return true
-		}
-	}
-	return false
+func (t ArticleTags) ContainsTag(tag string) bool {
+	return common.ContainsField(t, func(item *ArticleTag) string { return item.Tag }, tag)
 }
 
 func (t ArticleTags) ExtractIDs() []int64 {
-	ids := []int64{}
-	for _, tag := range t {
-		ids = append(ids, tag.ID)
-	}
-	return ids
+	return common.Map(t, func(item *ArticleTag) int64 { return item.ID })
 }
 
 type Tags []string
 
 func (t Tags) FilterExcluded(articleTags ArticleTags) Tags {
-	var result Tags
-	for _, tag := range t {
-		if !articleTags.ContainTag(tag) {
-			result = append(result, tag)
-		}
-	}
+	var result, _ []string = common.SplitBy(t, func(item string) bool { return !articleTags.ContainsTag(item) })
 	return result
 }
 
 func (t Tags) RemoveDuplicates() Tags {
-	allKeys := make(map[string]bool)
-	var result Tags
-	for _, tag := range t {
-		if _, value := allKeys[tag]; !value {
-			allKeys[tag] = true
-			result = append(result, tag)
-		}
-	}
-	return result
+	return common.Unique(t)
 }
 
 type ArticleTagCountDTO struct {

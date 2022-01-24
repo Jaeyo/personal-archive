@@ -21,7 +21,7 @@ func (d *Datastore) InitializeArticleSearch() error {
 		return errors.Wrap(err, "failed to find tables")
 	}
 
-	if common.Strings(tables).Contain("article_search") {
+	if common.Strings(tables).Contains("article_search") {
 		return nil
 	}
 
