@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/jaeyo/personal-archive/common"
+	"gorm.io/gorm"
 )
 
 type ReferenceArticle struct {
@@ -28,26 +30,21 @@ func (a *ReferenceArticle) BeforeSave(db *gorm.DB) error {
 type ReferenceArticles []*ReferenceArticle
 
 func (a ReferenceArticles) ExtractIDs() []int64 {
-	ids := []int64{}
-	for _, refArticle := range a {
-		ids = append(ids, refArticle.ID)
-	}
-	return ids
+	return common.Map(a, func(refArticle *ReferenceArticle) int64 {
+		return refArticle.ID
+	})
 }
 
 func (a ReferenceArticles) ExtractArticleIDs() []int64 {
-	ids := []int64{}
-	for _, refArticle := range a {
-		ids = append(ids, refArticle.ArticleID)
-	}
-	return ids
+	return common.Map(a, func(refArticle *ReferenceArticle) int64 {
+		return refArticle.ArticleID
+	})
 }
 
 func (a ReferenceArticles) ContainArticleID(articleID int64) bool {
-	for _, refArticle := range a {
-		if refArticle.ArticleID == articleID {
-			return true
-		}
-	}
-	return false
+	articleIDs := common.Map(a, func(refArticle *ReferenceArticle) int64 {
+		return refArticle.ArticleID
+	})
+
+	return common.Contains(articleIDs, articleID)
 }

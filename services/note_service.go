@@ -60,15 +60,13 @@ func (s *noteService) Create(title, content string, refArticleIDs []int64, refWe
 		return nil, fmt.Errorf("invalid reference article ids: %v", refArticleIDs)
 	}
 
-	var refArticles []*models.ReferenceArticle
-	for _, refArticleID := range refArticleIDs {
-		refArticles = append(refArticles, &models.ReferenceArticle{ArticleID: refArticleID})
-	}
+	refArticles := common.Map(refArticleIDs, func(refArticleID int64) *models.ReferenceArticle {
+		return &models.ReferenceArticle{ArticleID: refArticleID}
+	})
 
-	var refWebs []*models.ReferenceWeb
-	for _, refWebURL := range refWebURLs {
-		refWebs = append(refWebs, &models.ReferenceWeb{URL: refWebURL})
-	}
+	refWebs := common.Map(refWebURLs, func(refWebURL string) *models.ReferenceWeb {
+		return &models.ReferenceWeb{URL: refWebURL}
+	})
 
 	note := &models.Note{
 		Title: title,
@@ -96,15 +94,13 @@ func (s *noteService) CreateParagraph(id int64, content string, refArticleIDs []
 		return nil, fmt.Errorf("invalid reference article ids: %v", refArticleIDs)
 	}
 
-	var refArticles []*models.ReferenceArticle
-	for _, refArticleID := range refArticleIDs {
-		refArticles = append(refArticles, &models.ReferenceArticle{ArticleID: refArticleID})
-	}
+	refArticles := common.Map(refArticleIDs, func(refArticleID int64) *models.ReferenceArticle {
+		return &models.ReferenceArticle{ArticleID: refArticleID}
+	})
 
-	var refWebs []*models.ReferenceWeb
-	for _, refWebURL := range refWebURLs {
-		refWebs = append(refWebs, &models.ReferenceWeb{URL: refWebURL})
-	}
+	refWebs := common.Map(refWebURLs, func(refWebURL string) *models.ReferenceWeb {
+		return &models.ReferenceWeb{URL: refWebURL}
+	})
 
 	note, err := s.noteDatastore.GetNoteByID(id)
 	if err != nil {
@@ -173,30 +169,24 @@ func (s *noteService) UpdateParagraph(id, paragraphID int64, content string, ref
 		return errors.Wrap(err, "failed to get paragraph")
 	}
 
-	toBeRemovedRefArticles := models.ReferenceArticles{}
-	toBeAddedRefArticles := models.ReferenceArticles{}
-	for _, ra := range paragraph.ReferenceArticles {
-		if refArticleIDs.Contain(ra.ArticleID) {
-			toBeAddedRefArticles = append(toBeAddedRefArticles, ra)
-		} else {
-			toBeRemovedRefArticles = append(toBeRemovedRefArticles, ra)
-		}
-	}
+	var toBeRemovedRefArticles models.ReferenceArticles
+	var toBeAddedRefArticles models.ReferenceArticles
+	toBeAddedRefArticles, toBeRemovedRefArticles = common.SplitBy(paragraph.ReferenceArticles, func(refArticle *models.ReferenceArticle) bool {
+		return refArticleIDs.Contains(refArticle.ArticleID)
+	})
+
 	for _, articleID := range refArticleIDs {
 		if !toBeAddedRefArticles.ContainArticleID(articleID) {
 			toBeAddedRefArticles = append(toBeAddedRefArticles, &models.ReferenceArticle{ArticleID: articleID})
 		}
 	}
 
-	toBeRemovedRefWebs := models.ReferenceWebs{}
-	toBeAddedRefWebs := models.ReferenceWebs{}
-	for _, rw := range paragraph.ReferenceWebs {
-		if refWebURLs.Contain(rw.URL) {
-			toBeAddedRefWebs = append(toBeAddedRefWebs, rw)
-		} else {
-			toBeRemovedRefWebs = append(toBeRemovedRefWebs, rw)
-		}
-	}
+	var toBeRemovedRefWebs models.ReferenceWebs
+	var toBeAddedRefWebs models.ReferenceWebs
+	toBeAddedRefWebs, toBeRemovedRefWebs = common.SplitBy(paragraph.ReferenceWebs, func(refWeb *models.ReferenceWeb) bool {
+		return refWebURLs.Contains(refWeb.URL)
+	})
+
 	for _, url := range refWebURLs {
 		if !toBeAddedRefWebs.ContainURL(url) {
 			toBeAddedRefWebs = append(toBeAddedRefWebs, &models.ReferenceWeb{URL: url})

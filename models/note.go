@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/jaeyo/personal-archive/common"
+	"gorm.io/gorm"
 )
 
 type Note struct {
@@ -36,9 +38,7 @@ func (n *Note) BeforeSave(db *gorm.DB) error {
 type Notes []*Note
 
 func (n Notes) ExtractParagraphs() Paragraphs {
-	paragraphs := []*Paragraph{}
-	for _, note := range n {
-		paragraphs = append(paragraphs, note.Paragraphs...)
-	}
-	return paragraphs
+	return common.FlatMap(n, func(item *Note) []*Paragraph {
+		return item.Paragraphs
+	})
 }

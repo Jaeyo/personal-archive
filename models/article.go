@@ -1,15 +1,16 @@
 package models
 
 import (
+	"github.com/jaeyo/personal-archive/common"
 	"gorm.io/gorm"
 	"time"
 )
 
 const (
-	KindMarkdown = "markdown"
-	KindTweet    = "tweet"
+	KindMarkdown   = "markdown"
+	KindTweet      = "tweet"
 	KindSlideShare = "slideshare"
-	KindYoutube = "youtube"
+	KindYoutube    = "youtube"
 )
 
 type Article struct {
@@ -24,10 +25,7 @@ type Article struct {
 }
 
 func NewArticle(kind, url, content, title string, tags []string) *Article {
-	var articleTags []*ArticleTag
-	for _, tag := range tags {
-		articleTags = append(articleTags, &ArticleTag{Tag: tag})
-	}
+	articleTags := common.Map(tags, func(item string) *ArticleTag { return &ArticleTag{Tag: item} })
 
 	return &Article{
 		Kind:    kind,

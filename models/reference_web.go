@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/jaeyo/personal-archive/common"
+	"gorm.io/gorm"
 )
 
 type ReferenceWeb struct {
@@ -28,18 +30,13 @@ func (w *ReferenceWeb) BeforeSave(db *gorm.DB) error {
 type ReferenceWebs []*ReferenceWeb
 
 func (a ReferenceWebs) ExtractIDs() []int64 {
-	ids := []int64{}
-	for _, refWeb := range a {
-		ids = append(ids, refWeb.ID)
-	}
-	return ids
+	return common.Map(a, func(refWeb *ReferenceWeb) int64 {
+		return refWeb.ID
+	})
 }
 
 func (a ReferenceWebs) ContainURL(url string) bool {
-	for _, refWeb := range a {
-		if refWeb.URL == url {
-			return true
-		}
-	}
-	return false
+	return common.ContainsField(a, func(refWeb *ReferenceWeb) string {
+		return refWeb.URL
+	}, url)
 }

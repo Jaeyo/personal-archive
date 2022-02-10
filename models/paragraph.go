@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"github.com/jaeyo/personal-archive/common"
+	"gorm.io/gorm"
 )
 
 type Paragraph struct {
@@ -31,43 +33,31 @@ func (p *Paragraph) BeforeSave(db *gorm.DB) error {
 type Paragraphs []*Paragraph
 
 func (p Paragraphs) ExtractIDs() []int64 {
-	ids := []int64{}
-	for _, paragraph := range p {
-		ids = append(ids, paragraph.ID)
-	}
-	return ids
+	return common.Map(p, func(item *Paragraph) int64 { return item.ID })
 }
 
 func (p Paragraphs) ExtractReferenceArticleIDs() []int64 {
-	ids := []int64{}
-	for _, paragraph := range p {
-		ids = append(ids, paragraph.ReferenceArticles.ExtractIDs()...)
-	}
-	return ids
+	return common.FlatMap(p, func(paragraph *Paragraph) []int64 {
+		return paragraph.ReferenceArticles.ExtractIDs()
+	})
 }
 
 func (p Paragraphs) ExtractReferenceArticleArticleIDs() []int64 {
-	ids := []int64{}
-	for _, paragraph := range p {
-		ids = append(ids, paragraph.ReferenceArticles.ExtractArticleIDs()...)
-	}
-	return ids
+	return common.FlatMap(p, func(paragraph *Paragraph) []int64 {
+		return paragraph.ReferenceArticles.ExtractArticleIDs()
+	})
 }
 
 func (p Paragraphs) ExtractReferenceWebIDs() []int64 {
-	ids := []int64{}
-	for _, paragraph := range p {
-		ids = append(ids, paragraph.ReferenceWebs.ExtractIDs()...)
-	}
-	return ids
+	return common.FlatMap(p, func(paragraph *Paragraph) []int64 {
+		return paragraph.ReferenceWebs.ExtractIDs()
+	})
 }
 
 func (p Paragraphs) MaxSeq() int {
-	max := -1
-	for _, paragraph := range p {
-		if paragraph.Seq > max {
-			max = paragraph.Seq
-		}
-	}
-	return max
+	seqs := common.Map(p, func(paragraph *Paragraph) int {
+		return paragraph.Seq
+	})
+
+	return common.Max(seqs)
 }

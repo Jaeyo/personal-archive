@@ -1,8 +1,10 @@
 package dtos
 
 import (
-	"github.com/jaeyo/personal-archive/models"
 	"time"
+
+	"github.com/jaeyo/personal-archive/common"
+	"github.com/jaeyo/personal-archive/models"
 )
 
 type ArticleMeta struct {
@@ -34,9 +36,5 @@ func NewArticleMeta(article *models.Article) *ArticleMeta {
 type ArticleMetas []*ArticleMeta
 
 func (a ArticleMetas) ExtractTagIDs() []int64 {
-	ids := []int64{}
-	for _, articleMeta := range a {
-		ids = append(ids, articleMeta.Tags.ExtractIDs()...)
-	}
-	return ids
+	return common.FlatMap(a, func(articleMeta *ArticleMeta) []int64 { return articleMeta.Tags.ExtractIDs() })
 }
