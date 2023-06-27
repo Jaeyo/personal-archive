@@ -9,9 +9,15 @@ type Datastore struct {
 }
 
 func New() *Datastore {
-	return &Datastore{
+	d := &Datastore{
 		database: database.New(),
 	}
+
+	if err := d.Init(); err != nil {
+		panic(err)
+	}
+
+	return d
 }
 
 func (d *Datastore) Init() error {
